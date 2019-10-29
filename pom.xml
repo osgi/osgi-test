@@ -72,6 +72,7 @@
 	</properties>
 
 	<modules>
+		<module>org.osgi.test.common</module>
 		<module>org.osgi.test.assertj</module>
 		<module>org.osgi.test.junit4</module>
 		<module>org.osgi.test.junit5</module>
@@ -94,12 +95,28 @@
 					</executions>
 				</plugin>
 				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.8.0</version>
+					<configuration>
+						<source>${maven.compiler.source}</source>
+						<target>${maven.compiler.target}</target>
+						<showWarnings>true</showWarnings>
+						<showDeprecation>true</showDeprecation>
+					</configuration>
+				</plugin>
+				<plugin>
 					<artifactId>maven-jar-plugin</artifactId>
+					<version>3.1.2</version>
 					<configuration>
 						<archive>
 							<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 						</archive>
 					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.22.2</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -113,5 +130,16 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.core</artifactId>
+				<version>7.0.0</version>
+				<scope>provided</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 </project>
