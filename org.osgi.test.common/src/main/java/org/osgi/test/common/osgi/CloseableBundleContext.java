@@ -1,4 +1,4 @@
-package org.osgi.test.common;
+package org.osgi.test.common.osgi;
 /*
  * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
  *
