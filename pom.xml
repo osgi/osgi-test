@@ -142,4 +142,15 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<pluginRepositories>
+		<pluginRepository>
+			<id>bnd-snapshots</id>
+			<url>https://bndtools.jfrog.io/bndtools/libs-snapshot/</url>
+			<layout>default</layout>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+		</pluginRepository>
+	</pluginRepositories>
+
 </project>
