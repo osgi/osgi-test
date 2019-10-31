@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2018). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.0.0")
-package org.osgi.test.junit5;
+package org.osgi.test.assertj.filter;
+
+import java.util.Map;
+
+import org.assertj.core.api.Condition;
+import org.assertj.core.description.TextDescription;
+import org.osgi.framework.Filter;
+
+public class FilterCondition extends Condition<Filter> {
+	private final Map<String, ? > map;
+
+	public FilterCondition(Map<String, ? > map) {
+		super(new TextDescription("filter must match %s", map));
+		this.map = map;
+	}
+
+	@Override
+	public boolean matches(Filter filter) {
+		return filter.matches(map);
+	}
+}

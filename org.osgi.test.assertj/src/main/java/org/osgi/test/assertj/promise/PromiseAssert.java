@@ -1,6 +1,6 @@
 /*
  * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
- *
+ * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.0.0")
-package org.osgi.test.common;
+package org.osgi.test.assertj.promise;
+
+import org.osgi.util.promise.Promise;
+
+public class PromiseAssert<RESULT>
+		extends AbstractPromiseAssert<PromiseAssert<RESULT>,RESULT> {
+
+	public PromiseAssert(Promise<RESULT> actual) {
+		super(actual, PromiseAssert.class);
+	}
+
+	public static <T> PromiseAssert<T> assertThat(Promise<T> actual) {
+		return new PromiseAssert<>(actual);
+	}
+}

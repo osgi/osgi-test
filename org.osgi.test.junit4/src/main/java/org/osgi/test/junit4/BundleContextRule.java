@@ -21,7 +21,7 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.test.common.CloseableBundleContext;
+import org.osgi.test.common.osgi.CloseableBundleContext;
 
 /**
  * A JUnit 4 Rule to get the OSGi {@link BundleContext} of the test bundle.

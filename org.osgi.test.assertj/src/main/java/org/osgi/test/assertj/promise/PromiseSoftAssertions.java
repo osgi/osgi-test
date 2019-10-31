@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.0.0")
-package org.osgi.test.junit5;
+package org.osgi.test.assertj.promise;
+
+import org.assertj.core.api.SoftAssertions;
+import org.osgi.util.promise.Promise;
+
+public class PromiseSoftAssertions extends SoftAssertions {
+	/**
+	 * Create assertion for {@link org.osgi.util.promise.Promise}.
+	 *
+	 * @param actual the actual value.
+	 * @param <RESULT> the type of the value contained in the
+	 *            {@link org.osgi.util.promise.Promise}.
+	 * @return the created assertion object.
+	 */
+	public <RESULT> PromiseAssert<RESULT> assertThat(Promise<RESULT> actual) {
+		return proxy(PromiseAssert.class, Promise.class, actual);
+	}
+}
