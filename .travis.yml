@@ -6,16 +6,16 @@ language: java
 env:
   global:
     - LC_ALL=en_US.UTF-8
-    - GRADLE_OPTS=-Dorg.gradle.parallel=false
-    - JAVA8_JDK=https://cdn.azul.com/zulu/bin/zulu8.40.0.25-ca-jdk8.0.222-linux_x64.tar.gz
-    - JAVA11_JDK=https://cdn.azul.com/zulu/bin/zulu11.33.15-ca-jdk11.0.4-linux_x64.tar.gz
 
 matrix:
   include:
     - name: "OpenJDK8"
+      env:
+        - JAVA_JDK=https://cdn.azul.com/zulu/bin/zulu8.40.0.25-ca-jdk8.0.222-linux_x64.tar.gz
+        - secure: AQuPO2Lo3bkxMe969ajJ4rSfBUHs5//WqaRfWTK9E6cD/mHSE5hREg9KPVSzYxaReJFJz/Vd+ietAEGtWx47BMHDPYJwqILpuia1uiVZv5TA8vrhSzW9NXar9IVWDGMxZH4sbM6l0xPY/8V++aZCEQPc/TYf8Sog5puTjR5yDbPVlMenP4Y5d71YvUl+nyag6sjfdK8bQ0xWmGKuZAJbXk9k1bAeLFXuwHLZ2jwAIdVVeSBOubG371qE5shURAhgqQ7p/YXz14Z6tuGKzomfsjtNzgunr8CrXUovaNAn8TWntVhtfnlnH3U7bYJE/bFDYCkOzDqUBfbuN5vgBtTJzk6Md9HgwAK5i44riLo7YoYxwATD4PXLeT3HUHU0ly19+n1OkwbguDe0FZ9vKT0enSAsOP9EOYBwQhdWLfAd6O3JcDzZy/E2CPDeX0iK6bHF3Lq83vDWy0AZB9X98GI7HJIzy4r+NVFCFCQiXd++Oi4ePDq/LwFFIq/2xCkTLNWkikGmf3aa8ETm8QG+mqfbZe6sEPP6ZL8634ZiHIHSiYkpSep+39hjHz74IV0PnQNuRMquUEeXZwqXt/GVLSAoEHEgfwda7uoQrGpqbgIOKKpbJl0HcF/6fU7er68otWpQFd7e+QVXd7cfkTQA95dH9n7AsKsqTScZejFMdxjVMSM=
     - name: "OpenJDK11"
-      install:
-        - "source install-jdk.sh --url $JAVA11_JDK"
+      env:
+        - JAVA_JDK=https://cdn.azul.com/zulu/bin/zulu11.33.15-ca-jdk11.0.4-linux_x64.tar.gz
   allow_failures:
     - env: ALLOW_FAILURE=true
 
@@ -24,10 +24,13 @@ before_install:
   - "curl -O -L --retry 3 https://github.com/sormuras/bach/raw/master/install-jdk.sh"
 
 install:
-  - "source install-jdk.sh --url $JAVA8_JDK"
+  - "source install-jdk.sh --url $JAVA_JDK"
 
 before_script:
   - "./mvnw --version"
 
 script:
   - "./mvnw --no-transfer-progress clean install"
+
+after_success:
+  - "if [ master == $TRAVIS_BRANCH -a $TRAVIS_PULL_REQUEST == false -a ${OSSRH_USERNAME:=X} != X ]; then ./mvnw --no-transfer-progress deploy --settings .travis-deploy-settings.xml; fi"
