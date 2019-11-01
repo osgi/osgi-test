@@ -33,4 +33,4 @@ script:
   - "./mvnw --no-transfer-progress clean install"
 
 after_success:
-  - "if [ master == $TRAVIS_BRANCH -a $TRAVIS_PULL_REQUEST == false -a ${OSSRH_USERNAME:=X} != X ]; then ./mvnw --no-transfer-progress deploy --settings .travis-deploy-settings.xml; fi"
+  - "if [ master == $TRAVIS_BRANCH -a $TRAVIS_PULL_REQUEST == false -a ${OSSRH_USERNAME:=X} != X ]; then ./mvnw deploy --settings .travis-deploy-settings.xml; fi"
