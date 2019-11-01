@@ -16,28 +16,17 @@
 
 package org.osgi.test.junit4;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public class WithContextRule implements AutoCloseable {
+	final BundleContextRule rule;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
+	public WithContextRule(Class<?> testClass) {
+		this.rule = new BundleContextRule();
+		this.rule.init(testClass);
+	}
 
-/**
- * This is how a real test class should use {@link BundleContextRule}.
- */
-public class BundleContextRuleExampleTest {
-
-	@Rule
-	public BundleContextRule rule = new BundleContextRule();
-
-	@Test
-	public void test() throws Exception {
-		BundleContext bundleContext = rule.getBundleContext();
-
-		assertThat(bundleContext).isNotNull()
-			.extracting(BundleContext::getBundle)
-			.isEqualTo(FrameworkUtil.getBundle(getClass()));
+	@Override
+	public void close() throws Exception {
+		rule.close();
 	}
 
 }

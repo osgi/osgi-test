@@ -47,18 +47,23 @@ public class BundleContextRule implements AutoCloseable, TestRule {
 
 	private BundleContext bundleContext;
 
-	public BundleContext get() {
+	public BundleContext getBundleContext() {
 		return bundleContext;
 	}
 
 	public void init(Class<?> testClass) {
-		bundleContext = CloseableBundleContext.proxy(testClass, FrameworkUtil.getBundle(testClass)
-			.getBundleContext());
+		if (bundleContext == null) {
+			bundleContext = CloseableBundleContext.proxy(testClass, FrameworkUtil.getBundle(testClass)
+				.getBundleContext());
+		}
 	}
 
 	@Override
 	public void close() throws Exception {
-		((AutoCloseable) bundleContext).close();
+		if (bundleContext != null) {
+			((AutoCloseable) bundleContext).close();
+			bundleContext = null;
+		}
 	}
 
 	@Override
