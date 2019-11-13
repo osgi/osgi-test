@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.service;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static org.osgi.test.common.filter.Filters.format;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -29,7 +30,9 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-import org.osgi.test.common.osgi.ServiceUse;
+import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.common.tracking.TrackServices;
+import org.osgi.test.common.tracking.TrackingConfig;
 import org.osgi.test.junit4.context.BundleContextRule;
 
 /**
@@ -47,7 +50,7 @@ import org.osgi.test.junit4.context.BundleContextRule;
  *
  * @param <T> the service type
  */
-public class ServiceUseRule<T> implements AutoCloseable, TestRule {
+public class ServiceUseRule<T> implements AutoCloseable, ServiceAware<T>, TestRule, TrackingConfig {
 
 	public static class Builder<T> {
 
@@ -55,7 +58,7 @@ public class ServiceUseRule<T> implements AutoCloseable, TestRule {
 		private final BundleContextRule	bundleContextRule;
 		private Filter					filter;
 		private int						cardinality	= 1;
-		private long					timeout		= ServiceUse.DEFAULT_TIMEOUT;
+		private long					timeout		= TrackServices.DEFAULT_TIMEOUT;
 
 		/**
 		 * @param serviceType of the service
@@ -78,7 +81,10 @@ public class ServiceUseRule<T> implements AutoCloseable, TestRule {
 
 		/**
 		 * Indicate the number of services that are required to arrive within
-		 * the specified timeout.
+		 * the specified timeout before starting the test.
+		 *
+		 * @param cardinality the number of services required before starting
+		 *            the test
 		 */
 		public Builder<T> cardinality(int cardinality) {
 			if (cardinality < 0) {
@@ -108,15 +114,16 @@ public class ServiceUseRule<T> implements AutoCloseable, TestRule {
 
 	}
 
-	private final ServiceUse<T> use;
-	private final Class<T>			serviceType;
 	private final BundleContextRule	bundleContextRule;
+	private final T[]				empty;
+	private final TrackServices<T>	use;
 
+	@SuppressWarnings("unchecked")
 	protected ServiceUseRule(Class<T> serviceType, BundleContextRule bundleContextRule, Filter filter, int cardinality,
 		long timeout) {
-		this.serviceType = serviceType;
 		this.bundleContextRule = bundleContextRule;
-		this.use = new ServiceUse<>(filter, cardinality, timeout);
+		this.empty = (T[]) Array.newInstance(serviceType, 0);
+		this.use = new TrackServices<>(filter, cardinality, timeout);
 	}
 
 	void init(Class<?> testClass) {
@@ -130,14 +137,17 @@ public class ServiceUseRule<T> implements AutoCloseable, TestRule {
 		bundleContextRule.close();
 	}
 
+	@Override
 	public int getCardinality() {
 		return use.getCardinality();
 	}
 
+	@Override
 	public Filter getFilter() {
 		return use.getFilter();
 	}
 
+	@Override
 	public long getTimeout() {
 		return use.getTimeout();
 	}
@@ -157,54 +167,64 @@ public class ServiceUseRule<T> implements AutoCloseable, TestRule {
 		};
 	}
 
+	@Override
 	public T waitForService(long timeout) throws InterruptedException {
 		return use.tracker()
 			.waitForService(timeout);
 	}
 
-	public ServiceReference<T>[] getServiceReferences() {
-		return use.tracker()
+	@Override
+	public List<ServiceReference<T>> getServiceReferences() {
+		ServiceReference<T>[] serviceReferences = use.tracker()
 			.getServiceReferences();
+		return (serviceReferences == null) ? Collections.emptyList() : Arrays.asList(serviceReferences);
 	}
 
+	@Override
 	public ServiceReference<T> getServiceReference() {
 		return use.tracker()
 			.getServiceReference();
 	}
 
+	@Override
 	public T getService(ServiceReference<T> reference) {
 		return use.tracker()
 			.getService(reference);
 	}
 
+	@Override
 	public List<T> getServices() {
-		Object[] services = use.tracker()
-			.getServices();
-		return Arrays.stream(services != null ? services : new Object[0])
-			.map(serviceType::cast)
-			.collect(toList());
+		@SuppressWarnings("unchecked")
+		T[] services = use.tracker()
+			.getServices(empty);
+		return (services == null) ? Collections.emptyList() : Arrays.asList(services);
 	}
 
+	@Override
 	public T getService() {
 		return use.tracker()
 			.getService();
 	}
 
+	@Override
 	public int size() {
 		return use.tracker()
 			.size();
 	}
 
+	@Override
 	public int getTrackingCount() {
 		return use.tracker()
 			.getTrackingCount();
 	}
 
+	@Override
 	public SortedMap<ServiceReference<T>, T> getTracked() {
 		return use.tracker()
 			.getTracked();
 	}
 
+	@Override
 	public boolean isEmpty() {
 		return use.tracker()
 			.isEmpty();

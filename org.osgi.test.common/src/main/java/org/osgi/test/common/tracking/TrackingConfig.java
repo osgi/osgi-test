@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.0.0")
-package org.osgi.test.common.osgi;
+package org.osgi.test.common.tracking;
+
+import org.osgi.annotation.versioning.ProviderType;
+import org.osgi.framework.Filter;
+
+@ProviderType
+public interface TrackingConfig {
+
+	int getCardinality();
+
+	Filter getFilter();
+
+	long getTimeout();
+
+}

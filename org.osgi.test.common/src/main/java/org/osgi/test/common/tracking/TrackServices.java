@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.common.osgi;
+package org.osgi.test.common.tracking;
 
 import static java.util.Objects.requireNonNull;
 
@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class ServiceUse<T> implements AutoCloseable {
+public class TrackServices<T> implements AutoCloseable, TrackingConfig {
 
 	public static final long		DEFAULT_TIMEOUT	= 200;
 
@@ -38,7 +38,7 @@ public class ServiceUse<T> implements AutoCloseable {
 
 	private ServiceTracker<T, T>	tracker;
 
-	public ServiceUse(Filter filter, int cardinality, long timeout) {
+	public TrackServices(Filter filter, int cardinality, long timeout) {
 		this.filter = requireNonNull(filter);
 
 		if (cardinality < 0) {
@@ -90,14 +90,17 @@ public class ServiceUse<T> implements AutoCloseable {
 		return null;
 	}
 
+	@Override
 	public int getCardinality() {
 		return cardinality;
 	}
 
+	@Override
 	public Filter getFilter() {
 		return filter;
 	}
 
+	@Override
 	public long getTimeout() {
 		return timeout;
 	}
