@@ -20,24 +20,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
+import org.osgi.test.junit4.types.Foo;
 
-/**
- * This is how a real test class should use {@link BundleContextRule}.
- */
-public class BundleContextRuleExampleTest {
+public class ServiceUseRuleExampleTest {
 
 	@Rule
-	public BundleContextRule rule = new BundleContextRule();
+	public BundleContextRule	bundleContextRule	= new BundleContextRule();
+	@Rule
+	public ServiceUseRule<Foo>	fooUse				= new ServiceUseRule.Builder<>(Foo.class, bundleContextRule)
+		.cardinality(0)
+		.build();
 
 	@Test
 	public void test() throws Exception {
-		BundleContext bundleContext = rule.getBundleContext();
-
-		assertThat(bundleContext).isNotNull()
-			.extracting(BundleContext::getBundle)
-			.isEqualTo(FrameworkUtil.getBundle(getClass()));
+		assertThat(fooUse.getService()).isNull();
 	}
 
 }

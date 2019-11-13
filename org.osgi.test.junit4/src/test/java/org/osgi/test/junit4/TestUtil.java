@@ -16,28 +16,14 @@
 
 package org.osgi.test.junit4;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.io.InputStream;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
+public class TestUtil {
+	private TestUtil() {}
 
-/**
- * This is how a real test class should use {@link BundleContextRule}.
- */
-public class BundleContextRuleExampleTest {
-
-	@Rule
-	public BundleContextRule rule = new BundleContextRule();
-
-	@Test
-	public void test() throws Exception {
-		BundleContext bundleContext = rule.getBundleContext();
-
-		assertThat(bundleContext).isNotNull()
-			.extracting(BundleContext::getBundle)
-			.isEqualTo(FrameworkUtil.getBundle(getClass()));
+	public static InputStream getBundle(String name) {
+		return TestUtil.class.getClassLoader()
+			.getResourceAsStream(name);
 	}
 
 }

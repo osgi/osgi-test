@@ -85,14 +85,20 @@
 						</goals>
 						<configuration>
 							<bnd><![CDATA[
+								p = org.osgi.test.junit4
 								Bundle-SymbolicName: ${project.artifactId}-test
+								Export-Package: ${p},${p}.types
 								Fragment-Host: ${project.artifactId}
 								Test-Cases: ${classes;CONCRETE;ANNOTATED;org.junit.Test}
 								-fixupmessages: "Host ${project.artifactId}=...";is:=ignore
+								-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
+								-includeresource:\
+									tb1.jar
 							]]></bnd>
 							<classesDir>${project.build.testOutputDirectory}</classesDir>
 							<outputDir>${project.build.testOutputDirectory}</outputDir>
 							<manifestPath>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestPath>
+							<includeClassesDir>false</includeClassesDir>
 						</configuration>
 					</execution>
 				</executions>
@@ -174,6 +180,15 @@
 							<archive>
 								<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 							</archive>
+							<includes>
+								<include>META-INF/*</include>
+								<include>org/osgi/test/junit4/*</include>
+								<include>org/osgi/test/junit4/types/*</include>
+								<include>*.jar</include>
+							</includes>
+							<excludes>
+								<exclude>org/osgi/test/junit4/tb*</exclude>
+							</excludes>
 						</configuration>
 					</execution>
 				</executions>

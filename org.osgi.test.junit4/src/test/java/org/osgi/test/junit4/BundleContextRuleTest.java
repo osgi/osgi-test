@@ -17,20 +17,166 @@
 package org.osgi.test.junit4;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.osgi.test.junit4.TestUtil.getBundle;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Test;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleListener;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceObjects;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.test.junit4.types.Foo;
 
 public class BundleContextRuleTest {
 
 	@Test
 	public void test() throws Exception {
-		try (BundleContextRule bcRule = new BundleContextRule()) {
-			bcRule.init(getClass());
+		try (WithContextRule it = new WithContextRule(getClass())) {
+			BundleContext bundleContext = it.rule.getBundleContext();
 
-			BundleContext bundleContext = bcRule.get();
+			assertThat(bundleContext).isNotNull()
+				.extracting(BundleContext::getBundle)
+				.isEqualTo(FrameworkUtil.getBundle(getClass()));
+		}
+	}
 
-			assertThat(bundleContext).isNotNull();
+	@Test
+	public void cleansUpServices() throws Exception {
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+
+		try (WithContextRule it = new WithContextRule(getClass())) {
+			BundleContext bundleContext = it.rule.getBundleContext();
+
+			ServiceRegistration<Foo> serviceRegistration = bundleContext.registerService(Foo.class, new Foo() {}, null);
+
+			assertThat(bundle.getRegisteredServices())
+				.contains(serviceRegistration.getReference());
+		}
+
+		assertThat(bundle.getRegisteredServices()).isNull();
+	}
+
+	@Test
+	public void cleansUpBundles() throws Exception {
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		Bundle installedBundle = null;
+		long bundleId = -1;
+
+		try (WithContextRule it = new WithContextRule(getClass())) {
+			BundleContext bundleContext = it.rule.getBundleContext();
+
+			installedBundle = bundleContext.installBundle("it", getBundle("tb1.jar"));
+
+			bundleId = installedBundle.getBundleId();
+
+			assertThat(bundle.getBundleContext()
+				.getBundle(bundleId)).isNotNull()
+					.matches(installedBundle::equals);
+		}
+
+		assertThat(bundle.getBundleContext()
+			.getBundle(bundleId)).isNull();
+		assertThat(installedBundle).isNotNull()
+			.extracting(Bundle::getState)
+			.isEqualTo(Bundle.UNINSTALLED);
+	}
+
+	@Test
+	public void cleansUpListeners() throws Exception {
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		Bundle installedBundle = null;
+
+		final AtomicReference<BundleEvent> ref = new AtomicReference<BundleEvent>();
+
+		BundleListener bl = new SynchronousBundleListener() {
+			@Override
+			public void bundleChanged(BundleEvent event) {
+				ref.set(event);
+			}
+		};
+
+		try (WithContextRule it = new WithContextRule(getClass())) {
+			BundleContext bundleContext = it.rule.getBundleContext();
+
+			bundleContext.addBundleListener(bl);
+
+			installedBundle = bundleContext.installBundle("it", getBundle("tb1.jar"));
+
+			assertThat(ref.get()).isNotNull()
+				.extracting(BundleEvent::getBundle)
+				.isEqualTo(installedBundle);
+		}
+
+		assertThat(installedBundle).isNotNull()
+			.extracting(Bundle::getState)
+			.isEqualTo(Bundle.UNINSTALLED);
+
+		// now reset the ref
+		ref.set(null);
+
+		try {
+			// re-install the bundle
+			installedBundle = bundle.getBundleContext()
+				.installBundle("it", getBundle("tb1.jar"));
+
+			// check that the listener didn't notice this last bundle install
+			assertThat(ref.get()).isNull();
+		} finally {
+			installedBundle.uninstall();
+		}
+	}
+
+	@Test
+	public void cleansUpGottenServices() throws Exception {
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		Bundle installedBundle = bundle.getBundleContext().installBundle("it", getBundle("tb1.jar"));
+		installedBundle.start();
+
+		try (WithContextRule it = new WithContextRule(getClass())) {
+			BundleContext bundleContext = it.rule.getBundleContext();
+
+			ServiceReference<Foo> serviceReference = bundleContext.getServiceReference(Foo.class);
+
+			Foo foo = bundleContext.getService(serviceReference);
+
+			assertThat(foo).isNotNull();
+			assertThat(bundle.getServicesInUse()).isNotNull()
+				.contains(serviceReference);
+		} finally {
+			assertThat(bundle.getServicesInUse()).isNull();
+
+			installedBundle.uninstall();
+		}
+	}
+
+	@Test
+	public void cleansUpGottenServiceObjects() throws Exception {
+		Bundle bundle = FrameworkUtil.getBundle(getClass());
+		Bundle installedBundle = bundle.getBundleContext()
+			.installBundle("it", getBundle("tb1.jar"));
+		installedBundle.start();
+
+		try (WithContextRule it = new WithContextRule(getClass())) {
+			BundleContext bundleContext = it.rule.getBundleContext();
+
+			ServiceReference<Foo> serviceReference = bundleContext.getServiceReference(Foo.class);
+
+			ServiceObjects<Foo> serviceObjects = bundleContext.getServiceObjects(serviceReference);
+
+			assertThat(serviceObjects).isNotNull();
+			assertThat(serviceObjects.getService()).isNotNull();
+			assertThat(bundle.getServicesInUse()).isNotNull()
+				.contains(serviceReference);
+		} finally {
+			assertThat(bundle.getServicesInUse()).isNull();
+
+			installedBundle.uninstall();
 		}
 	}
 
