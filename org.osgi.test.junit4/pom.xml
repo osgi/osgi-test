@@ -68,6 +68,10 @@
 			<artifactId>org.eclipse.osgi</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.service.log</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
