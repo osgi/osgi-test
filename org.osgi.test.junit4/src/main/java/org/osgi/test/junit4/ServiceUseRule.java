@@ -18,7 +18,7 @@ package org.osgi.test.junit4;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.osgi.test.common.osgi.Filters.format;
+import static org.osgi.test.common.filter.Filters.format;
 
 import java.util.Arrays;
 import java.util.List;

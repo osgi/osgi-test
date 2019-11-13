@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.framework.Filter;
-import org.osgi.test.common.osgi.Filters;
+import org.osgi.test.common.filter.Filters;
 
 public class FilterConditionTest {
 
