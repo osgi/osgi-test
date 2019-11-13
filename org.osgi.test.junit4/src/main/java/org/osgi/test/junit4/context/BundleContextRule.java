@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.context;
 
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.test.common.osgi.CloseableBundleContext;
+import org.osgi.test.common.context.CloseableBundleContext;
 
 /**
  * A JUnit 4 Rule to get the OSGi {@link BundleContext} of the test bundle.

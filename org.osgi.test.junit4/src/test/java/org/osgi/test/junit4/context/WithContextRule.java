@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.context;
+
+import org.osgi.test.junit4.context.BundleContextRule;
 
 public class WithContextRule implements AutoCloseable {
 	final BundleContextRule rule;

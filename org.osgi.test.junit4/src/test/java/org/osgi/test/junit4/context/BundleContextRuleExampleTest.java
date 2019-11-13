@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,6 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.test.junit4.context.BundleContextRule;
 
 /**
  * This is how a real test class should use {@link BundleContextRule}.
