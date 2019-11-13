@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.osgi.test.junit4.TestUtil.getBundle;

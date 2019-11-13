@@ -25,6 +25,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.osgi.ServiceUse;
+import org.osgi.test.junit4.context.BundleContextRule;
 import org.osgi.test.junit4.types.Foo;
 
 public class ServiceUseRuleTest {

@@ -30,6 +30,7 @@ import org.junit.runners.model.Statement;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.test.common.osgi.ServiceUse;
+import org.osgi.test.junit4.context.BundleContextRule;
 
 /**
  * A JUnit 4 Rule to depend on OSGi services.

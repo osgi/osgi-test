@@ -37,7 +37,7 @@ import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.test.common.osgi.CloseableBundleContext;
+import org.osgi.test.common.context.CloseableBundleContext;
 
 public class BundleContextExtension
 	implements BeforeEachCallback, ParameterResolver {

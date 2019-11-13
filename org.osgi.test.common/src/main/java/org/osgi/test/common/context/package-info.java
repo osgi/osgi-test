@@ -14,27 +14,6 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Rule;
-import org.junit.Test;
-import org.osgi.test.junit4.context.BundleContextRule;
-import org.osgi.test.junit4.types.Foo;
-
-public class ServiceUseRuleExampleTest {
-
-	@Rule
-	public BundleContextRule	bundleContextRule	= new BundleContextRule();
-	@Rule
-	public ServiceUseRule<Foo>	fooUse				= new ServiceUseRule.Builder<>(Foo.class, bundleContextRule)
-		.cardinality(0)
-		.build();
-
-	@Test
-	public void test() throws Exception {
-		assertThat(fooUse.getService()).isNull();
-	}
-
-}
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.0")
+package org.osgi.test.common.context;
