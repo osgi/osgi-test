@@ -27,7 +27,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit4.ExecutorRule;
 import org.osgi.test.junit4.context.BundleContextRule;
-import org.osgi.test.junit4.service.ServiceUseRule;
 import org.osgi.test.junit4.types.Foo;
 
 public class ServiceUseRuleTest {
@@ -144,27 +143,27 @@ public class ServiceUseRuleTest {
 			SoftAssertions softly = new SoftAssertions();
 
 			softly.assertThat(foos.getService())
-				.isNotNull();
+				.isEqualTo(afoo);
 			softly.assertThat(foos.getServiceReference())
 				.isNotNull();
 			softly.assertThat(foos.getServiceReferences())
-				.isNotNull();
+				.hasSize(1);
 			softly.assertThat(foos.getServices())
-				.contains(afoo);
+				.containsExactly(afoo);
 			softly.assertThat(foos.getTimeout())
 				.isEqualTo(1000);
 			softly.assertThat(foos.getTracked())
-				.isNotEmpty();
+				.hasSize(1);
 			softly.assertThat(foos.getTrackingCount())
 				.isEqualTo(1);
 			softly.assertThat(foos.getCardinality())
-				.isGreaterThan(0);
+				.isEqualTo(1);
 			softly.assertThat(foos.size())
 				.isEqualTo(1);
 			softly.assertThat(foos.isEmpty())
 				.isFalse();
 			softly.assertThat(foos.waitForService(20))
-				.isNotNull();
+				.isEqualTo(afoo);
 
 			softly.assertAll();
 		}
