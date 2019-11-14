@@ -33,7 +33,8 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<bnd.version>4.3.0</bnd.version>
-		<junit-jupiter.version>5.5.2</junit-jupiter.version>
+		<junit-jupiter.version>5.3.1</junit-jupiter.version>
+		<junit-platform.version>1.3.1</junit-platform.version>
 		<assertj.version>3.13.2</assertj.version>
 	</properties>
 
@@ -181,7 +182,7 @@
 						</execution>
 					</executions>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -285,5 +286,24 @@
 			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
 		</snapshotRepository>
 	</distributionManagement>
+
+	<profiles>
+		<profile>
+			<id>bnd-next</id>
+			<properties>
+				<bnd.version>4.4.0-SNAPSHOT</bnd.version>
+			</properties>
+			<pluginRepositories>
+				<pluginRepository>
+					<id>bnd-snapshots</id>
+					<url>https://bndtools.jfrog.io/bndtools/libs-snapshot/</url>
+					<layout>default</layout>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+				</pluginRepository>
+			</pluginRepositories>
+		</profile>
+	</profiles>
 
 </project>

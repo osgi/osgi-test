@@ -51,6 +51,18 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>2.28.2</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -59,7 +71,157 @@
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skipTests>true</skipTests>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>bnd-next</id>
+			<dependencies>
+				<dependency>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>biz.aQute.tester.junit-platform</artifactId>
+					<version>${bnd.version}</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.apache.felix</groupId>
+					<artifactId>org.apache.felix.logback</artifactId>
+					<version>1.0.2</version>
+					<scope>test</scope>
+				</dependency>
+				<dependency>
+					<groupId>org.eclipse.platform</groupId>
+					<artifactId>org.eclipse.osgi</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bnd-maven-plugin</artifactId>
+						<executions>
+							<!-- Integration Test Configuration -->
+							<execution>
+								<id>bnd-process-test</id>
+								<phase>process-test-classes</phase>
+								<goals>
+									<goal>bnd-process</goal>
+								</goals>
+								<configuration>
+									<bnd><![CDATA[
+										p = org.osgi.test.junit5
+										Bundle-SymbolicName: ${project.artifactId}-test
+										Export-Package: !${p}.tb*,${p}.*
+										Fragment-Host: ${project.artifactId}
+										Test-Cases: ${classes;CONCRETE;ANNOTATED;org.junit.jupiter.api.Test}
+										-fixupmessages: "Host ${project.artifactId}=...";is:=ignore
+										-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
+										-includeresource:\
+											tb1.jar
+									]]></bnd>
+									<classesDir>${project.build.testOutputDirectory}</classesDir>
+									<outputDir>${project.build.testOutputDirectory}</outputDir>
+									<manifestPath>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestPath>
+									<includeClassesDir>false</includeClassesDir>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- This dynamically calculates all the things we need to run our code. -->
+					<plugin>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bnd-resolver-maven-plugin</artifactId>
+						<version>${bnd.version}</version>
+						<executions>
+							<!-- Integration Test Configuration -->
+							<execution>
+								<id>resolve-test</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>resolve</goal>
+								</goals>
+								<configuration>
+									<bndruns>
+										<bndrun>test.bndrun</bndrun>
+									</bndruns>
+									<bundles>
+										<bundle>target/${project.build.finalName}-test.jar</bundle>
+									</bundles>
+									<failOnChanges>false</failOnChanges>
+									<includeDependencyManagement>true</includeDependencyManagement>
+									<reportOptional>false</reportOptional>
+									<scopes>
+										<scope>compile</scope>
+										<scope>runtime</scope>
+										<scope>test</scope>
+									</scopes>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- This is the plugin runs the OSGi integration tests. -->
+					<plugin>
+						<groupId>biz.aQute.bnd</groupId>
+						<artifactId>bnd-testing-maven-plugin</artifactId>
+						<version>${bnd.version}</version>
+						<executions>
+							<execution>
+								<id>testing</id>
+								<goals>
+									<goal>testing</goal>
+								</goals>
+								<configuration>
+									<bndruns>
+										<bndrun>test.bndrun</bndrun>
+									</bndruns>
+									<bundles>
+										<bundle>target/${project.build.finalName}-test.jar</bundle>
+									</bundles>
+									<failOnChanges>false</failOnChanges>
+									<includeDependencyManagement>true</includeDependencyManagement>
+									<resolve>false</resolve>
+									<scopes>
+										<scope>compile</scope>
+										<scope>runtime</scope>
+										<scope>test</scope>
+									</scopes>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<artifactId>maven-jar-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>test-jar</id>
+								<phase>package</phase>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+								<configuration>
+									<classifier>test</classifier>
+									<classesDirectory>${project.build.testOutputDirectory}</classesDirectory>
+									<archive>
+										<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
+									</archive>
+									<excludes>
+										<exclude>org/osgi/test/junit5/tb*/**</exclude>
+									</excludes>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 </project>
