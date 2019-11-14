@@ -27,10 +27,10 @@ install:
   - "source install-jdk.sh --url $JAVA_JDK"
 
 before_script:
-  - "./mvnw --version"
+  - "./mvnw --version --settings .travis-settings.xml"
 
 script:
-  - "./mvnw --no-transfer-progress clean install"
+  - "./mvnw --no-transfer-progress --settings .travis-settings.xml clean install"
 
 after_success:
-  - "if [ master == $TRAVIS_BRANCH -a $TRAVIS_PULL_REQUEST == false -a ${OSSRH_USERNAME:=X} != X ]; then ./mvnw deploy --settings .travis-deploy-settings.xml; fi"
+  - "if [ master == $TRAVIS_BRANCH -a $TRAVIS_PULL_REQUEST == false -a ${OSSRH_USERNAME:=X} != X ]; then ./mvnw --settings .travis-settings.xml deploy; fi"
