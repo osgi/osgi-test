@@ -17,10 +17,11 @@
 package org.osgi.test.junit4.service;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 import static org.osgi.test.common.filter.Filters.format;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -162,9 +163,10 @@ public class ServiceUseRule<T> implements AutoCloseable, TestRule {
 			.waitForService(timeout);
 	}
 
-	public ServiceReference<T>[] getServiceReferences() {
-		return use.tracker()
+	public List<ServiceReference<T>> getServiceReferences() {
+		ServiceReference<T>[] serviceReferences = use.tracker()
 			.getServiceReferences();
+		return (serviceReferences == null) ? Collections.emptyList() : Arrays.asList(serviceReferences);
 	}
 
 	public ServiceReference<T> getServiceReference() {
@@ -178,11 +180,10 @@ public class ServiceUseRule<T> implements AutoCloseable, TestRule {
 	}
 
 	public List<T> getServices() {
-		Object[] services = use.tracker()
-			.getServices();
-		return Arrays.stream(services != null ? services : new Object[0])
-			.map(serviceType::cast)
-			.collect(toList());
+		@SuppressWarnings("unchecked")
+		T[] services = use.tracker()
+			.getServices((T[]) Array.newInstance(serviceType, 0));
+		return (services == null) ? Collections.emptyList() : Arrays.asList(services);
 	}
 
 	public T getService() {
