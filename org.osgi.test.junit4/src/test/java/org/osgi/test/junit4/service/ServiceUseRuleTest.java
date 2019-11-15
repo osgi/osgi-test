@@ -16,6 +16,7 @@
 
 package org.osgi.test.junit4.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Hashtable;
@@ -27,7 +28,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.service.ServiceUse;
 import org.osgi.test.junit4.ExecutorRule;
 import org.osgi.test.junit4.context.BundleContextRule;
-import org.osgi.test.junit4.service.ServiceUseRule;
 import org.osgi.test.junit4.types.Foo;
 
 public class ServiceUseRuleTest {
@@ -43,6 +43,11 @@ public class ServiceUseRuleTest {
 				.build()) {
 
 			bcRule.init(getClass());
+
+			assertThat(bcRule.getBundleContext()
+				.getBundle()
+				.getRegisteredServices()).isNull();
+
 			foos.init(getClass());
 
 			SoftAssertions softly = new SoftAssertions();
@@ -67,6 +72,11 @@ public class ServiceUseRuleTest {
 						.build()) {
 
 					bcRule.init(getClass());
+
+					assertThat(bcRule.getBundleContext()
+						.getBundle()
+						.getRegisteredServices()).isNull();
+
 					foos.init(getClass());
 				}
 			})
@@ -84,6 +94,11 @@ public class ServiceUseRuleTest {
 						.build()) {
 
 					bcRule.init(getClass());
+
+					assertThat(bcRule.getBundleContext()
+						.getBundle()
+						.getRegisteredServices()).isNull();
+
 					foos.init(getClass());
 				}
 			})
@@ -98,6 +113,10 @@ public class ServiceUseRuleTest {
 				.build();) {
 
 			bcRule.init(getClass());
+
+			assertThat(bcRule.getBundleContext()
+				.getBundle()
+				.getRegisteredServices()).isNull();
 
 			final Foo afoo = new Foo() {};
 
@@ -132,6 +151,10 @@ public class ServiceUseRuleTest {
 
 			bcRule.init(getClass());
 
+			assertThat(bcRule.getBundleContext()
+				.getBundle()
+				.getRegisteredServices()).isNull();
+
 			final Foo afoo = new Foo() {};
 
 			executor.schedule(
@@ -156,7 +179,7 @@ public class ServiceUseRuleTest {
 			softly.assertThat(foos.getTracked())
 				.isNotEmpty();
 			softly.assertThat(foos.getTrackingCount())
-				.isEqualTo(1);
+				.isGreaterThan(0);
 			softly.assertThat(foos.getCardinality())
 				.isGreaterThan(0);
 			softly.assertThat(foos.size())
@@ -181,6 +204,10 @@ public class ServiceUseRuleTest {
 				.build()) {
 
 			bcRule.init(getClass());
+
+			assertThat(bcRule.getBundleContext()
+				.getBundle()
+				.getRegisteredServices()).isNull();
 
 			final Foo afoo = new Foo() {};
 
@@ -209,7 +236,7 @@ public class ServiceUseRuleTest {
 			softly.assertThat(fooRule.getTracked())
 				.isNotEmpty();
 			softly.assertThat(fooRule.getTrackingCount())
-				.isEqualTo(1);
+				.isGreaterThan(0);
 			softly.assertThat(fooRule.getCardinality())
 				.isEqualTo(1);
 			softly.assertThat(fooRule.size())
@@ -231,6 +258,10 @@ public class ServiceUseRuleTest {
 				.build()) {
 
 			bcRule.init(getClass());
+
+			assertThat(bcRule.getBundleContext()
+				.getBundle()
+				.getRegisteredServices()).isNull();
 
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
 			executor.schedule(() -> bcRule.getBundleContext()
@@ -255,7 +286,7 @@ public class ServiceUseRuleTest {
 			softly.assertThat(fooRule.getTracked())
 				.isNotEmpty();
 			softly.assertThat(fooRule.getTrackingCount())
-				.isEqualTo(2);
+				.isGreaterThan(0);
 			softly.assertThat(fooRule.getCardinality())
 				.isEqualTo(2);
 			softly.assertThat(fooRule.size())
@@ -283,6 +314,10 @@ public class ServiceUseRuleTest {
 
 					bcRule.init(getClass());
 
+					assertThat(bcRule.getBundleContext()
+						.getBundle()
+						.getRegisteredServices()).isNull();
+
 					final Foo afoo = new Foo() {};
 
 					executor.schedule(() -> bcRule.getBundleContext()
@@ -306,6 +341,13 @@ public class ServiceUseRuleTest {
 						.filter("(foo=baz")
 						.build()) {
 
+					bcRule.init(getClass());
+
+					assertThat(bcRule.getBundleContext()
+						.getBundle()
+						.getRegisteredServices()).isNull();
+
+					fooRule.init(getClass());
 				}
 			});
 	}

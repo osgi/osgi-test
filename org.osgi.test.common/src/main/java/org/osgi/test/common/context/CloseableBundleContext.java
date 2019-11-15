@@ -104,7 +104,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		bundles.stream()
 			.filter(this::installed)
 			.forEach(this::uninstall);
-		services.forEach(bundleContext::ungetService);
+		services.forEach(this::ungetService);
 		serviceobjects.stream()
 			.map(AutoCloseable.class::cast)
 			.forEach(this::autoclose);
@@ -221,6 +221,10 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		} catch (BundleException be) {
 			throwsUnchecked(be);
 		}
+	}
+
+	private void ungetService(ServiceReference<?> reference) {
+		while (bundleContext.ungetService(reference)) {}
 	}
 
 	@SuppressWarnings("unchecked")
