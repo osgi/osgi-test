@@ -31,6 +31,7 @@ import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.test.common.osgi.CloseableBundleContext;
 import org.osgi.test.junit4.types.Foo;
 
 public class BundleContextRuleTest {
@@ -55,8 +56,7 @@ public class BundleContextRuleTest {
 
 			ServiceRegistration<Foo> serviceRegistration = bundleContext.registerService(Foo.class, new Foo() {}, null);
 
-			assertThat(bundle.getRegisteredServices())
-				.contains(serviceRegistration.getReference());
+			assertThat(bundle.getRegisteredServices()).contains(serviceRegistration.getReference());
 		}
 
 		assertThat(bundle.getRegisteredServices()).isNull();
@@ -135,7 +135,8 @@ public class BundleContextRuleTest {
 	@Test
 	public void cleansUpGottenServices() throws Exception {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
-		Bundle installedBundle = bundle.getBundleContext().installBundle("it", getBundle("tb1.jar"));
+		Bundle installedBundle = bundle.getBundleContext()
+			.installBundle("it", getBundle("tb1.jar"));
 		installedBundle.start();
 
 		try (WithContextRule it = new WithContextRule(getClass())) {
@@ -180,4 +181,17 @@ public class BundleContextRuleTest {
 		}
 	}
 
+	@Test
+	public void closeableBundleContext_handlesSelectedMethodsOfObject() throws Exception {
+		BundleContext upstream = FrameworkUtil.getBundle(getClass())
+			.getBundleContext();
+		BundleContext closeableBC = CloseableBundleContext.proxy(getClass(), upstream);
+
+		closeableBC.toString();
+		assertThat(closeableBC).as("toString")
+			.hasToString("CloseableBundleContext[" + System.identityHashCode(closeableBC) + "]:" + upstream.toString())
+			.isEqualTo(upstream);
+		assertThat(closeableBC.hashCode()).as("hashcode")
+			.isEqualTo(upstream.hashCode());
+	}
 }

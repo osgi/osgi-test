@@ -73,6 +73,11 @@
 			<name>Ray Augé</name>
 			<email>raymond.auge@liferay.com</email>
 		</developer>
+		<developer>
+			<id>kriegfrj</id>
+			<name>Fr Jeremy Krieg</name>
+			<email>fr.jkrieg@greekwelfaresa.org.au</email>
+		</developer>
 	</developers>
 	<issueManagement>
 		<system>GitHub Issues</system>
