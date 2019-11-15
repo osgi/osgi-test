@@ -60,6 +60,7 @@ public class ServiceUse<T> implements AutoCloseable {
 	}
 
 	public void init(BundleContext bundleContext) {
+		final long endTime = System.currentTimeMillis() + timeout;
 		CountDownLatch countDownLatch = new CountDownLatch(getCardinality());
 
 		tracker = new ServiceTracker<>(bundleContext, getFilter(),
@@ -70,6 +71,18 @@ public class ServiceUse<T> implements AutoCloseable {
 			if (!countDownLatch.await(getTimeout(), TimeUnit.MILLISECONDS)) {
 				throw new AssertionError(
 					getCardinality() + " services " + getFilter() + " didn't arrive within " + getTimeout() + "ms");
+			}
+
+			// CountDownLatch is fired when the last addingService() is called,
+			// but this completes before the service is actually added to the
+			// tracker. Need to poll-wait for a bit while the actual addition
+			// completes (shouldn't be long).
+			while (tracker.size() < cardinality) {
+				if (System.currentTimeMillis() > endTime) {
+					throw new AssertionError(
+						getCardinality() + " services " + getFilter() + " didn't arrive within " + getTimeout() + "ms");
+				}
+				Thread.sleep(10);
 			}
 		} catch (InterruptedException e) {
 			throw new AssertionError(e);
