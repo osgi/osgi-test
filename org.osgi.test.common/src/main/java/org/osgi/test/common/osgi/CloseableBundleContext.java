@@ -84,6 +84,17 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 				return method.invoke(bundleContext, args);
 			}
 		}
+		if (method.getDeclaringClass()
+			.equals(Object.class)) {
+			switch (method.getName()) {
+				case "toString" :
+					return delegatedToString(proxy);
+				case "hashCode" :
+					return bundleContext.hashCode();
+				case "equals" :
+					return bundleContext.equals(args[0]);
+			}
+		}
 
 		throw new IllegalArgumentException();
 	}
@@ -101,6 +112,10 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		bListeners.forEach(bundleContext::removeBundleListener);
 		sListeners.forEach(bundleContext::removeServiceListener);
 		fwListeners.forEach(bundleContext::removeFrameworkListener);
+	}
+
+	public String delegatedToString(Object proxy) {
+		return "CloseableBundleContext[" + System.identityHashCode(proxy) + "]:" + bundleContext.toString();
 	}
 
 	public Bundle installBundle(String location, InputStream input) throws BundleException {
