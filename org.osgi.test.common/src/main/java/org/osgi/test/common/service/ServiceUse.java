@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.common.osgi;
+package org.osgi.test.common.service;
 
 import static java.util.Objects.requireNonNull;
 

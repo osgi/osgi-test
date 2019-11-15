@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Rule;
 import org.junit.Test;
+import org.osgi.test.junit4.context.BundleContextRule;
+import org.osgi.test.junit4.service.ServiceUseRule;
 import org.osgi.test.junit4.types.Foo;
 
 public class ServiceUseRuleExampleTest {

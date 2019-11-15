@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.service;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -29,7 +29,8 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-import org.osgi.test.common.osgi.ServiceUse;
+import org.osgi.test.common.service.ServiceUse;
+import org.osgi.test.junit4.context.BundleContextRule;
 
 /**
  * A JUnit 4 Rule to depend on OSGi services.
