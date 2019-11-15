@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.service;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
@@ -24,7 +24,10 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.test.common.osgi.ServiceUse;
+import org.osgi.test.common.service.ServiceUse;
+import org.osgi.test.junit4.ExecutorRule;
+import org.osgi.test.junit4.context.BundleContextRule;
+import org.osgi.test.junit4.service.ServiceUseRule;
 import org.osgi.test.junit4.types.Foo;
 
 public class ServiceUseRuleTest {

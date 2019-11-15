@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.common.osgi;
+package org.osgi.test.common.filter;
 
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;

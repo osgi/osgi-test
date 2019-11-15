@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit5;
+package org.osgi.test.junit5.context;
 
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
 import static org.junit.platform.commons.util.ReflectionUtils.isPrivate;
@@ -37,7 +37,7 @@ import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.test.common.osgi.CloseableBundleContext;
+import org.osgi.test.common.context.CloseableBundleContext;
 
 public class BundleContextExtension
 	implements BeforeEachCallback, ParameterResolver {

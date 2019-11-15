@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.osgi.test.junit4.TestUtil.getBundle;
@@ -31,7 +31,7 @@ import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
-import org.osgi.test.common.osgi.CloseableBundleContext;
+import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.junit4.types.Foo;
 
 public class BundleContextRuleTest {

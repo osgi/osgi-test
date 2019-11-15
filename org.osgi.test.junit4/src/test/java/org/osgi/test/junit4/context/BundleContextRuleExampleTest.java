@@ -14,26 +14,31 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4;
+package org.osgi.test.junit4.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.osgi.test.junit4.types.Foo;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.FrameworkUtil;
+import org.osgi.test.junit4.context.BundleContextRule;
 
-public class ServiceUseRuleExampleTest {
+/**
+ * This is how a real test class should use {@link BundleContextRule}.
+ */
+public class BundleContextRuleExampleTest {
 
 	@Rule
-	public BundleContextRule	bundleContextRule	= new BundleContextRule();
-	@Rule
-	public ServiceUseRule<Foo>	fooUse				= new ServiceUseRule.Builder<>(Foo.class, bundleContextRule)
-		.cardinality(0)
-		.build();
+	public BundleContextRule rule = new BundleContextRule();
 
 	@Test
 	public void test() throws Exception {
-		assertThat(fooUse.getService()).isNull();
+		BundleContext bundleContext = rule.getBundleContext();
+
+		assertThat(bundleContext).isNotNull()
+			.extracting(BundleContext::getBundle)
+			.isEqualTo(FrameworkUtil.getBundle(getClass()));
 	}
 
 }

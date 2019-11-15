@@ -87,7 +87,7 @@
 							<bnd><![CDATA[
 								p = org.osgi.test.junit4
 								Bundle-SymbolicName: ${project.artifactId}-test
-								Export-Package: ${p},${p}.types
+								Export-Package: !${p}.tb*,${p}.*
 								Fragment-Host: ${project.artifactId}
 								Test-Cases: ${classes;CONCRETE;ANNOTATED;org.junit.Test}
 								-fixupmessages: "Host ${project.artifactId}=...";is:=ignore
@@ -180,14 +180,8 @@
 							<archive>
 								<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 							</archive>
-							<includes>
-								<include>META-INF/*</include>
-								<include>org/osgi/test/junit4/*</include>
-								<include>org/osgi/test/junit4/types/*</include>
-								<include>*.jar</include>
-							</includes>
 							<excludes>
-								<exclude>org/osgi/test/junit4/tb*</exclude>
+								<exclude>org/osgi/test/junit4/tb*/**</exclude>
 							</excludes>
 						</configuration>
 					</execution>

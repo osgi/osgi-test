@@ -1,4 +1,4 @@
-package org.osgi.test.junit5;
+package org.osgi.test.junit5.context;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.PARAMETER;
