@@ -42,11 +42,12 @@ import org.osgi.test.common.context.CloseableBundleContext;
 public class BundleContextExtension
 	implements BeforeEachCallback, ParameterResolver {
 
-	private static final String					KEY			= "bundle.context";
-	private static final Namespace				NAMESPACE	= Namespace.create(BundleContextExtension.class);
+	public static final String		KEY			= "bundle.context";
+	public static final Namespace	NAMESPACE	= Namespace.create(BundleContextExtension.class);
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
+		getBundleContext(extensionContext);
 		injectFields(extensionContext, extensionContext.getRequiredTestInstance(), ReflectionUtils::isNotStatic);
 	}
 
@@ -59,7 +60,7 @@ public class BundleContextExtension
 		Class<?> parameterType = parameterContext.getParameter()
 			.getType();
 		assertSupportedType("parameter", parameterType);
-		return getBundleContext(parameterType, extensionContext);
+		return getBundleContext(extensionContext);
 	}
 
 	/**
@@ -92,7 +93,7 @@ public class BundleContextExtension
 		}
 	}
 
-	private Object getBundleContext(Class<?> type, ExtensionContext extensionContext) {
+	public BundleContext getBundleContext(ExtensionContext extensionContext) {
 		BundleContext bundleContext = extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(KEY,
 				key -> new CloseableResourceBundleContext(extensionContext.getRequiredTestClass(),
@@ -109,14 +110,14 @@ public class BundleContextExtension
 			.forEach(field -> {
 				assertValidFieldCandidate(field);
 				try {
-					makeAccessible(field).set(testInstance, getBundleContext(field.getType(), extensionContext));
+					makeAccessible(field).set(testInstance, getBundleContext(extensionContext));
 				} catch (Throwable t) {
 					ExceptionUtils.throwAsUncheckedException(t);
 				}
 			});
 	}
 
-	private static class CloseableResourceBundleContext implements CloseableResource {
+	public static class CloseableResourceBundleContext implements CloseableResource {
 
 		private final BundleContext bundleContext;
 
@@ -134,4 +135,5 @@ public class BundleContextExtension
 		}
 
 	}
+
 }

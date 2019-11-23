@@ -25,7 +25,7 @@ import org.assertj.core.api.SoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.test.common.service.ServiceUse;
+import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit4.ExecutorRule;
 import org.osgi.test.junit4.context.BundleContextRule;
 import org.osgi.test.junit4.types.Foo;
@@ -55,7 +55,7 @@ public class ServiceUseRuleTest {
 			softly.assertThat(foos.isEmpty())
 				.isTrue();
 			softly.assertThat(foos.getTimeout())
-				.isEqualTo(ServiceUse.DEFAULT_TIMEOUT);
+				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(foos.getCardinality())
 				.isEqualTo(0);
 
@@ -134,7 +134,7 @@ public class ServiceUseRuleTest {
 			softly.assertThat(foos.size())
 				.isEqualTo(1);
 			softly.assertThat(foos.getTimeout())
-				.isEqualTo(ServiceUse.DEFAULT_TIMEOUT);
+				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(foos.getCardinality())
 				.isGreaterThan(0);
 
@@ -167,27 +167,27 @@ public class ServiceUseRuleTest {
 			SoftAssertions softly = new SoftAssertions();
 
 			softly.assertThat(foos.getService())
-				.isNotNull();
+				.isEqualTo(afoo);
 			softly.assertThat(foos.getServiceReference())
 				.isNotNull();
 			softly.assertThat(foos.getServiceReferences())
-				.isNotNull();
+				.hasSize(1);
 			softly.assertThat(foos.getServices())
-				.contains(afoo);
+				.containsExactly(afoo);
 			softly.assertThat(foos.getTimeout())
 				.isEqualTo(1000);
 			softly.assertThat(foos.getTracked())
-				.isNotEmpty();
+				.hasSize(1);
 			softly.assertThat(foos.getTrackingCount())
 				.isGreaterThan(0);
 			softly.assertThat(foos.getCardinality())
-				.isGreaterThan(0);
+				.isEqualTo(1);
 			softly.assertThat(foos.size())
 				.isEqualTo(1);
 			softly.assertThat(foos.isEmpty())
 				.isFalse();
 			softly.assertThat(foos.waitForService(20))
-				.isNotNull();
+				.isEqualTo(afoo);
 
 			softly.assertAll();
 		}
@@ -232,7 +232,7 @@ public class ServiceUseRuleTest {
 				.isNotEmpty()
 				.contains(afoo);
 			softly.assertThat(fooRule.getTimeout())
-				.isEqualTo(ServiceUse.DEFAULT_TIMEOUT);
+				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(fooRule.getTracked())
 				.isNotEmpty();
 			softly.assertThat(fooRule.getTrackingCount())
@@ -282,7 +282,7 @@ public class ServiceUseRuleTest {
 			softly.assertThat(fooRule.getServices())
 				.containsExactlyInAnyOrder(s1, s2);
 			softly.assertThat(fooRule.getTimeout())
-				.isEqualTo(ServiceUse.DEFAULT_TIMEOUT);
+				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(fooRule.getTracked())
 				.isNotEmpty();
 			softly.assertThat(fooRule.getTrackingCount())
