@@ -7,7 +7,6 @@ env:
   global:
     - LC_ALL=en_US.UTF-8
     - JAVA_JDK=https://cdn.azul.com/zulu/bin/zulu8.42.0.23-ca-jdk8.0.232-linux_x64.tar.gz
-    - ALLOW_FAILURE=false
 
 jobs:
   include:
@@ -18,8 +17,7 @@ jobs:
       env:
         - JAVA_JDK=https://cdn.azul.com/zulu/bin/zulu11.35.15-ca-jdk11.0.5-linux_x64.tar.gz
     - name: "BndNext"
-      env:
-        - ALLOW_FAILURE=true
+      env: ALLOW_FAILURE=true
       script:
         - "./mvnw --no-transfer-progress --settings .travis-settings.xml clean install -Pbnd-next"
   allow_failures:
