@@ -300,8 +300,18 @@
 		<profile>
 			<id>bnd-next</id>
 			<properties>
-				<bnd.version>4.4.0-SNAPSHOT</bnd.version>
+				<bnd.version>5.0.0-SNAPSHOT</bnd.version>
 			</properties>
+			<repositories>
+				<repository>
+					<id>bnd-snapshots</id>
+					<url>https://bndtools.jfrog.io/bndtools/libs-snapshot/</url>
+					<layout>default</layout>
+					<releases>
+						<enabled>false</enabled>
+					</releases>
+				</repository>
+			</repositories>
 			<pluginRepositories>
 				<pluginRepository>
 					<id>bnd-snapshots</id>
