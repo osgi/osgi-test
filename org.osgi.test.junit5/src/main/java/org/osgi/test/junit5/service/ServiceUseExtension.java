@@ -25,11 +25,11 @@ import static org.osgi.test.common.filter.Filters.format;
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
-import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
@@ -41,7 +41,7 @@ import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit5.context.BundleContextExtension;
 
 public class ServiceUseExtension<T> extends BaseServiceUse<T>
-	implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
+	implements BeforeEachCallback, ParameterResolver {
 
 	public static class Builder<T> {
 
@@ -52,7 +52,19 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 		private long			timeout		= TrackServices.DEFAULT_TIMEOUT;
 
 		/**
+		 * Create with default BundleContextExtension.
+		 *
 		 * @param serviceType of the service
+		 */
+		public Builder(Class<T> serviceType) {
+			this(serviceType, new BundleContextExtension());
+		}
+
+		/**
+		 * Create with available BundleContextExtension.
+		 *
+		 * @param serviceType of the service
+		 * @param contextExtension the BundleContextExtension if available
 		 */
 		public Builder(Class<T> serviceType, BundleContextExtension contextExtension) {
 			this.serviceType = serviceType;
@@ -108,33 +120,36 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 	final static Namespace					NAMESPACE	= Namespace.create(ServiceUseExtension.class);
 
 	private final BundleContextExtension	contextExtension;
-	private final TrackServices<T>			trackServices;
+	private final Filter					filter;
+	private final int						cardinality;
+	private final long						timeout;
+	private volatile TrackServices<T>		trackServices;
 
 	@SuppressWarnings("unchecked")
 	protected ServiceUseExtension(Class<T> serviceType, BundleContextExtension contextExtension, Filter filter,
 		int cardinality, long timeout) {
 		super(serviceType);
 		this.contextExtension = contextExtension;
-		this.trackServices = new TrackServices<>(filter, cardinality, timeout);
+		this.filter = filter;
+		this.cardinality = cardinality;
+		this.timeout = timeout;
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
 		contextExtension.beforeEach(extensionContext);
-		trackServices.init(contextExtension.getBundleContext(extensionContext));
-		injectFields(extensionContext, extensionContext.getRequiredTestInstance(), ReflectionUtils::isNotStatic);
-	}
-
-	@Override
-	public void afterEach(ExtensionContext extensionContext) throws Exception {
-		close();
+		// set this in order to be able to honour the BaseServiceUse contract
+		trackServices = getTrackServices(extensionContext);
+		injectFields(trackServices, extensionContext, extensionContext.getRequiredTestInstance(),
+			ReflectionUtils::isNotStatic);
 	}
 
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
+
 		assertRequired();
-		return trackServices.tracker()
+		return getTrackServices(extensionContext).tracker()
 			.getService();
 	}
 
@@ -152,28 +167,30 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 	}
 
 	private void assertRequired() {
-		if (trackServices.getCardinality() < 1) {
-			throw new ExtensionConfigurationException("Can only resolve @ServiceParameter when service is required.");
+		if (cardinality < 1) {
+			throw new ExtensionConfigurationException(
+				"Can only resolve @ServiceParameter when cardinality is greater than 0.");
 		}
 	}
 
-	private void assertValidFieldCandidate(Field field) {
+	private void assertValidFieldCandidate(Field field, TrackServices<T> trackServices) {
 		assertRequired();
 		if (isPrivate(field)) {
 			throw new ExtensionConfigurationException("@ServiceParameter field [" + field + "] must not be private.");
 		}
 	}
 
-	private void injectFields(ExtensionContext extensionContext, Object testInstance, Predicate<Field> predicate) {
+	private void injectFields(TrackServices<T> ts, ExtensionContext extensionContext, Object testInstance,
+		Predicate<Field> predicate) {
 		findAnnotatedFields(extensionContext.getRequiredTestClass(), ServiceUseParameter.class, predicate)
 			.forEach(field -> {
-				assertValidFieldCandidate(field);
 				if (!field.getType()
 					.equals(getServiceType())) {
 					return;
 				}
+				assertValidFieldCandidate(field, ts);
 				try {
-					makeAccessible(field).set(testInstance, trackServices.tracker()
+					makeAccessible(field).set(testInstance, ts.tracker()
 						.getService());
 				} catch (Throwable t) {
 					ExceptionUtils.throwAsUncheckedException(t);
@@ -181,9 +198,38 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 			});
 	}
 
+	private TrackServices<T> getTrackServices(ExtensionContext extensionContext) {
+		CloseableTrackServices<T> closeableTrackServices = extensionContext.getStore(NAMESPACE)
+			.getOrComputeIfAbsent(filter.toString(), k -> {
+				TrackServices<T> ts = new TrackServices<>(filter, cardinality, timeout);
+				ts.init(contextExtension.getBundleContext(extensionContext));
+				return new CloseableTrackServices<T>(ts);
+			}, CloseableTrackServices.class);
+		return closeableTrackServices.get();
+	}
+
 	@Override
 	protected TrackServices<T> getTrackServices() {
 		return trackServices;
+	}
+
+	public static class CloseableTrackServices<T> implements CloseableResource {
+
+		private final TrackServices<T> trackServices;
+
+		CloseableTrackServices(TrackServices<T> trackServices) {
+			this.trackServices = trackServices;
+		}
+
+		@Override
+		public void close() throws Exception {
+			trackServices.close();
+		}
+
+		public TrackServices<T> get() {
+			return trackServices;
+		}
+
 	}
 
 }

@@ -20,21 +20,41 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.service.log.LogService;
 import org.osgi.test.junit5.types.Foo;
 
 public class ServiceExtensionExampleTest {
 
 	@RegisterExtension
-	BundleContextExtension		bcExt	= new BundleContextExtension();
+	ServiceUseExtension<Foo>	fExt	= new ServiceUseExtension.Builder<>(	//
+		Foo.class)																	//
+			.cardinality(0)
+			.build();
 	@RegisterExtension
-	ServiceUseExtension<Foo>	fooUse	= new ServiceUseExtension.Builder<>(Foo.class, bcExt)	//
-		.cardinality(0)
-		.build();
+	ServiceUseExtension<LogService>	lsExt	= new ServiceUseExtension.Builder<>(	//
+		LogService.class).build();
+
+	@ServiceUseParameter
+	LogService						logService;
 
 	@Test
-	public void test() throws Exception {
-		assertThat(fooUse.getService()).isNull();
+	public void testNoService() throws Exception {
+		assertThat(fExt.getService()).isNull();
+	}
+
+	@Test
+	public void testWithLogServiceUse() throws Exception {
+		assertThat(lsExt.getService()).isNotNull();
+	}
+
+	@Test
+	public void testWithLogServiceField() throws Exception {
+		assertThat(logService).isNotNull();
+	}
+
+	@Test
+	public void testWithLogServiceParameter(@ServiceUseParameter LogService logService) throws Exception {
+		assertThat(logService).isNotNull();
 	}
 
 }
