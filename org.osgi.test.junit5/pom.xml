@@ -36,6 +36,10 @@
 		<developerConnection>scm:git:git@github.com:osgi/osgi-test.git</developerConnection>
 	</scm>
 
+	<properties>
+		<junit-jupiter-api.version>5.3.1</junit-jupiter-api.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -45,7 +49,7 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<version>${junit-jupiter.version}</version>
+			<version>${junit-jupiter-api.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
