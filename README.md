@@ -31,6 +31,12 @@ You can use your system `mvn` but we require a recent version.
 
 [![Build Status](https://travis-ci.com/osgi/osgi-test.svg?branch=master)](https://travis-ci.com/osgi/osgi-test)
 
+## Repository
+
+Currently OSGi Testing artifacts are available as snapshots from the Sonatype OSS repository:
+
+[https://oss.sonatype.org/content/repositories/snapshots/](https://oss.sonatype.org/content/repositories/snapshots/)
+
 ## Future work
 
 See the [open issues](https://github.com/osgi/osgi-test/issues) for the list of outstanding TODOs.
