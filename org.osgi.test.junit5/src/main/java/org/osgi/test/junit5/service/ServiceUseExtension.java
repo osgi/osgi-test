@@ -83,6 +83,18 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 		}
 
 		/**
+		 * Filter string used to target more specific services using the
+		 * {@code String.format} pattern.
+		 *
+		 * @param format a format string
+		 * @param args arguments to the format string
+		 */
+		public Builder<T> filter(String format, Object... args) {
+			this.filter = format("(&%s%s)", this.filter.toString(), String.format(requireNonNull(format), args));
+			return this;
+		}
+
+		/**
 		 * Indicate the number of services that are required to arrive within
 		 * the specified timeout before starting the test.
 		 *
