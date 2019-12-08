@@ -56,6 +56,13 @@ public class ServiceUseRule<T> extends BaseServiceUse<T>
 		/**
 		 * @param serviceType of the service
 		 */
+		public Builder(Class<T> serviceType) {
+			this(serviceType, new BundleContextRule());
+		}
+
+		/**
+		 * @param serviceType of the service
+		 */
 		public Builder(Class<T> serviceType, BundleContextRule bundleContextRule) {
 			this.serviceType = requireNonNull(serviceType);
 			this.bundleContextRule = requireNonNull(bundleContextRule);
