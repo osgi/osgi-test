@@ -1,6 +1,6 @@
 /*
- * Copyright (c) OSGi Alliance (2018). All Rights Reserved.
- * 
+ * Copyright (c) OSGi Alliance (2018, 2019). All Rights Reserved.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,12 +16,16 @@
 
 package org.osgi.test.common.dictionary;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.AbstractMap;
 import java.util.AbstractSet;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -30,23 +34,39 @@ public class Dictionaries {
 
 	private Dictionaries() {}
 
-	@SuppressWarnings("unchecked")
-	public static <K, V> Map<K,V> asMap(Dictionary<K,V> dict) {
-		if (dict instanceof Map) {
-			return (Map<K,V>) dict;
+	/**
+	 * Return a Map wrapper around a Dictionary.
+	 *
+	 * @param <K> The type of the key.
+	 * @param <V> The type of the value.
+	 * @param dictionary The dictionary to wrap.
+	 * @return A Map object which wraps the specified dictionary. If the
+	 *         specified dictionary can be cast to a Map, then the specified
+	 *         dictionary is returned.
+	 */
+	public static <K, V> Map<K, V> asMap(Dictionary<? extends K, ? extends V> dictionary) {
+		if (dictionary instanceof Map) {
+			@SuppressWarnings("unchecked")
+			Map<K, V> coerced = (Map<K, V>) dictionary;
+			return coerced;
 		}
-		return new DictionaryAsMap<>(dict);
+		return new DictionaryAsMap<>(dictionary);
 	}
 
-	private static class DictionaryAsMap<K, V> extends AbstractMap<K,V> {
-		private final Dictionary<K,V> dict;
+	private static class DictionaryAsMap<K, V> extends AbstractMap<K, V> {
+		private final Dictionary<K, V> dict;
 
-		DictionaryAsMap(Dictionary<K,V> dict) {
-			this.dict = Objects.requireNonNull(dict);
+		@SuppressWarnings("unchecked")
+		DictionaryAsMap(Dictionary<? extends K, ? extends V> dict) {
+			this.dict = (Dictionary<K, V>) requireNonNull(dict);
 		}
 
-		Enumeration<K> keys() {
-			return dict.keys();
+		Iterator<K> keys() {
+			List<K> keys = new ArrayList<>(dict.size());
+			for (Enumeration<K> e = dict.keys(); e.hasMoreElements();) {
+				keys.add(e.nextElement());
+			}
+			return keys.iterator();
 		}
 
 		@Override
@@ -77,7 +97,8 @@ public class Dictionaries {
 
 		@Override
 		public V put(K key, V value) {
-			return dict.put(key, value);
+			return dict.put(requireNonNull(key, "a Dictionary cannot contain a null key"),
+				requireNonNull(value, "a Dictionary cannot contain a null value"));
 		}
 
 		@Override
@@ -90,9 +111,8 @@ public class Dictionaries {
 
 		@Override
 		public void clear() {
-			for (Enumeration<K> enumerator = dict.keys(); enumerator
-					.hasMoreElements();) {
-				dict.remove(enumerator.nextElement());
+			for (Iterator<K> iter = keys(); iter.hasNext();) {
+				dict.remove(iter.next());
 			}
 		}
 
@@ -102,8 +122,13 @@ public class Dictionaries {
 		}
 
 		@Override
-		public Set<Map.Entry<K,V>> entrySet() {
+		public Set<Map.Entry<K, V>> entrySet() {
 			return new EntrySet();
+		}
+
+		@Override
+		public String toString() {
+			return dict.toString();
 		}
 
 		final class KeySet extends AbstractSet<K> {
@@ -139,18 +164,17 @@ public class Dictionaries {
 		}
 
 		final class KeyIterator implements Iterator<K> {
-			private final Enumeration<K>	keys	= DictionaryAsMap.this
-					.keys();
-			private K						key		= null;
+			private final Iterator<K>	keys	= DictionaryAsMap.this.keys();
+			private K					key		= null;
 
 			@Override
 			public boolean hasNext() {
-				return keys.hasMoreElements();
+				return keys.hasNext();
 			}
 
 			@Override
 			public K next() {
-				return key = keys.nextElement();
+				return key = keys.next();
 			}
 
 			@Override
@@ -163,9 +187,9 @@ public class Dictionaries {
 			}
 		}
 
-		final class EntrySet extends AbstractSet<Map.Entry<K,V>> {
+		final class EntrySet extends AbstractSet<Map.Entry<K, V>> {
 			@Override
-			public Iterator<Map.Entry<K,V>> iterator() {
+			public Iterator<Map.Entry<K, V>> iterator() {
 				return new EntryIterator();
 			}
 
@@ -182,13 +206,13 @@ public class Dictionaries {
 			@Override
 			public boolean contains(Object o) {
 				if (o instanceof Map.Entry) {
-					Map.Entry< ? , ? > e = (Map.Entry< ? , ? >) o;
+					Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
 					return containsEntry(e);
 				}
 				return false;
 			}
 
-			private boolean containsEntry(Map.Entry< ? , ? > e) {
+			private boolean containsEntry(Map.Entry<?, ?> e) {
 				Object key = e.getKey();
 				if (key == null) {
 					return false;
@@ -203,7 +227,7 @@ public class Dictionaries {
 			@Override
 			public boolean remove(Object o) {
 				if (o instanceof Map.Entry) {
-					Map.Entry< ? , ? > e = (Map.Entry< ? , ? >) o;
+					Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
 					if (containsEntry(e)) {
 						DictionaryAsMap.this.remove(e.getKey());
 						return true;
@@ -218,19 +242,18 @@ public class Dictionaries {
 			}
 		}
 
-		final class EntryIterator implements Iterator<Map.Entry<K,V>> {
-			private final Enumeration<K>	keys	= DictionaryAsMap.this
-					.keys();
-			private K						key		= null;
+		final class EntryIterator implements Iterator<Map.Entry<K, V>> {
+			private final Iterator<K>	keys	= DictionaryAsMap.this.keys();
+			private K					key		= null;
 
 			@Override
 			public boolean hasNext() {
-				return keys.hasMoreElements();
+				return keys.hasNext();
 			}
 
 			@Override
-			public Map.Entry<K,V> next() {
-				return new Entry(key = keys.nextElement());
+			public Map.Entry<K, V> next() {
+				return new Entry(key = keys.next());
 			}
 
 			@Override
@@ -243,7 +266,7 @@ public class Dictionaries {
 			}
 		}
 
-		final class Entry extends SimpleEntry<K,V> {
+		final class Entry extends SimpleEntry<K, V> {
 			private static final long serialVersionUID = 1L;
 
 			Entry(K key) {
@@ -258,22 +281,36 @@ public class Dictionaries {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public static <K, V> Dictionary<K,V> asDictionary(Map<K,V> map) {
+	/**
+	 * Return a Dictionary wrapper around a Map.
+	 *
+	 * @param <K> The type of the key.
+	 * @param <V> The type of the value.
+	 * @param map The map to wrap.
+	 * @return A Dictionary object which wraps the specified map. If the
+	 *         specified map can be cast to a Dictionary, then the specified map
+	 *         is returned.
+	 */
+	public static <K, V> Dictionary<K, V> asDictionary(Map<? extends K, ? extends V> map) {
 		if (map instanceof Dictionary) {
-			return (Dictionary<K,V>) map;
+			@SuppressWarnings("unchecked")
+			Dictionary<K, V> coerced = (Dictionary<K, V>) map;
+			return coerced;
 		}
 		return new MapAsDictionary<>(map);
 	}
 
-	private static class MapAsDictionary<K, V> extends Dictionary<K,V> {
-		private final Map<K,V> map;
+	private static class MapAsDictionary<K, V> extends Dictionary<K, V> {
+		private final Map<K, V> map;
 
-		MapAsDictionary(Map<K,V> map) {
-			this.map = Objects.requireNonNull(map);
-			if (map.containsKey(null) || map.containsValue(null)) {
-				throw new NullPointerException(
-						"map contains a null key or null value");
+		@SuppressWarnings("unchecked")
+		MapAsDictionary(Map<? extends K, ? extends V> map) {
+			this.map = (Map<K, V>) requireNonNull(map);
+			if (map.containsKey(null)) {
+				throw new NullPointerException("a Dictionary cannot contain a null key");
+			}
+			if (map.containsValue(null)) {
+				throw new NullPointerException("a Dictionary cannot contain a null value");
 			}
 		}
 
@@ -307,11 +344,8 @@ public class Dictionaries {
 
 		@Override
 		public V put(K key, V value) {
-			if ((key == null) || (value == null)) {
-				throw new IllegalArgumentException(
-						"a null key or null value cannot be specified");
-			}
-			return map.put(key, value);
+			return map.put(requireNonNull(key, "a Dictionary cannot contain a null key"),
+				requireNonNull(value, "a Dictionary cannot contain a null value"));
 		}
 
 		@Override
@@ -320,6 +354,11 @@ public class Dictionaries {
 				return null;
 			}
 			return map.remove(key);
+		}
+
+		@Override
+		public String toString() {
+			return map.toString();
 		}
 	}
 }
