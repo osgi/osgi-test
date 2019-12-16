@@ -125,6 +125,7 @@
 									<bnd><![CDATA[
 										p = org.osgi.test.junit5
 										Bundle-SymbolicName: ${project.artifactId}-test
+										Bundle-Name: ${project.groupId}:${project.artifactId}-test
 										Export-Package: !${p}.tb*,${p}.*
 										Fragment-Host: ${project.artifactId}
 										Test-Cases: ${classes;CONCRETE;ANNOTATED;org.junit.jupiter.api.Test}
