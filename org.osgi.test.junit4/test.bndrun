@@ -30,8 +30,7 @@
 	ch.qos.logback.core,\
 	org.apache.felix.logback,\
 	slf4j.api
--runrequires: \
-	osgi.identity;filter:='(osgi.identity=org.osgi.test.junit4-test)'
+-runrequires: bnd.identity;id='${project.artifactId}-test'
 -runbundles: \
 	org.apache.servicemix.bundles.junit;version='[4.12.0,4.12.1)',\
 	org.assertj.core;version='[3.13.2,3.13.3)',\

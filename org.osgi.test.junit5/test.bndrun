@@ -37,9 +37,9 @@
 	org.apache.felix.logback,\
 	slf4j.api
 -runrequires: \
-	osgi.identity;filter:='(osgi.identity=org.osgi.test.junit5-test)',\
-	osgi.identity;filter:='(osgi.identity=org.junit.jupiter.engine)',\
-	osgi.identity;filter:='(osgi.identity=org.junit.platform.launcher)'
+	bnd.identity;id='${project.artifactId}-test',\
+	bnd.identity;id='org.junit.jupiter.engine',\
+	bnd.identity;id='org.junit.platform.launcher'
 -runbundles: \
 	org.apiguardian;version='[1.0.0,1.0.1)',\
 	org.assertj.core;version='[3.13.2,3.13.3)',\
