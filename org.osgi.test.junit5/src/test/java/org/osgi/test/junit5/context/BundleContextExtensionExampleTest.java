@@ -21,8 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
-import org.osgi.test.junit5.context.BundleContextExtension;
-import org.osgi.test.junit5.context.BundleContextParameter;
+import org.osgi.test.common.install.InstallBundle;
 
 /**
  * This is how a real test class should use {@link BundleContextExtension}.
@@ -30,19 +29,38 @@ import org.osgi.test.junit5.context.BundleContextParameter;
 @ExtendWith(BundleContextExtension.class)
 public class BundleContextExtensionExampleTest {
 
+	// BundleContext injection
+
 	@Test
-	public void test1(@BundleContextParameter BundleContext b1) {
-		assertThat(b1).isNotNull();
+	public void testBundleContext1(@BundleContextParameter BundleContext bundleContext1) {
+		assertThat(bundleContext1).isNotNull();
 	}
 
 	// OR
 
 	@BundleContextParameter
-	public BundleContext b2;
+	BundleContext bundleContext2;
 
 	@Test
-	public void test2() {
-		assertThat(b2).isNotNull();
+	public void testBundleContext2() {
+		assertThat(bundleContext2).isNotNull();
+	}
+
+	// InstallBundle injection
+
+	@Test
+	public void testInstallBundle(@InstallBundleParameter InstallBundle installBundle1) {
+		assertThat(installBundle1).isNotNull();
+	}
+
+	// OR
+
+	@InstallBundleParameter
+	InstallBundle installBundle2;
+
+	@Test
+	public void testInstallBundle() {
+		assertThat(installBundle2).isNotNull();
 	}
 
 }

@@ -22,6 +22,7 @@ import org.junit.runners.model.Statement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.install.InstallBundle;
 
 /**
  * A JUnit 4 Rule to get the OSGi {@link BundleContext} of the test bundle.
@@ -43,10 +44,11 @@ import org.osgi.test.common.context.CloseableBundleContext;
  * }
  * </pre>
  */
-public class BundleContextRule implements AutoCloseable, TestRule {
+public class BundleContextRule implements AutoCloseable, InstallBundle, TestRule {
 
 	private BundleContext bundleContext;
 
+	@Override
 	public BundleContext getBundleContext() {
 		return bundleContext;
 	}

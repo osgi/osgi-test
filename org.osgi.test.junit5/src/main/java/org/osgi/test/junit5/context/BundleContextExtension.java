@@ -19,6 +19,7 @@ package org.osgi.test.junit5.context;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
 import static org.junit.platform.commons.util.ReflectionUtils.isPrivate;
 import static org.junit.platform.commons.util.ReflectionUtils.makeAccessible;
+import static org.osgi.test.common.exceptions.Exceptions.unchecked;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -34,16 +35,17 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.install.InstallBundle;
 
 public class BundleContextExtension
 	implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
-	public static final String		KEY			= "bundle.context";
+	public static final String		BUNDLE_CONTEXT_KEY		= "bundle.context";
+	public static final String		INSTALL_BUNLDE_KEY		= "install.bundle";
 	public static final Namespace	NAMESPACE	= Namespace.create(BundleContextExtension.class);
 
 	@Override
@@ -53,49 +55,64 @@ public class BundleContextExtension
 
 	@Override
 	public void afterEach(ExtensionContext extensionContext) throws Exception {
+		extensionContext.getStore(NAMESPACE)
+			.remove(INSTALL_BUNLDE_KEY, ExtensionInstallBundle.class);
 		CloseableResourceBundleContext closeableResourceBundleContext = extensionContext.getStore(NAMESPACE)
-			.remove(KEY, CloseableResourceBundleContext.class);
+			.remove(BUNDLE_CONTEXT_KEY, CloseableResourceBundleContext.class);
 		if (closeableResourceBundleContext != null) {
 			closeableResourceBundleContext.close();
 		}
 	}
 
 	/**
-	 * Resolve the BundleContext for the {@link Parameter} in the supplied
+	 * Resolve {@link Parameter} annotated with
+	 * {@link BundleContextParameter @BundleContextParameter} OR
+	 * {@link InstallBundleParameter @InstallBundleParameter} in the supplied
 	 * {@link ParameterContext}.
 	 */
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Class<?> parameterType = parameterContext.getParameter()
 			.getType();
-		assertSupportedType("parameter", parameterType);
-		return getBundleContext(extensionContext);
+
+		if (parameterContext.isAnnotated(BundleContextParameter.class)) {
+			assertSupportedType("parameter", parameterType, BundleContext.class);
+			return getBundleContext(extensionContext);
+		} else if (parameterContext.isAnnotated(InstallBundleParameter.class)) {
+			assertSupportedType("parameter", parameterType, InstallBundle.class);
+			return getInstallbundle(extensionContext);
+		}
+
+		throw new ExtensionConfigurationException("No parameter types known to BundleContextExtension were found");
 	}
 
 	/**
 	 * Determine if the {@link Parameter} in the supplied
 	 * {@link ParameterContext} is annotated with
-	 * {@link BundleContextParameter @BundleContextParameter}.
+	 * {@link BundleContextParameter @BundleContextParameter} OR
+	 * {@link InstallBundleParameter @InstallBundleParameter}.
 	 */
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		boolean annotated = parameterContext.isAnnotated(BundleContextParameter.class);
-		if (annotated && parameterContext.getDeclaringExecutable() instanceof Constructor) {
+		boolean annotatedBundleContextParameter = parameterContext.isAnnotated(BundleContextParameter.class);
+		boolean annotatedInstallBundleParameter = parameterContext.isAnnotated(InstallBundleParameter.class);
+		if ((annotatedBundleContextParameter || annotatedInstallBundleParameter)
+			&& (parameterContext.getDeclaringExecutable() instanceof Constructor)) {
 			throw new ParameterResolutionException(
-				"@BundleContextParameter is not supported on constructor parameters. Please use field injection instead.");
+				"BundleContextExtension only supports field and parameter injection.");
 		}
-		return annotated;
+		return annotatedBundleContextParameter || annotatedInstallBundleParameter;
 	}
 
-	private void assertSupportedType(String target, Class<?> type) {
-		if (type != BundleContext.class) {
-			throw new ExtensionConfigurationException("Can only resolve @BundleContextParameter " + target
-				+ " of type " + BundleContext.class.getName() + " but was: " + type.getName());
+	private void assertSupportedType(String target, Class<?> type, Class<?> typeToCheckFor) {
+		if (type != typeToCheckFor) {
+			throw new ExtensionConfigurationException("Can only resolve @" + typeToCheckFor.getSimpleName() + " "
+				+ target + " of type " + typeToCheckFor.getName() + " but was: " + type.getName());
 		}
 	}
 
-	private void assertValidFieldCandidate(Field field) {
-		assertSupportedType("field", field.getType());
+	private void assertValidFieldCandidate(Field field, Class<?> typeToCheckFor) {
+		assertSupportedType("field", field.getType(), typeToCheckFor);
 		if (isPrivate(field)) {
 			throw new ExtensionConfigurationException(
 				"@BundleContextParameter field [" + field + "] must not be private.");
@@ -104,7 +121,7 @@ public class BundleContextExtension
 
 	public BundleContext getBundleContext(ExtensionContext extensionContext) {
 		BundleContext bundleContext = extensionContext.getStore(NAMESPACE)
-			.getOrComputeIfAbsent(KEY,
+			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
 				key -> new CloseableResourceBundleContext(extensionContext.getRequiredTestClass(),
 					FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
 					.getBundleContext()),
@@ -114,16 +131,38 @@ public class BundleContextExtension
 		return bundleContext;
 	}
 
+	public InstallBundle getInstallbundle(ExtensionContext extensionContext) {
+		return extensionContext.getStore(NAMESPACE)
+			.getOrComputeIfAbsent(INSTALL_BUNLDE_KEY, key -> new ExtensionInstallBundle(getBundleContext(extensionContext)),
+				ExtensionInstallBundle.class);
+	}
+
 	private void injectFields(ExtensionContext extensionContext, Object testInstance, Predicate<Field> predicate) {
 		findAnnotatedFields(extensionContext.getRequiredTestClass(), BundleContextParameter.class, predicate)
 			.forEach(field -> {
-				assertValidFieldCandidate(field);
-				try {
-					makeAccessible(field).set(testInstance, getBundleContext(extensionContext));
-				} catch (Throwable t) {
-					ExceptionUtils.throwAsUncheckedException(t);
-				}
+				assertValidFieldCandidate(field, BundleContext.class);
+				unchecked(() -> makeAccessible(field).set(testInstance, getBundleContext(extensionContext)));
 			});
+		findAnnotatedFields(extensionContext.getRequiredTestClass(), InstallBundleParameter.class, predicate)
+			.forEach(field -> {
+				assertValidFieldCandidate(field, InstallBundle.class);
+				unchecked(() -> makeAccessible(field).set(testInstance, getInstallbundle(extensionContext)));
+			});
+	}
+
+	public static class ExtensionInstallBundle implements InstallBundle {
+
+		private final BundleContext bundleContext;
+
+		ExtensionInstallBundle(BundleContext proxiedBundleContext) {
+			this.bundleContext = proxiedBundleContext;
+		}
+
+		@Override
+		public BundleContext getBundleContext() {
+			return bundleContext;
+		}
+
 	}
 
 	public static class CloseableResourceBundleContext implements CloseableResource {

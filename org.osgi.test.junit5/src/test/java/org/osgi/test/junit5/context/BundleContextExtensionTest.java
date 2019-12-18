@@ -20,10 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.osgi.framework.Bundle.INSTALLED;
+import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.test.junit5.TestUtil.getBundle;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -53,6 +56,40 @@ public class BundleContextExtensionTest {
 
 		when(extensionContext.getRequiredTestClass()).then((Answer<Class<?>>) a -> getClass());
 		when(extensionContext.getStore(any())).then((Answer<Store>) a -> store);
+	}
+
+	@Test
+	public void testInstallBundle_B() throws Exception {
+		Bundle bundle = null;
+
+		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
+			bundle = it.getExtension()
+				.getInstallbundle(extensionContext)
+				.installBundle("foo/tbfoo.jar", false);
+
+			assertThat(bundle).extracting(Bundle::getState)
+				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
+		}
+
+		assertThat(bundle).extracting(Bundle::getState)
+			.is(new Condition<Integer>(state -> (state & UNINSTALLED) == UNINSTALLED, "Uninstalled"));
+	}
+
+	@Test
+	public void testInstallBundle() throws Exception {
+		Bundle bundle = null;
+
+		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
+			bundle = it.getExtension()
+				.getInstallbundle(extensionContext)
+				.installBundle("tb1.jar", false);
+
+			assertThat(bundle).extracting(Bundle::getState)
+				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
+		}
+
+		assertThat(bundle).extracting(Bundle::getState)
+			.is(new Condition<Integer>(state -> (state & UNINSTALLED) == UNINSTALLED, "Uninstalled"));
 	}
 
 	@Test

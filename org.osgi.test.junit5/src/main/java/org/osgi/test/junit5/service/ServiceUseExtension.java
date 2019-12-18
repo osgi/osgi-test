@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
 import static org.junit.platform.commons.util.ReflectionUtils.isPrivate;
 import static org.junit.platform.commons.util.ReflectionUtils.makeAccessible;
+import static org.osgi.test.common.exceptions.Exceptions.unchecked;
 import static org.osgi.test.common.filter.Filters.format;
 
 import java.lang.reflect.Field;
@@ -34,7 +35,6 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.platform.commons.util.ExceptionUtils;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.osgi.framework.Filter;
 import org.osgi.test.common.service.BaseServiceUse;
@@ -213,12 +213,8 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 					return;
 				}
 				assertValidFieldCandidate(field, ts);
-				try {
-					makeAccessible(field).set(testInstance, ts.tracker()
-						.getService());
-				} catch (Throwable t) {
-					ExceptionUtils.throwAsUncheckedException(t);
-				}
+				unchecked(() -> makeAccessible(field).set(testInstance, ts.tracker()
+					.getService()));
 			});
 	}
 

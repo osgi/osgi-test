@@ -132,7 +132,8 @@
 										-fixupmessages: "Host ${project.artifactId}=...";is:=ignore
 										-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
 										-includeresource:\
-											tb1.jar
+											tb1.jar,\
+											foo/tbfoo.jar=tb1.jar
 									]]></bnd>
 									<classesDir>${project.build.testOutputDirectory}</classesDir>
 									<outputDir>${project.build.testOutputDirectory}</outputDir>
