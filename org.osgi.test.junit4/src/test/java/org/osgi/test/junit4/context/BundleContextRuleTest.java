@@ -150,10 +150,10 @@ public class BundleContextRuleTest {
 			assertThat(bundle.getServicesInUse()).isNotNull()
 				.contains(serviceReference);
 		} finally {
-			assertThat(bundle.getServicesInUse()).isNull();
-
 			installedBundle.uninstall();
 		}
+
+		assertThat(bundle.getServicesInUse()).isNull();
 	}
 
 	@Test
@@ -175,10 +175,10 @@ public class BundleContextRuleTest {
 			assertThat(bundle.getServicesInUse()).isNotNull()
 				.contains(serviceReference);
 		} finally {
-			assertThat(bundle.getServicesInUse()).isNull();
-
 			installedBundle.uninstall();
 		}
+
+		assertThat(bundle.getServicesInUse()).isNull();
 	}
 
 	@Test
