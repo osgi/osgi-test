@@ -16,6 +16,7 @@
 
 package org.osgi.test.junit5.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -26,12 +27,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.mockito.stubbing.Answer;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit5.ExecutorExtension;
@@ -55,6 +58,13 @@ public class ServiceUseExtensionTest {
 
 		when(extensionContext.getRequiredTestClass()).then((Answer<Class<?>>) a -> getClass());
 		when(extensionContext.getStore(any())).then((Answer<Store>) a -> store);
+	}
+
+	@AfterEach
+	public void afterEach() {
+		assertThat(FrameworkUtil.getBundle(getClass())
+			.getRegisteredServices()).as("registered services")
+				.isNull();
 	}
 
 	@Test
@@ -111,6 +121,7 @@ public class ServiceUseExtensionTest {
 				" services (objectClass=org.osgi.test.junit5.types.Foo) didn't arrive within 50ms");
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void successWhenService() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
@@ -122,7 +133,11 @@ public class ServiceUseExtensionTest {
 
 			executor.schedule(
 				() -> it.getBundleContext()
-					.registerService(Foo.class, afoo, null),
+					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
+						{
+							put("case", "successWhenService");
+						}
+					}),
 				0, TimeUnit.MILLISECONDS);
 
 			it.init();
@@ -146,6 +161,7 @@ public class ServiceUseExtensionTest {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
@@ -157,7 +173,11 @@ public class ServiceUseExtensionTest {
 
 			executor.schedule(
 				() -> it.getBundleContext()
-					.registerService(Foo.class, afoo, null),
+					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
+						{
+							put("case", "successWhenServiceWithTimeout");
+						}
+					}),
 				0, TimeUnit.MILLISECONDS);
 
 			it.init();
@@ -218,6 +238,7 @@ public class ServiceUseExtensionTest {
 				.registerService(Foo.class, afoo, new Hashtable() {
 					{
 						put("foo", "bar");
+						put("case", "matchByFilter");
 					}
 				}), 0, TimeUnit.MILLISECONDS);
 
@@ -264,6 +285,7 @@ public class ServiceUseExtensionTest {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void matchMultiple() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
@@ -273,9 +295,17 @@ public class ServiceUseExtensionTest {
 
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
 			executor.schedule(() -> it.getBundleContext()
-				.registerService(Foo.class, s1, null), 0, TimeUnit.MILLISECONDS);
+				.registerService(Foo.class, s1, new Hashtable<String, Object>() {
+					{
+						put("case", "matchMultiple_1");
+					}
+				}), 0, TimeUnit.MILLISECONDS);
 			executor.schedule(() -> it.getBundleContext()
-				.registerService(Foo.class, s2, null), 0, TimeUnit.MILLISECONDS);
+				.registerService(Foo.class, s2, new Hashtable<String, Object>() {
+					{
+						put("case", "matchMultiple_2");
+					}
+				}), 0, TimeUnit.MILLISECONDS);
 
 			it.init();
 
@@ -283,36 +313,47 @@ public class ServiceUseExtensionTest {
 
 			softly.assertThat(it.getExtension()
 				.getService())
+				.as("getService")
 				.isIn(s1, s2);
 			softly.assertThat(it.getExtension()
 				.getServiceReference())
+				.as("getServiceReference")
 				.isNotNull();
 			softly.assertThat(it.getExtension()
 				.getServiceReferences())
+				.as("getServiceReferences")
 				.isNotNull();
 			softly.assertThat(it.getExtension()
 				.getServices())
+				.as("getServices")
 				.containsExactlyInAnyOrder(s1, s2);
 			softly.assertThat(it.getExtension()
 				.getTimeout())
+				.as("getTimeout")
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getTracked())
+				.as("getTracked")
 				.isNotEmpty();
 			softly.assertThat(it.getExtension()
 				.getTrackingCount())
+				.as("getTrackingCount")
 				.isEqualTo(2);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
+				.as("getCardinality")
 				.isEqualTo(2);
 			softly.assertThat(it.getExtension()
 				.size())
+				.as("size")
 				.isEqualTo(2);
 			softly.assertThat(it.getExtension()
 				.isEmpty())
+				.as("isEmpty")
 				.isFalse();
 			softly.assertThat(it.getExtension()
 				.waitForService(20))
+				.as("waitForService(20)")
 				.isNotNull();
 
 			softly.assertAll();
@@ -337,6 +378,7 @@ public class ServiceUseExtensionTest {
 						.registerService(Foo.class, afoo, new Hashtable() {
 							{
 								put("foo", "bar");
+								put("case", "nomatchByFilter");
 							}
 						}), 0, TimeUnit.MILLISECONDS);
 

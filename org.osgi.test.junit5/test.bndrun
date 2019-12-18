@@ -53,6 +53,6 @@
 	org.osgi.test.common;version='[1.0.0,1.0.1)',\
 	org.osgi.test.junit5-test;version='[1.0.0,1.0.1)',\
 	org.osgi.test.junit5;version='[1.0.0,1.0.1)',\
-	net.bytebuddy.byte-buddy;version='[1.10.3,1.10.4)',\
-	net.bytebuddy.byte-buddy-agent;version='[1.10.3,1.10.4)',\
-	org.mockito.mockito-core;version='[3.2.0,3.2.1)'
+	net.bytebuddy.byte-buddy;version='[1.10.5,1.10.6)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.10.5,1.10.6)',\
+	org.mockito.mockito-core;version='[3.2.4,3.2.5)'

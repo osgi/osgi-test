@@ -78,8 +78,9 @@ public class BundleContextExtensionTest {
 			assertThat(bundle.getRegisteredServices()).isNotEmpty()
 				.contains(serviceRegistration.getReference());
 		}
-
-		assertThat(bundle.getRegisteredServices()).isNull();
+		finally {
+			assertThat(bundle.getRegisteredServices()).isNull();
+		}
 	}
 
 	@Test
@@ -99,12 +100,13 @@ public class BundleContextExtensionTest {
 				.getBundle(bundleId)).isNotNull()
 					.matches(installedBundle::equals);
 		}
-
-		assertThat(bundle.getBundleContext()
-			.getBundle(bundleId)).isNull();
-		assertThat(installedBundle).isNotNull()
-			.extracting(Bundle::getState)
-			.isEqualTo(Bundle.UNINSTALLED);
+		finally {
+			assertThat(bundle.getBundleContext()
+				.getBundle(bundleId)).isNull();
+			assertThat(installedBundle).isNotNull()
+				.extracting(Bundle::getState)
+				.isEqualTo(Bundle.UNINSTALLED);
+		}
 	}
 
 	@Test
@@ -132,23 +134,25 @@ public class BundleContextExtensionTest {
 				.extracting(BundleEvent::getBundle)
 				.isEqualTo(installedBundle);
 		}
+		finally {
+			assertThat(installedBundle).isNotNull()
+				.extracting(Bundle::getState)
+				.isEqualTo(Bundle.UNINSTALLED);
 
-		assertThat(installedBundle).isNotNull()
-			.extracting(Bundle::getState)
-			.isEqualTo(Bundle.UNINSTALLED);
+			// now reset the ref
+			ref.set(null);
 
-		// now reset the ref
-		ref.set(null);
+			try {
+				// re-install the bundle
+				installedBundle = bundle.getBundleContext()
+					.installBundle("it", getBundle("tb1.jar"));
 
-		try {
-			// re-install the bundle
-			installedBundle = bundle.getBundleContext()
-				.installBundle("it", getBundle("tb1.jar"));
-
-			// check that the listener didn't notice this last bundle install
-			assertThat(ref.get()).isNull();
-		} finally {
-			installedBundle.uninstall();
+				// check that the listener didn't notice this last bundle
+				// install
+				assertThat(ref.get()).isNull();
+			} finally {
+				installedBundle.uninstall();
+			}
 		}
 	}
 

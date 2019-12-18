@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -40,15 +41,23 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.context.CloseableBundleContext;
 
 public class BundleContextExtension
-	implements BeforeEachCallback, ParameterResolver {
+	implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
 	public static final String		KEY			= "bundle.context";
 	public static final Namespace	NAMESPACE	= Namespace.create(BundleContextExtension.class);
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		getBundleContext(extensionContext);
 		injectFields(extensionContext, extensionContext.getRequiredTestInstance(), ReflectionUtils::isNotStatic);
+	}
+
+	@Override
+	public void afterEach(ExtensionContext extensionContext) throws Exception {
+		CloseableResourceBundleContext closeableResourceBundleContext = extensionContext.getStore(NAMESPACE)
+			.remove(KEY, CloseableResourceBundleContext.class);
+		if (closeableResourceBundleContext != null) {
+			closeableResourceBundleContext.close();
+		}
 	}
 
 	/**

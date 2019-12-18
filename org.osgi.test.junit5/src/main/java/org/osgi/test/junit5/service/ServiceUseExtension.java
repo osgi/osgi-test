@@ -25,6 +25,7 @@ import static org.osgi.test.common.filter.Filters.format;
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -41,7 +42,7 @@ import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit5.context.BundleContextExtension;
 
 public class ServiceUseExtension<T> extends BaseServiceUse<T>
-	implements BeforeEachCallback, ParameterResolver {
+	implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
 	public static class Builder<T> {
 
@@ -154,6 +155,17 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 		trackServices = getTrackServices(extensionContext);
 		injectFields(trackServices, extensionContext, extensionContext.getRequiredTestInstance(),
 			ReflectionUtils::isNotStatic);
+	}
+
+	@Override
+	public void afterEach(ExtensionContext extensionContext) throws Exception {
+		CloseableTrackServices<?> closeableTrackServices = extensionContext.getStore(NAMESPACE)
+			.remove(filter.toString(), CloseableTrackServices.class);
+		if (closeableTrackServices != null) {
+			closeableTrackServices.close();
+		}
+		trackServices = null;
+		contextExtension.afterEach(extensionContext);
 	}
 
 	@Override

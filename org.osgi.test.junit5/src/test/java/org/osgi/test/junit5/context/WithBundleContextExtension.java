@@ -31,9 +31,7 @@ public class WithBundleContextExtension implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		extensionContext.getStore(BundleContextExtension.NAMESPACE)
-			.remove(BundleContextExtension.KEY, BundleContextExtension.CloseableResourceBundleContext.class)
-			.close();
+		bundleContextExtension.afterEach(extensionContext);
 	}
 
 	BundleContext getBundleContext() {
