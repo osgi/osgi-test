@@ -1,4 +1,3 @@
-package org.osgi.test.common.context;
 /*
  * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
  *
@@ -14,6 +13,8 @@ package org.osgi.test.common.context;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.osgi.test.common.context;
 
 import static org.osgi.test.common.exceptions.Exceptions.duck;
 
