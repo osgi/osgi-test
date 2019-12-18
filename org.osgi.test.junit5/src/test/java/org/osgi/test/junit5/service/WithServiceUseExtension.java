@@ -22,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.test.junit5.context.BundleContextExtension;
-import org.osgi.test.junit5.context.BundleContextExtension.CloseableResourceBundleContext;
 
 class WithServiceUseExtension<T> implements AutoCloseable {
 	private final ExtensionContext	extensionContext;
@@ -53,14 +52,7 @@ class WithServiceUseExtension<T> implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		serviceUseExtension.close();
-
-		CloseableResourceBundleContext crbc = extensionContext.getStore(BundleContextExtension.NAMESPACE)
-			.remove(BundleContextExtension.KEY, BundleContextExtension.CloseableResourceBundleContext.class);
-
-		if (crbc != null) {
-			crbc.close();
-		}
+		serviceUseExtension.afterEach(extensionContext);
 	}
 
 	public BundleContext getBundleContext() {
