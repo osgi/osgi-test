@@ -15,6 +15,8 @@ package org.osgi.test.common.context;
  * limitations under the License.
  */
 
+import static org.osgi.test.common.exceptions.Exceptions.duck;
+
 import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -207,7 +209,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		try {
 			autoCloseable.close();
 		} catch (Exception be) {
-			throwsUnchecked(be);
+			throw duck(be);
 		}
 	}
 
@@ -219,17 +221,12 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		try {
 			bundle.uninstall();
 		} catch (BundleException be) {
-			throwsUnchecked(be);
+			throw duck(be);
 		}
 	}
 
 	private void ungetService(ServiceReference<?> reference) {
 		while (bundleContext.ungetService(reference)) {}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <E extends Throwable> void throwsUnchecked(Throwable throwable) throws E {
-		throw (E) throwable;
 	}
 
 	private static class ClosableServiceObjects<S> implements AutoCloseable, InvocationHandler {

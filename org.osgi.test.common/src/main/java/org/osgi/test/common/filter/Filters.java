@@ -16,6 +16,8 @@
 
 package org.osgi.test.common.filter;
 
+import static org.osgi.test.common.exceptions.Exceptions.duck;
+
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
@@ -37,14 +39,8 @@ public class Filters {
 		try {
 			return FrameworkUtil.createFilter(String.format(format, args));
 		} catch (InvalidSyntaxException ise) {
-			throwsUnchecked(ise);
-			return null;
+			throw duck(ise);
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	private static <E extends Throwable> void throwsUnchecked(Throwable throwable) throws E {
-		throw (E) throwable;
 	}
 
 }
