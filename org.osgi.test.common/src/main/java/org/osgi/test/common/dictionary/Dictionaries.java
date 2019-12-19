@@ -21,14 +21,21 @@ import static java.util.Objects.requireNonNull;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
+import org.osgi.test.common.stream.MapStream;
 
 public class Dictionaries {
 
@@ -300,7 +307,7 @@ public class Dictionaries {
 		return new MapAsDictionary<>(map);
 	}
 
-	private static class MapAsDictionary<K, V> extends Dictionary<K, V> {
+	private static class MapAsDictionary<K, V> extends Dictionary<K, V> implements Map<K, V> {
 		private final Map<K, V> map;
 
 		@SuppressWarnings("unchecked")
@@ -312,6 +319,42 @@ public class Dictionaries {
 			if (map.containsValue(null)) {
 				throw new NullPointerException("a Dictionary cannot contain a null value");
 			}
+		}
+
+		@Override
+		public boolean containsKey(Object key) {
+			return map.containsKey(key);
+		}
+
+		@Override
+		public boolean containsValue(Object value) {
+			return map.containsValue(value);
+		}
+
+		@Override
+		public void putAll(Map<? extends K, ? extends V> m) {
+			MapStream.of(m)
+				.forEachOrdered(this::put);
+		}
+
+		@Override
+		public void clear() {
+			map.clear();
+		}
+
+		@Override
+		public Set<K> keySet() {
+			return map.keySet();
+		}
+
+		@Override
+		public Collection<V> values() {
+			return map.values();
+		}
+
+		@Override
+		public Set<Entry<K, V>> entrySet() {
+			return map.entrySet();
 		}
 
 		@Override
@@ -360,5 +403,35 @@ public class Dictionaries {
 		public String toString() {
 			return map.toString();
 		}
+	}
+
+	public static <K, V> Dictionary<K, V> dictionaryOf() {
+		return new MapAsDictionary<>(Collections.emptyMap());
+	}
+
+	public static <K, V> Dictionary<K, V> dictionaryOf(K k1, V v1) {
+		return MapStream.of(k1, v1)
+			.collect(toDictionary());
+	}
+
+	public static <K, V> Dictionary<K, V> dictionaryOf(K k1, V v1, K k2, V v2) {
+		return MapStream.of(k1, v1, k2, v2)
+			.collect(toDictionary());
+	}
+
+	public static <K, V> Dictionary<K, V> dictionaryOf(K k1, V v1, K k2, V v2, K k3, V v3) {
+		return MapStream.of(k1, v1, k2, v2, k3, v3)
+			.collect(toDictionary());
+	}
+
+	public static <K, V> Dictionary<K, V> dictionaryOf(K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
+		return MapStream.of(k1, v1, k2, v2, k3, v3, k4, v4)
+			.collect(toDictionary());
+	}
+
+	private static <K, V> Collector<? super Map.Entry<? extends K, ? extends V>, ?, Dictionary<K, V>> toDictionary() {
+		return Collectors.collectingAndThen(MapStream.toMap((u, v) -> {
+			throw new IllegalArgumentException("duplicate keys");
+		}, (Supplier<Map<K, V>>) LinkedHashMap::new), map -> new MapAsDictionary<>(Collections.unmodifiableMap(map)));
 	}
 }

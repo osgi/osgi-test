@@ -18,6 +18,7 @@ package org.osgi.test.common.dictionary;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 
@@ -33,6 +34,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -456,6 +458,121 @@ public class DictionariesTestCase {
 		assertThat(asMap.isEmpty()).isTrue();
 		assertThat(dict.size()).isZero();
 		assertThat(dict.isEmpty()).isTrue();
+	}
+
+	@Test
+	public void dictionaryOf_exceptions() {
+		Supplier<Dictionary<String, String>> supplier = () -> Dictionaries.dictionaryOf("key1", "value1");
+		assertThat(supplier.get()).isNotNull();
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
+			supplier.get()
+				.remove("key1");
+		});
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> {
+			supplier.get()
+				.put("key2", "value2");
+		});
+		assertThatIllegalArgumentException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf("key1", "value1", "key1", "value2");
+		});
+
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf(null, "value1");
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf("key1", null);
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf("key1", "value1", null, "value2");
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf("key1", "value1", "key2", null);
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf("key1", "value1", "key2", "value2", null, "value3");
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf("key1", "value1", "key2", "value2", "key3", null);
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf("key1", "value1", "key2", "value2", "key3", "value3", null, "value4");
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.dictionaryOf("key1", "value1", "key2", "value2", "key3", "value3", "key4", null);
+		});
+	}
+
+	@Test
+	public void dictionaryOf_empty() {
+		Dictionary<String, String> dict = Dictionaries.dictionaryOf();
+		assertThat(dict).isNotNull()
+			.isInstanceOf(Map.class);
+		assertThat(dict.isEmpty()).isTrue();
+		assertThat(dict.size()).isZero();
+	}
+
+	@Test
+	public void dictionaryOf_1() {
+		Dictionary<String, String> dict = Dictionaries.dictionaryOf("key1", "value1");
+		assertThat(dict).isNotNull()
+			.isInstanceOf(Map.class);
+		assertThat(dict.isEmpty()).isFalse();
+		assertThat(dict.size()).isEqualTo(1);
+		assertThat(dict.get("key1")).isEqualTo("value1");
+		assertThat(Collections.list(dict.keys())).hasSize(1)
+			.containsExactly("key1");
+		assertThat(Collections.list(dict.elements())).hasSize(1)
+			.containsExactly("value1");
+	}
+
+	@Test
+	public void dictionaryOf_2() {
+		Dictionary<String, String> dict = Dictionaries.dictionaryOf("key1", "value1", "key2", "value2");
+		assertThat(dict).isNotNull()
+			.isInstanceOf(Map.class);
+		assertThat(dict.isEmpty()).isFalse();
+		assertThat(dict.size()).isEqualTo(2);
+		assertThat(dict.get("key1")).isEqualTo("value1");
+		assertThat(dict.get("key2")).isEqualTo("value2");
+		assertThat(Collections.list(dict.keys())).hasSize(2)
+			.containsExactly("key1", "key2");
+		assertThat(Collections.list(dict.elements())).hasSize(2)
+			.containsExactly("value1", "value2");
+	}
+
+	@Test
+	public void dictionaryOf_3() {
+		Dictionary<String, String> dict = Dictionaries.dictionaryOf("key1", "value1", "key2", "value2", "key3",
+			"value3");
+		assertThat(dict).isNotNull()
+			.isInstanceOf(Map.class);
+		assertThat(dict.isEmpty()).isFalse();
+		assertThat(dict.size()).isEqualTo(3);
+		assertThat(dict.get("key1")).isEqualTo("value1");
+		assertThat(dict.get("key2")).isEqualTo("value2");
+		assertThat(dict.get("key3")).isEqualTo("value3");
+		assertThat(Collections.list(dict.keys())).hasSize(3)
+			.containsExactly("key1", "key2", "key3");
+		assertThat(Collections.list(dict.elements())).hasSize(3)
+			.containsExactly("value1", "value2", "value3");
+	}
+
+	@Test
+	public void dictionaryOf_4() {
+		Dictionary<String, String> dict = Dictionaries.dictionaryOf("key1", "value1", "key2", "value2", "key3",
+			"value3", "key4", "value4");
+		assertThat(dict).isNotNull()
+			.isInstanceOf(Map.class);
+		assertThat(dict.isEmpty()).isFalse();
+		assertThat(dict.size()).isEqualTo(4);
+		assertThat(dict.get("key1")).isEqualTo("value1");
+		assertThat(dict.get("key2")).isEqualTo("value2");
+		assertThat(dict.get("key3")).isEqualTo("value3");
+		assertThat(dict.get("key4")).isEqualTo("value4");
+		assertThat(Collections.list(dict.keys())).hasSize(4)
+			.containsExactly("key1", "key2", "key3", "key4");
+		assertThat(Collections.list(dict.elements())).hasSize(4)
+			.containsExactly("value1", "value2", "value3", "value4");
 	}
 
 	public static class TestDictionary<K, V> extends Dictionary<K, V> {

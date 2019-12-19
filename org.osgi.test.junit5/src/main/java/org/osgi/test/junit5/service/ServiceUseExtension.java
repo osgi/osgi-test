@@ -138,7 +138,6 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 	private final long						timeout;
 	private volatile TrackServices<T>		trackServices;
 
-	@SuppressWarnings("unchecked")
 	protected ServiceUseExtension(Class<T> serviceType, BundleContextExtension contextExtension, Filter filter,
 		int cardinality, long timeout) {
 		super(serviceType);
@@ -219,6 +218,7 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 	}
 
 	private TrackServices<T> getTrackServices(ExtensionContext extensionContext) {
+		@SuppressWarnings("unchecked")
 		CloseableTrackServices<T> closeableTrackServices = extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(filter.toString(), k -> {
 				TrackServices<T> ts = new TrackServices<>(filter, cardinality, timeout);

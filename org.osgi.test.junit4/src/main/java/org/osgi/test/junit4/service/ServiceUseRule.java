@@ -129,7 +129,6 @@ public class ServiceUseRule<T> extends BaseServiceUse<T>
 	private final BundleContextRule	bundleContextRule;
 	private final TrackServices<T>	trackServices;
 
-	@SuppressWarnings("unchecked")
 	protected ServiceUseRule(Class<T> serviceType, BundleContextRule bundleContextRule, Filter filter, int cardinality,
 		long timeout) {
 		super(serviceType);

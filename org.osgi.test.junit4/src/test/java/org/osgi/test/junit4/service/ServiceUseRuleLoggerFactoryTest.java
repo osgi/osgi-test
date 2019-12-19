@@ -23,7 +23,6 @@ import org.junit.Test;
 import org.osgi.service.log.LoggerFactory;
 import org.osgi.test.junit4.context.BundleContextRule;
 
-@SuppressWarnings("deprecation")
 public class ServiceUseRuleLoggerFactoryTest {
 
 	@Rule

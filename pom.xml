@@ -119,6 +119,7 @@
 						<target>${maven.compiler.target}</target>
 						<showWarnings>true</showWarnings>
 						<showDeprecation>true</showDeprecation>
+						<compilerArgument>-Xlint:unchecked</compilerArgument>
 					</configuration>
 				</plugin>
 				<plugin>

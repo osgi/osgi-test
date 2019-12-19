@@ -16,7 +16,8 @@
 
 package org.osgi.test.common.context;
 
-import static org.osgi.test.common.exceptions.Exceptions.duck;
+import static org.osgi.test.common.exceptions.ConsumerWithException.asConsumer;
+import static org.osgi.test.common.exceptions.ConsumerWithException.asConsumerIgnoreException;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
@@ -26,6 +27,8 @@ import java.util.Collections;
 import java.util.Dictionary;
 import java.util.IdentityHashMap;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -40,22 +43,28 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 
 public class CloseableBundleContext implements AutoCloseable, InvocationHandler {
+	private static final Consumer<ServiceRegistration<?>>	unregisterService	= asConsumerIgnoreException(
+		ServiceRegistration::unregister);
+	private static final Consumer<AutoCloseable>			autoclose			= asConsumer(AutoCloseable::close);
+	private static final Predicate<Bundle>					installed			= bundle -> (bundle.getState()
+		& Bundle.UNINSTALLED) != Bundle.UNINSTALLED;
+	private static final Consumer<Bundle>					uninstallBundle		= asConsumer(Bundle::uninstall);
 
-	private final BundleContext					bundleContext;
-	private final Class<?>						host;
-	private final Set<ServiceRegistration<?>>	regs		= Collections
+	private final BundleContext								bundleContext;
+	private final Class<?>									host;
+	private final Set<ServiceRegistration<?>>				regs				= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<FrameworkListener>		fwListeners	= Collections
+	private final Set<FrameworkListener>					fwListeners			= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<ServiceListener>			sListeners	= Collections
+	private final Set<ServiceListener>						sListeners			= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<BundleListener>			bListeners	= Collections
+	private final Set<BundleListener>						bListeners			= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<Bundle>					bundles		= Collections
+	private final Set<Bundle>								bundles				= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<ServiceReference<?>>		services	= Collections
+	private final Set<ServiceReference<?>>					services			= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<ServiceObjects<?>>		serviceobjects	= Collections
+	private final Set<ServiceObjects<?>>					serviceobjects		= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
 
 	public static BundleContext proxy(Class<?> host, BundleContext bundleContext) {
@@ -105,19 +114,13 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 	@Override
 	public void close() {
 		bundles.stream()
-			.filter(this::installed)
-			.forEach(this::uninstall);
+			.filter(installed)
+			.forEach(uninstallBundle);
 		services.forEach(this::ungetService);
 		serviceobjects.stream()
 			.map(AutoCloseable.class::cast)
-			.forEach(this::autoclose);
-		regs.forEach(sr -> {
-			try {
-				sr.unregister();
-			} catch (Throwable t) {
-				// ignore
-			}
-		});
+			.forEach(autoclose);
+		regs.forEach(unregisterService);
 		bListeners.forEach(bundleContext::removeBundleListener);
 		sListeners.forEach(bundleContext::removeServiceListener);
 		fwListeners.forEach(bundleContext::removeFrameworkListener);
@@ -212,32 +215,12 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		return reg;
 	}
 
-	private void autoclose(AutoCloseable autoCloseable) {
-		try {
-			autoCloseable.close();
-		} catch (Exception be) {
-			throw duck(be);
-		}
-	}
-
-	private boolean installed(Bundle bundle) {
-		return (bundle.getState() & Bundle.UNINSTALLED) != Bundle.UNINSTALLED;
-	}
-
-	private void uninstall(Bundle bundle) {
-		try {
-			bundle.uninstall();
-		} catch (BundleException be) {
-			throw duck(be);
-		}
-	}
-
 	private void ungetService(ServiceReference<?> reference) {
 		while (bundleContext.ungetService(reference)) {}
 	}
 
 	private static class ClosableServiceObjects<S> implements AutoCloseable, InvocationHandler {
-		private final ServiceObjects<S>			so;
+		private final ServiceObjects<S>	so;
 		private final Set<S>			instances	= Collections
 			.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
 
