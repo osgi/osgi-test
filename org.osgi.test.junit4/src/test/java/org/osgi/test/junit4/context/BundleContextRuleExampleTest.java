@@ -22,7 +22,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.test.junit4.context.BundleContextRule;
 
 /**
  * This is how a real test class should use {@link BundleContextRule}.

@@ -17,10 +17,13 @@
 package org.osgi.test.junit4.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.osgi.framework.Bundle.INSTALLED;
+import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.test.junit4.TestUtil.getBundle;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.assertj.core.api.Condition;
 import org.junit.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -35,6 +38,36 @@ import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.junit4.types.Foo;
 
 public class BundleContextRuleTest {
+
+	@Test
+	public void testInstallBundle_B() throws Exception {
+		Bundle bundle = null;
+
+		try (WithContextRule it = new WithContextRule(getClass())) {
+			bundle = it.rule.installBundle("foo/tbfoo.jar", false);
+
+			assertThat(bundle).extracting(Bundle::getState)
+				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
+		}
+
+		assertThat(bundle).extracting(Bundle::getState)
+			.is(new Condition<Integer>(state -> (state & UNINSTALLED) == UNINSTALLED, "Uninstalled"));
+	}
+
+	@Test
+	public void testInstallBundle() throws Exception {
+		Bundle bundle = null;
+
+		try (WithContextRule it = new WithContextRule(getClass())) {
+			bundle = it.rule.installBundle("tb1.jar", false);
+
+			assertThat(bundle).extracting(Bundle::getState)
+				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
+		}
+
+		assertThat(bundle).extracting(Bundle::getState)
+			.is(new Condition<Integer>(state -> (state & UNINSTALLED) == UNINSTALLED, "Uninstalled"));
+	}
 
 	@Test
 	public void test() throws Exception {
@@ -150,10 +183,10 @@ public class BundleContextRuleTest {
 			assertThat(bundle.getServicesInUse()).isNotNull()
 				.contains(serviceReference);
 		} finally {
-			assertThat(bundle.getServicesInUse()).isNull();
-
 			installedBundle.uninstall();
 		}
+
+		assertThat(bundle.getServicesInUse()).isNull();
 	}
 
 	@Test
@@ -175,10 +208,10 @@ public class BundleContextRuleTest {
 			assertThat(bundle.getServicesInUse()).isNotNull()
 				.contains(serviceReference);
 		} finally {
-			assertThat(bundle.getServicesInUse()).isNull();
-
 			installedBundle.uninstall();
 		}
+
+		assertThat(bundle.getServicesInUse()).isNull();
 	}
 
 	@Test

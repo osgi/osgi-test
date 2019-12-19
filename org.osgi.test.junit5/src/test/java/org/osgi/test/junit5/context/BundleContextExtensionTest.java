@@ -20,10 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.osgi.framework.Bundle.INSTALLED;
+import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.test.junit5.TestUtil.getBundle;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -56,6 +59,40 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
+	public void testInstallBundle_B() throws Exception {
+		Bundle bundle = null;
+
+		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
+			bundle = it.getExtension()
+				.getInstallbundle(extensionContext)
+				.installBundle("foo/tbfoo.jar", false);
+
+			assertThat(bundle).extracting(Bundle::getState)
+				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
+		}
+
+		assertThat(bundle).extracting(Bundle::getState)
+			.is(new Condition<Integer>(state -> (state & UNINSTALLED) == UNINSTALLED, "Uninstalled"));
+	}
+
+	@Test
+	public void testInstallBundle() throws Exception {
+		Bundle bundle = null;
+
+		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
+			bundle = it.getExtension()
+				.getInstallbundle(extensionContext)
+				.installBundle("tb1.jar", false);
+
+			assertThat(bundle).extracting(Bundle::getState)
+				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
+		}
+
+		assertThat(bundle).extracting(Bundle::getState)
+			.is(new Condition<Integer>(state -> (state & UNINSTALLED) == UNINSTALLED, "Uninstalled"));
+	}
+
+	@Test
 	public void test() throws Exception {
 		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
 			BundleContext bundleContext = it.getBundleContext();
@@ -78,9 +115,8 @@ public class BundleContextExtensionTest {
 			assertThat(bundle.getRegisteredServices()).isNotEmpty()
 				.contains(serviceRegistration.getReference());
 		}
-		finally {
-			assertThat(bundle.getRegisteredServices()).isNull();
-		}
+
+		assertThat(bundle.getRegisteredServices()).isNull();
 	}
 
 	@Test
@@ -100,13 +136,12 @@ public class BundleContextExtensionTest {
 				.getBundle(bundleId)).isNotNull()
 					.matches(installedBundle::equals);
 		}
-		finally {
-			assertThat(bundle.getBundleContext()
-				.getBundle(bundleId)).isNull();
-			assertThat(installedBundle).isNotNull()
-				.extracting(Bundle::getState)
-				.isEqualTo(Bundle.UNINSTALLED);
-		}
+
+		assertThat(bundle.getBundleContext()
+			.getBundle(bundleId)).isNull();
+		assertThat(installedBundle).isNotNull()
+			.extracting(Bundle::getState)
+			.isEqualTo(Bundle.UNINSTALLED);
 	}
 
 	@Test
@@ -134,25 +169,24 @@ public class BundleContextExtensionTest {
 				.extracting(BundleEvent::getBundle)
 				.isEqualTo(installedBundle);
 		}
-		finally {
-			assertThat(installedBundle).isNotNull()
-				.extracting(Bundle::getState)
-				.isEqualTo(Bundle.UNINSTALLED);
 
-			// now reset the ref
-			ref.set(null);
+		assertThat(installedBundle).isNotNull()
+			.extracting(Bundle::getState)
+			.isEqualTo(Bundle.UNINSTALLED);
 
-			try {
-				// re-install the bundle
-				installedBundle = bundle.getBundleContext()
-					.installBundle("it", getBundle("tb1.jar"));
+		// now reset the ref
+		ref.set(null);
 
-				// check that the listener didn't notice this last bundle
-				// install
-				assertThat(ref.get()).isNull();
-			} finally {
-				installedBundle.uninstall();
-			}
+		try {
+			// re-install the bundle
+			installedBundle = bundle.getBundleContext()
+				.installBundle("it", getBundle("tb1.jar"));
+
+			// check that the listener didn't notice this last bundle
+			// install
+			assertThat(ref.get()).isNull();
+		} finally {
+			installedBundle.uninstall();
 		}
 	}
 
@@ -174,10 +208,10 @@ public class BundleContextExtensionTest {
 			assertThat(bundle.getServicesInUse()).isNotNull()
 				.contains(serviceReference);
 		} finally {
-			assertThat(bundle.getServicesInUse()).isNull();
-
 			installedBundle.uninstall();
 		}
+
+		assertThat(bundle.getServicesInUse()).isNull();
 	}
 
 	@Test
@@ -199,10 +233,10 @@ public class BundleContextExtensionTest {
 			assertThat(bundle.getServicesInUse()).isNotNull()
 				.contains(serviceReference);
 		} finally {
-			assertThat(bundle.getServicesInUse()).isNull();
-
 			installedBundle.uninstall();
 		}
+
+		assertThat(bundle.getServicesInUse()).isNull();
 	}
 
 }
