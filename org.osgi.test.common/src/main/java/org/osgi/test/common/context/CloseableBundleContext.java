@@ -111,7 +111,13 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		serviceobjects.stream()
 			.map(AutoCloseable.class::cast)
 			.forEach(this::autoclose);
-		regs.forEach(ServiceRegistration::unregister);
+		regs.forEach(sr -> {
+			try {
+				sr.unregister();
+			} catch (Throwable t) {
+				// ignore
+			}
+		});
 		bListeners.forEach(bundleContext::removeBundleListener);
 		sListeners.forEach(bundleContext::removeServiceListener);
 		fwListeners.forEach(bundleContext::removeFrameworkListener);
