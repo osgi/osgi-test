@@ -22,20 +22,23 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Hashtable;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.mockito.stubbing.Answer;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit5.ExecutorExtension;
 import org.osgi.test.junit5.ExecutorParameter;
@@ -51,8 +54,13 @@ public class ServiceUseExtensionTest {
 	ExtensionContext	extensionContext;
 	Store				store;
 
+	String						testMethodName;
+
 	@BeforeEach
-	public void beforeEach() {
+	public void beforeEach(TestInfo testInfo) {
+		testMethodName = testInfo.getTestMethod()
+			.get()
+			.getName();
 		extensionContext = mock(ExtensionContext.class);
 		store = new MockStore();
 
@@ -121,7 +129,6 @@ public class ServiceUseExtensionTest {
 				" services (objectClass=org.osgi.test.junit5.types.Foo) didn't arrive within 50ms");
 	}
 
-	@SuppressWarnings("serial")
 	@Test
 	public void successWhenService() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
@@ -131,16 +138,14 @@ public class ServiceUseExtensionTest {
 
 			final Foo afoo = new Foo() {};
 
-			executor.schedule(
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
 				() -> it.getBundleContext()
-					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
-						{
-							put("case", "successWhenService");
-						}
-					}),
+					.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)),
 				0, TimeUnit.MILLISECONDS);
 
 			it.init();
+			// Make sure the scheduled event is processed
+			assertThat(scheduledFuture.get()).isNotNull();
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -161,7 +166,6 @@ public class ServiceUseExtensionTest {
 		}
 	}
 
-	@SuppressWarnings("serial")
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
@@ -171,16 +175,14 @@ public class ServiceUseExtensionTest {
 
 			final Foo afoo = new Foo() {};
 
-			executor.schedule(
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
 				() -> it.getBundleContext()
-					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
-						{
-							put("case", "successWhenServiceWithTimeout");
-						}
-					}),
+					.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)),
 				0, TimeUnit.MILLISECONDS);
 
 			it.init();
+			// Make sure the scheduled event is processed
+			assertThat(scheduledFuture.get()).isNotNull();
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -222,9 +224,6 @@ public class ServiceUseExtensionTest {
 		}
 	}
 
-	@SuppressWarnings({
-		"rawtypes", "serial", "unchecked"
-	})
 	@Test
 	public void matchByFilter() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
@@ -234,15 +233,13 @@ public class ServiceUseExtensionTest {
 
 			final Foo afoo = new Foo() {};
 
-			executor.schedule(() -> it.getBundleContext()
-				.registerService(Foo.class, afoo, new Hashtable() {
-					{
-						put("foo", "bar");
-						put("case", "matchByFilter");
-					}
-				}), 0, TimeUnit.MILLISECONDS);
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> it.getBundleContext()
+				.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("foo", "bar", "case", testMethodName)), 0,
+				TimeUnit.MILLISECONDS);
 
 			it.init();
+			// Make sure the scheduled event is processed
+			assertThat(scheduledFuture.get()).isNotNull();
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -285,7 +282,6 @@ public class ServiceUseExtensionTest {
 		}
 	}
 
-	@SuppressWarnings("serial")
 	@Test
 	public void matchMultiple() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
@@ -294,20 +290,17 @@ public class ServiceUseExtensionTest {
 			it.bceInit();
 
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
-			executor.schedule(() -> it.getBundleContext()
-				.registerService(Foo.class, s1, new Hashtable<String, Object>() {
-					{
-						put("case", "matchMultiple_1");
-					}
-				}), 0, TimeUnit.MILLISECONDS);
-			executor.schedule(() -> it.getBundleContext()
-				.registerService(Foo.class, s2, new Hashtable<String, Object>() {
-					{
-						put("case", "matchMultiple_2");
-					}
-				}), 0, TimeUnit.MILLISECONDS);
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture1 = executor.schedule(() -> it.getBundleContext()
+				.registerService(Foo.class, s1, Dictionaries.dictionaryOf("foo", testMethodName.concat("_1"))), 0,
+				TimeUnit.MILLISECONDS);
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture2 = executor.schedule(() -> it.getBundleContext()
+				.registerService(Foo.class, s2, Dictionaries.dictionaryOf("foo", testMethodName.concat("_2"))), 0,
+				TimeUnit.MILLISECONDS);
 
 			it.init();
+			// Make sure the scheduled event is processed
+			assertThat(scheduledFuture1.get()).isNotNull();
+			assertThat(scheduledFuture2.get()).isNotNull();
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -360,9 +353,6 @@ public class ServiceUseExtensionTest {
 		}
 	}
 
-	@SuppressWarnings({
-		"rawtypes", "serial", "unchecked"
-	})
 	@Test
 	public void nomatchByFilter() throws Exception {
 		assertThatExceptionOfType(AssertionError.class) //
@@ -374,15 +364,15 @@ public class ServiceUseExtensionTest {
 
 					final Foo afoo = new Foo() {};
 
-					executor.schedule(() -> it.getBundleContext()
-						.registerService(Foo.class, afoo, new Hashtable() {
-							{
-								put("foo", "bar");
-								put("case", "nomatchByFilter");
-							}
-						}), 0, TimeUnit.MILLISECONDS);
+					ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
+						() -> it.getBundleContext()
+						.registerService(Foo.class, afoo,
+							Dictionaries.dictionaryOf("foo", "bar", "case", testMethodName)),
+						0, TimeUnit.MILLISECONDS);
 
 					it.init();
+					// Make sure the scheduled event is processed
+					assertThat(scheduledFuture.get()).isNotNull();
 				}
 			});
 	}

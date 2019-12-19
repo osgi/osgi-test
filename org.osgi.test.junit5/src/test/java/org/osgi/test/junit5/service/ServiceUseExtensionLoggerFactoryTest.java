@@ -23,7 +23,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.osgi.service.log.LoggerFactory;
 import org.osgi.test.junit5.context.BundleContextExtension;
 
-@SuppressWarnings("deprecation")
 public class ServiceUseExtensionLoggerFactoryTest {
 
 	@RegisterExtension

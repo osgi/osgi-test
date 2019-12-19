@@ -19,14 +19,15 @@ package org.osgi.test.junit4.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.util.Hashtable;
 import java.util.concurrent.ScheduledFuture;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit4.ExecutorRule;
 import org.osgi.test.junit4.context.BundleContextRule;
@@ -36,6 +37,8 @@ public class ServiceUseRuleTest {
 
 	@Rule
 	public ExecutorRule executor = new ExecutorRule();
+	@Rule
+	public TestName		name		= new TestName();
 
 	@Test
 	public void basicAssumptions() throws Exception {
@@ -108,7 +111,6 @@ public class ServiceUseRuleTest {
 				" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 50ms");
 	}
 
-	@SuppressWarnings("serial")
 	@Test
 	public void successWhenService() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -123,14 +125,9 @@ public class ServiceUseRuleTest {
 
 			final Foo afoo = new Foo() {};
 
-			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture = executor.schedule(
-				() -> bcRule.getBundleContext()
-					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
-						{
-							put("case", "successWhenService");
-						}
-					}),
-				0);
+			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture = executor
+				.schedule(() -> bcRule.getBundleContext()
+					.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", name.getMethodName())), 0);
 
 			foos.init(getClass());
 
@@ -152,7 +149,6 @@ public class ServiceUseRuleTest {
 		}
 	}
 
-	@SuppressWarnings("serial")
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -169,14 +165,8 @@ public class ServiceUseRuleTest {
 			final Foo afoo = new Foo() {};
 
 			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture = executor
-				.schedule(
-				() -> bcRule.getBundleContext()
-					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
-						{
-							put("case", "successWhenServiceWithTimeout");
-						}
-					}),
-				0);
+				.schedule(() -> bcRule.getBundleContext()
+					.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", name.getMethodName())), 0);
 
 			foos.init(getClass());
 
@@ -212,14 +202,11 @@ public class ServiceUseRuleTest {
 		}
 	}
 
-	@SuppressWarnings({
-		"rawtypes", "serial", "unchecked"
-	})
 	@Test
 	public void matchByFilter() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
 			ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule)
-				.filter("(foo=matchByFilter)")
+				.filter("(foo=bar)")
 				.build()) {
 
 			bcRule.init(getClass());
@@ -231,11 +218,9 @@ public class ServiceUseRuleTest {
 			final Foo afoo = new Foo() {};
 
 			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> bcRule.getBundleContext()
-				.registerService(Foo.class, afoo, new Hashtable() {
-					{
-						put("foo", "matchByFilter");
-					}
-				}), 0);
+				.registerService(Foo.class, afoo,
+					Dictionaries.dictionaryOf("foo", "bar", "case", name.getMethodName())),
+				0);
 
 			fooRule.init(getClass());
 
@@ -272,7 +257,6 @@ public class ServiceUseRuleTest {
 		}
 	}
 
-	@SuppressWarnings("serial")
 	@Test
 	public void matchMultiple() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -289,18 +273,14 @@ public class ServiceUseRuleTest {
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
 			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture1 = executor
 				.schedule(() -> bcRule.getBundleContext()
-				.registerService(Foo.class, s1, new Hashtable<String, Object>() {
-					{
-						put("case", "matchMultiple_1");
-					}
-				}), 0);
+					.registerService(Foo.class, s1, Dictionaries.dictionaryOf("case", name.getMethodName()
+						.concat("_1"))),
+					0);
 			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture2 = executor
 				.schedule(() -> bcRule.getBundleContext()
-				.registerService(Foo.class, s2, new Hashtable<String, Object>() {
-					{
-						put("case", "matchMultiple_2");
-					}
-				}), 0);
+					.registerService(Foo.class, s2, Dictionaries.dictionaryOf("case", name.getMethodName()
+						.concat("_2"))),
+					0);
 
 			fooRule.init(getClass());
 
@@ -337,9 +317,6 @@ public class ServiceUseRuleTest {
 		}
 	}
 
-	@SuppressWarnings({
-		"rawtypes", "serial", "unchecked"
-	})
 	@Test
 	public void nomatchByFilter() throws Exception {
 		assertThatExceptionOfType(AssertionError.class) //
@@ -357,13 +334,11 @@ public class ServiceUseRuleTest {
 
 					final Foo afoo = new Foo() {};
 
-					ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor
-						.schedule(() -> bcRule.getBundleContext()
-						.registerService(Foo.class, afoo, new Hashtable() {
-							{
-								put("foo", "nomatchByFilter");
-							}
-						}), 0);
+					ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
+						() -> bcRule.getBundleContext()
+							.registerService(Foo.class, afoo,
+								Dictionaries.dictionaryOf("foo", "bar", "case", name.getMethodName())),
+						0);
 
 					fooRule.init(getClass());
 

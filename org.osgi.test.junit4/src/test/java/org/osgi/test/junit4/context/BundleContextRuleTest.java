@@ -21,11 +21,12 @@ import static org.osgi.framework.Bundle.INSTALLED;
 import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.test.junit4.TestUtil.getBundle;
 
-import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.assertj.core.api.Condition;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -36,9 +37,13 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.junit4.types.Foo;
 
 public class BundleContextRuleTest {
+
+	@Rule
+	public TestName name = new TestName();
 
 	@Test
 	public void testInstallBundle_B() throws Exception {
@@ -88,13 +93,8 @@ public class BundleContextRuleTest {
 		try (WithContextRule it = new WithContextRule(getClass())) {
 			BundleContext bundleContext = it.rule.getBundleContext();
 
-			@SuppressWarnings("serial")
 			ServiceRegistration<Foo> serviceRegistration = bundleContext.registerService(Foo.class, new Foo() {},
-				new Hashtable<String, Object>() {
-					{
-						put("case", "cleansUpServices");
-					}
-				});
+				Dictionaries.dictionaryOf("case", name.getMethodName()));
 
 			assertThat(bundle.getRegisteredServices()).contains(serviceRegistration.getReference());
 		}

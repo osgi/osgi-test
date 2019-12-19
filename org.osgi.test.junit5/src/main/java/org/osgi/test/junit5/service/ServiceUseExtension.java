@@ -138,7 +138,6 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 	private final long						timeout;
 	private volatile TrackServices<T>		trackServices;
 
-	@SuppressWarnings("unchecked")
 	protected ServiceUseExtension(Class<T> serviceType, BundleContextExtension contextExtension, Filter filter,
 		int cardinality, long timeout) {
 		super(serviceType);
