@@ -20,11 +20,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Hashtable;
+import java.util.concurrent.ScheduledFuture;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit4.ExecutorRule;
 import org.osgi.test.junit4.context.BundleContextRule;
@@ -106,6 +108,7 @@ public class ServiceUseRuleTest {
 				" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 50ms");
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void successWhenService() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -120,12 +123,19 @@ public class ServiceUseRuleTest {
 
 			final Foo afoo = new Foo() {};
 
-			executor.schedule(
+			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture = executor.schedule(
 				() -> bcRule.getBundleContext()
-					.registerService(Foo.class, afoo, null),
+					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
+						{
+							put("case", "successWhenService");
+						}
+					}),
 				0);
 
 			foos.init(getClass());
+
+			// Make sure the scheduled event is processed
+			assertThat(scheduledFuture.get()).isNotNull();
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -142,6 +152,7 @@ public class ServiceUseRuleTest {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -157,12 +168,20 @@ public class ServiceUseRuleTest {
 
 			final Foo afoo = new Foo() {};
 
-			executor.schedule(
+			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture = executor
+				.schedule(
 				() -> bcRule.getBundleContext()
-					.registerService(Foo.class, afoo, null),
+					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
+						{
+							put("case", "successWhenServiceWithTimeout");
+						}
+					}),
 				0);
 
 			foos.init(getClass());
+
+			// Make sure the scheduled event is processed
+			assertThat(scheduledFuture.get()).isNotNull();
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -200,7 +219,7 @@ public class ServiceUseRuleTest {
 	public void matchByFilter() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
 			ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule)
-				.filter("(foo=bar)")
+				.filter("(foo=matchByFilter)")
 				.build()) {
 
 			bcRule.init(getClass());
@@ -211,14 +230,17 @@ public class ServiceUseRuleTest {
 
 			final Foo afoo = new Foo() {};
 
-			executor.schedule(() -> bcRule.getBundleContext()
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> bcRule.getBundleContext()
 				.registerService(Foo.class, afoo, new Hashtable() {
 					{
-						put("foo", "bar");
+						put("foo", "matchByFilter");
 					}
 				}), 0);
 
 			fooRule.init(getClass());
+
+			// Make sure the scheduled event is processed
+			assertThat(scheduledFuture.get()).isNotNull();
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -250,6 +272,7 @@ public class ServiceUseRuleTest {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void matchMultiple() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -264,12 +287,26 @@ public class ServiceUseRuleTest {
 				.getRegisteredServices()).isNull();
 
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
-			executor.schedule(() -> bcRule.getBundleContext()
-				.registerService(Foo.class, s1, null), 0);
-			executor.schedule(() -> bcRule.getBundleContext()
-				.registerService(Foo.class, s2, null), 0);
+			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture1 = executor
+				.schedule(() -> bcRule.getBundleContext()
+				.registerService(Foo.class, s1, new Hashtable<String, Object>() {
+					{
+						put("case", "matchMultiple_1");
+					}
+				}), 0);
+			ScheduledFuture<ServiceRegistration<Foo>> scheduledFuture2 = executor
+				.schedule(() -> bcRule.getBundleContext()
+				.registerService(Foo.class, s2, new Hashtable<String, Object>() {
+					{
+						put("case", "matchMultiple_2");
+					}
+				}), 0);
 
 			fooRule.init(getClass());
+
+			// Make sure the scheduled event is processed
+			assertThat(scheduledFuture1.get()).isNotNull();
+			assertThat(scheduledFuture2.get()).isNotNull();
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -320,14 +357,18 @@ public class ServiceUseRuleTest {
 
 					final Foo afoo = new Foo() {};
 
-					executor.schedule(() -> bcRule.getBundleContext()
+					ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor
+						.schedule(() -> bcRule.getBundleContext()
 						.registerService(Foo.class, afoo, new Hashtable() {
 							{
-								put("foo", "bar");
+								put("foo", "nomatchByFilter");
 							}
 						}), 0);
 
 					fooRule.init(getClass());
+
+					// Make sure the scheduled event is processed
+					assertThat(scheduledFuture.get()).isNotNull();
 				}
 			});
 	}
