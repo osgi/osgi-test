@@ -218,6 +218,7 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 	}
 
 	private TrackServices<T> getTrackServices(ExtensionContext extensionContext) {
+		@SuppressWarnings("unchecked")
 		CloseableTrackServices<T> closeableTrackServices = extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(filter.toString(), k -> {
 				TrackServices<T> ts = new TrackServices<>(filter, cardinality, timeout);

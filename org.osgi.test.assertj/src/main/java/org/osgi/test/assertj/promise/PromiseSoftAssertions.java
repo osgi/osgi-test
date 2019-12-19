@@ -29,6 +29,8 @@ public class PromiseSoftAssertions extends SoftAssertions {
 	 * @return the created assertion object.
 	 */
 	public <RESULT> PromiseAssert<RESULT> assertThat(Promise<RESULT> actual) {
-		return proxy(PromiseAssert.class, Promise.class, actual);
+		@SuppressWarnings("unchecked")
+		PromiseAssert<RESULT> softly = proxy(PromiseAssert.class, Promise.class, actual);
+		return softly;
 	}
 }
