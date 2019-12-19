@@ -280,7 +280,7 @@
 			<dependency>
 				<groupId>org.eclipse.platform</groupId>
 				<artifactId>org.eclipse.osgi</artifactId>
-				<version>3.15.0</version>
+				<version>3.15.100</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
