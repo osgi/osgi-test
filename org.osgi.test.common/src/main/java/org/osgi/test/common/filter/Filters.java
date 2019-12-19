@@ -16,15 +16,18 @@
 
 package org.osgi.test.common.filter;
 
-import static org.osgi.test.common.exceptions.Exceptions.duck;
+import java.util.function.Function;
 
 import org.osgi.framework.Filter;
 import org.osgi.framework.FrameworkUtil;
-import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.test.common.exceptions.FunctionWithException;
 
 public class Filters {
 
 	private Filters() {}
+
+	private static final Function<String, Filter> createFilter = FunctionWithException
+		.asFunction(FrameworkUtil::createFilter);
 
 	/**
 	 * Utility method for creating a {@link Filter} using a format string.
@@ -36,11 +39,8 @@ public class Filters {
 	 * @return filter
 	 */
 	public static Filter format(String format, Object... args) {
-		try {
-			return FrameworkUtil.createFilter(String.format(format, args));
-		} catch (InvalidSyntaxException ise) {
-			throw duck(ise);
-		}
+		String filter = String.format(format, args);
+		return createFilter.apply(filter);
 	}
 
 }
