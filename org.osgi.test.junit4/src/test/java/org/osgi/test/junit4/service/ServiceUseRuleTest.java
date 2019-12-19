@@ -106,6 +106,7 @@ public class ServiceUseRuleTest {
 				" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 50ms");
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void successWhenService() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -122,7 +123,11 @@ public class ServiceUseRuleTest {
 
 			executor.schedule(
 				() -> bcRule.getBundleContext()
-					.registerService(Foo.class, afoo, null),
+					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
+						{
+							put("case", "successWhenService");
+						}
+					}),
 				0);
 
 			foos.init(getClass());
@@ -142,6 +147,7 @@ public class ServiceUseRuleTest {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -159,7 +165,11 @@ public class ServiceUseRuleTest {
 
 			executor.schedule(
 				() -> bcRule.getBundleContext()
-					.registerService(Foo.class, afoo, null),
+					.registerService(Foo.class, afoo, new Hashtable<String, Object>() {
+						{
+							put("case", "successWhenServiceWithTimeout");
+						}
+					}),
 				0);
 
 			foos.init(getClass());
@@ -200,7 +210,7 @@ public class ServiceUseRuleTest {
 	public void matchByFilter() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
 			ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule)
-				.filter("(foo=bar)")
+				.filter("(foo=matchByFilter)")
 				.build()) {
 
 			bcRule.init(getClass());
@@ -214,7 +224,7 @@ public class ServiceUseRuleTest {
 			executor.schedule(() -> bcRule.getBundleContext()
 				.registerService(Foo.class, afoo, new Hashtable() {
 					{
-						put("foo", "bar");
+						put("foo", "matchByFilter");
 					}
 				}), 0);
 
@@ -250,6 +260,7 @@ public class ServiceUseRuleTest {
 		}
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void matchMultiple() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
@@ -265,9 +276,17 @@ public class ServiceUseRuleTest {
 
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
 			executor.schedule(() -> bcRule.getBundleContext()
-				.registerService(Foo.class, s1, null), 0);
+				.registerService(Foo.class, s1, new Hashtable<String, Object>() {
+					{
+						put("case", "matchMultiple_1");
+					}
+				}), 0);
 			executor.schedule(() -> bcRule.getBundleContext()
-				.registerService(Foo.class, s2, null), 0);
+				.registerService(Foo.class, s2, new Hashtable<String, Object>() {
+					{
+						put("case", "matchMultiple_2");
+					}
+				}), 0);
 
 			fooRule.init(getClass());
 
@@ -323,7 +342,7 @@ public class ServiceUseRuleTest {
 					executor.schedule(() -> bcRule.getBundleContext()
 						.registerService(Foo.class, afoo, new Hashtable() {
 							{
-								put("foo", "bar");
+								put("foo", "nomatchByFilter");
 							}
 						}), 0);
 

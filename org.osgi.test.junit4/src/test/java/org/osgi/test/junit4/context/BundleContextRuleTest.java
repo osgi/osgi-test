@@ -21,6 +21,7 @@ import static org.osgi.framework.Bundle.INSTALLED;
 import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.test.junit4.TestUtil.getBundle;
 
+import java.util.Hashtable;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.assertj.core.api.Condition;
@@ -87,7 +88,13 @@ public class BundleContextRuleTest {
 		try (WithContextRule it = new WithContextRule(getClass())) {
 			BundleContext bundleContext = it.rule.getBundleContext();
 
-			ServiceRegistration<Foo> serviceRegistration = bundleContext.registerService(Foo.class, new Foo() {}, null);
+			@SuppressWarnings("serial")
+			ServiceRegistration<Foo> serviceRegistration = bundleContext.registerService(Foo.class, new Foo() {},
+				new Hashtable<String, Object>() {
+					{
+						put("case", "cleansUpServices");
+					}
+				});
 
 			assertThat(bundle.getRegisteredServices()).contains(serviceRegistration.getReference());
 		}

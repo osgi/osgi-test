@@ -16,6 +16,8 @@
 
 package org.osgi.test.junit4.tb1;
 
+import java.util.Hashtable;
+
 import org.osgi.annotation.bundle.Header;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
@@ -30,9 +32,14 @@ public class FooImpl implements BundleActivator, PrototypeServiceFactory<Foo> {
 
 	private ServiceRegistration<Foo> serviceRegistration;
 
+	@SuppressWarnings("serial")
 	@Override
 	public void start(BundleContext bundleContext) throws Exception {
-		serviceRegistration = bundleContext.registerService(Foo.class, this, null);
+		serviceRegistration = bundleContext.registerService(Foo.class, this, new Hashtable<String, Object>() {
+			{
+				put("case", "FooImpl");
+			}
+		});
 	}
 
 	@Override
