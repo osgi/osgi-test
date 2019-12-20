@@ -21,10 +21,10 @@ jobs:
       run: |
         ./.github/scripts/build.sh
     - name: Publish
-      if: success() && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') && (env.OSSRH_USERNAME != '')
+      if: success() && (github.repository == 'osgi/osgi-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request')
       shell: bash
       run: |
-        ./.github/scripts/publish.sh
+        ./.github/scripts/publish.sh -Possrh
       env:
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
