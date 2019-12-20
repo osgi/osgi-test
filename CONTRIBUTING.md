@@ -18,8 +18,8 @@ You can use your system `mvn` but we require a recent version.
 
 - `./mvnw clean install` - Assembles and tests the project
 
-We use [Travis CI](https://travis-ci.com/osgi/osgi-test) and the repo includes a
-`.travis.yml` file to build on Travis CI.
+We use [GitHub Actions](https://github.com/osgi/osgi-test/actions?query=workflow%3A%22CI%20Build%22) and the repo includes a
+`.github/workflows/cibuild.yml` file to build with GitHub Actions.
 
 ## Workflow
 
@@ -56,10 +56,6 @@ unless you are already using Git 2.0 where it is the default.
 Finally, the third side of the triangle is pull requests from your fork repo to the
 main repo.
 
-Make sure to set up [Travis CI](https://travis-ci.com) for your fork repo to test your commits
-when they are pushed to your fork repo. Travis CI will also build any [pull requests you 
-submit](https://travis-ci.com/osgi/osgi-test/pull_requests).
-
 ## Contribution guidelines
 
 ### Pull requests are always welcome
@@ -95,8 +91,7 @@ Fork the repo and make changes on your fork in a feature branch:
   intentions, and name it XXX-something where XXX is the number of the issue.
 
 Submit unit tests for your changes. We use JUnit 5. Run the full build including all
-the tests in your branch before submitting a pull request. Having Travis CI set up
-for your fork repo is quite a help here.
+the tests in your branch before submitting a pull request. Having GitHub Actions set up for your fork repo is quite a help here.
 
 Write clean code. Universally formatted code promotes ease of writing, reading,
 and maintenance. We use Eclipse and the project has Eclipse `.settings` which
