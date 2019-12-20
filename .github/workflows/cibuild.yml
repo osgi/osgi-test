@@ -1,0 +1,87 @@
+name: CI Build
+
+on: [push, pull_request]
+
+env:
+  LC_ALL: en_US.UTF-8
+
+jobs:
+  OpenJDK8_Linux:
+    name: OpenJDK8 Linux
+    runs-on: ubuntu-latest
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v1
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build
+      shell: bash
+      run: |
+        ./.github/scripts/build.sh
+    - name: Publish
+      if: success() && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') && (env.OSSRH_USERNAME != '')
+      shell: bash
+      run: |
+        ./.github/scripts/publish.sh
+      env:
+        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+  OpenJDK11_Linux:
+    name: OpenJDK11 Linux
+    runs-on: ubuntu-latest
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v1
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Build
+      shell: bash
+      run: |
+        ./.github/scripts/build.sh
+  OpenJDK8_Bnd_SNAPSHOT:
+    name: OpenJDK8 Bnd SNAPSHOT
+    runs-on: ubuntu-latest
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v1
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build
+      continue-on-error: true
+      shell: bash
+      run: |
+        ./.github/scripts/build.sh -Pbnd-next
+  OpenJDK8_Windows:
+    name: OpenJDK8 Windows
+    runs-on: windows-latest
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v1
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build
+      shell: bash
+      run: |
+        ./.github/scripts/build.sh
+  OpenJDK8_macOS:
+    name: OpenJDK8 macOS
+    runs-on: macos-latest
+    steps:
+    - name: Git Checkout
+      uses: actions/checkout@v1
+    - name: Set up Java
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build
+      shell: bash
+      run: |
+        ./.github/scripts/build.sh
