@@ -29,7 +29,7 @@ You can use your system `mvn` but we require a recent version.
 
 - `./mvnw clean install` - Assembles and tests the project
 
-[![Build Status](https://travis-ci.com/osgi/osgi-test.svg?branch=master)](https://travis-ci.com/osgi/osgi-test)
+[![Build Status](https://github.com/osgi/osgi-test/workflows/CI%20Build/badge.svg)](https://github.com/osgi/osgi-test/actions?query=workflow%3A%22CI%20Build%22)
 
 ## Repository
 
