@@ -286,17 +286,6 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<distributionManagement>
-		<repository>
-			<id>OSGi Releases</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-		</repository>
-		<snapshotRepository>
-			<id>OSGi Snapshots</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
-
 	<profiles>
 		<profile>
 			<id>bnd-next</id>
@@ -323,6 +312,23 @@
 					</releases>
 				</pluginRepository>
 			</pluginRepositories>
+		</profile>
+		<profile>
+			<id>ossrh</id>
+			<properties>
+				<skipTests>true</skipTests>
+				<invoker.skip>true</invoker.skip>
+			</properties>
+			<distributionManagement>
+				<snapshotRepository>
+					<id>OSGi Snapshots</id>
+					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+				</snapshotRepository>
+				<repository>
+					<id>OSGi Releases</id>
+					<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+				</repository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 
