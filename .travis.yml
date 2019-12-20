@@ -19,7 +19,7 @@ jobs:
     - name: "BndNext"
       env: ALLOW_FAILURE=true
       script:
-        - "./mvnw --no-transfer-progress --settings .travis-settings.xml clean install -Pbnd-next"
+        - "./mvnw --no-transfer-progress --settings settings.xml clean install -Pbnd-next"
   allow_failures:
     - env: ALLOW_FAILURE=true
 
@@ -31,10 +31,10 @@ install:
   - "source install-jdk.sh --url $JAVA_JDK"
 
 before_script:
-  - "./mvnw --version --settings .travis-settings.xml"
+  - "./mvnw --version --settings settings.xml"
 
 script:
-  - "./mvnw --no-transfer-progress --settings .travis-settings.xml clean install"
+  - "./mvnw --no-transfer-progress --settings settings.xml clean install"
 
 after_success:
-  - "if [ master == $TRAVIS_BRANCH -a $TRAVIS_PULL_REQUEST == false -a ${OSSRH_USERNAME:=X} != X ]; then ./mvnw --settings .travis-settings.xml deploy; fi"
+  - "if [ master == $TRAVIS_BRANCH -a $TRAVIS_PULL_REQUEST == false -a ${OSSRH_USERNAME:=X} != X ]; then ./mvnw --settings settings.xml deploy; fi"
