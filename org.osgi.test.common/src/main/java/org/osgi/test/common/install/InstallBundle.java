@@ -74,7 +74,7 @@ public interface InstallBundle {
 		}
 		Enumeration<URL> entries = getBundleContext().getBundle()
 			.findEntries(parts[0], parts[1], false);
-		if (!entries.hasMoreElements())
+		if (entries == null || !entries.hasMoreElements())
 			throw new AssertionError(
 				"No bundle entry " + pathToEmbeddedJar + " found in " + getBundleContext().getBundle());
 		try (InputStream is = entries.nextElement()

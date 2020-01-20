@@ -37,7 +37,7 @@
 	</scm>
 
 	<properties>
-		<junit-jupiter-api.version>5.3.1</junit-jupiter-api.version>
+		<junit-jupiter-api.version>5.5.2</junit-jupiter-api.version>
 	</properties>
 
 	<dependencies>
@@ -49,6 +49,11 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit-jupiter-api.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter</artifactId>
 			<version>${junit-jupiter-api.version}</version>
 		</dependency>
 		<dependency>

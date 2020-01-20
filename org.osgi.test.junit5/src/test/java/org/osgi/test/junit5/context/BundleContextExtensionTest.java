@@ -27,6 +27,7 @@ import static org.osgi.test.junit5.TestUtil.getBundle;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.assertj.core.api.Condition;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -41,6 +42,7 @@ import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
+import org.osgi.test.junit5.common.InsideOsgiFrameworkOnlyTest;
 import org.osgi.test.junit5.types.Foo;
 import org.osgi.test.junit5.types.MockStore;
 
@@ -59,6 +61,7 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
+	@InsideOsgiFrameworkOnlyTest
 	public void testInstallBundle_B() throws Exception {
 		Bundle bundle = null;
 
@@ -76,6 +79,7 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
+	@InsideOsgiFrameworkOnlyTest
 	public void testInstallBundle() throws Exception {
 		Bundle bundle = null;
 
@@ -93,6 +97,7 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
+	@InsideOsgiFrameworkOnlyTest
 	public void test() throws Exception {
 		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
 			BundleContext bundleContext = it.getBundleContext();
@@ -104,6 +109,7 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
+	@InsideOsgiFrameworkOnlyTest // TODO: use Tags as flag?
 	public void cleansUpServices() throws Exception {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
 
@@ -120,7 +126,31 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
-	public void cleansUpBundles() throws Exception {
+
+	public void cleansUpServicesOutsideOSGi() throws Exception {
+
+		BundleContext bundleContext = null;
+		Bundle bundle = null;
+		ServiceRegistration<Foo> serviceRegistration = null;
+		ServiceReference<Foo> serviceReference = null;
+		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
+			bundleContext = it.getBundleContext();
+			bundle = bundleContext.getBundle();
+			serviceRegistration = bundleContext.registerService(Foo.class, new Foo() {}, null);
+			serviceReference = serviceRegistration.getReference();
+			assertThat(bundle.getRegisteredServices()).isNotEmpty()
+				.contains(serviceRegistration.getReference());
+		}
+
+		final ServiceRegistration<Foo> serviceRegistrationF = serviceRegistration;
+		Assertions.assertThrows(IllegalStateException.class, () -> {
+			serviceRegistrationF.getReference();
+		});
+		assertThat(bundle.getRegisteredServices()).doesNotContain(serviceReference);
+	}
+
+	@Test
+	public void cleansUpBundlesInsideOSGi() throws Exception {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
 		Bundle installedBundle = null;
 		long bundleId = -1;
@@ -145,8 +175,32 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
+	public void cleansUpBundlesOutsideOsgi() throws Exception {
+		Bundle installedBundle = null;
+		long bundleId = -1;
+		BundleContext bundleContext = null;
+		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
+			bundleContext = it.getBundleContext();
+
+			installedBundle = bundleContext.installBundle("it", getBundle("tb1.jar"));
+
+			bundleId = installedBundle.getBundleId();
+
+			assertThat(bundleContext
+				.getBundle(bundleId)).isNotNull()
+					.matches(installedBundle::equals);
+		}
+		assertThat(bundleContext.getBundle(bundleId)).isNull();
+
+
+		assertThat(installedBundle).isNotNull()
+			.extracting(Bundle::getState)
+			.isEqualTo(Bundle.UNINSTALLED);
+	}
+
+	@Test
 	public void cleansUpListeners() throws Exception {
-		Bundle bundle = FrameworkUtil.getBundle(getClass());
+
 		Bundle installedBundle = null;
 
 		final AtomicReference<BundleEvent> ref = new AtomicReference<BundleEvent>();
@@ -158,8 +212,9 @@ public class BundleContextExtensionTest {
 			}
 		};
 
+		BundleContext bundleContext = null;
 		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
-			BundleContext bundleContext = it.getBundleContext();
+			bundleContext = it.getBundleContext();
 
 			bundleContext.addBundleListener(bl);
 
@@ -179,7 +234,7 @@ public class BundleContextExtensionTest {
 
 		try {
 			// re-install the bundle
-			installedBundle = bundle.getBundleContext()
+			installedBundle = bundleContext
 				.installBundle("it", getBundle("tb1.jar"));
 
 			// check that the listener didn't notice this last bundle
@@ -191,6 +246,7 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
+	@InsideOsgiFrameworkOnlyTest
 	public void cleansUpGottenServices() throws Exception {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
 		Bundle installedBundle = bundle.getBundleContext()
@@ -215,6 +271,7 @@ public class BundleContextExtensionTest {
 	}
 
 	@Test
+	@InsideOsgiFrameworkOnlyTest
 	public void cleansUpGottenServiceObjects() throws Exception {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
 		Bundle installedBundle = bundle.getBundleContext()

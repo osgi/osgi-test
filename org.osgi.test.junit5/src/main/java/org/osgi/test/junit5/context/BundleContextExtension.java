@@ -37,9 +37,10 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.platform.commons.util.ReflectionUtils;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.launch.Framework;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.install.InstallBundle;
+import org.osgi.test.junit5.framework.FrameworkExtension;
 
 public class BundleContextExtension
 	implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
@@ -48,8 +49,17 @@ public class BundleContextExtension
 	public static final String		INSTALL_BUNLDE_KEY		= "install.bundle";
 	public static final Namespace	NAMESPACE	= Namespace.create(BundleContextExtension.class);
 
+	private final FrameworkExtension	frameworkExtension;
+
+	public BundleContextExtension() {
+		this(new FrameworkExtension());
+	}
+	public BundleContextExtension(FrameworkExtension frameworkExtension) {
+		this.frameworkExtension=frameworkExtension;
+	}
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
+		frameworkExtension.beforeEach(extensionContext);
 		injectFields(extensionContext, extensionContext.getRequiredTestInstance(), ReflectionUtils::isNotStatic);
 	}
 
@@ -62,6 +72,8 @@ public class BundleContextExtension
 		if (closeableResourceBundleContext != null) {
 			closeableResourceBundleContext.close();
 		}
+
+		frameworkExtension.afterEach(extensionContext);
 	}
 
 	/**
@@ -123,8 +135,9 @@ public class BundleContextExtension
 		BundleContext bundleContext = extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
 				key -> new CloseableResourceBundleContext(extensionContext.getRequiredTestClass(),
-					FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
-					.getBundleContext()),
+					frameworkExtension.create(Framework.class, extensionContext)
+						.get(Framework.class)
+						.getBundleContext()),
 				CloseableResourceBundleContext.class)
 			.get();
 
