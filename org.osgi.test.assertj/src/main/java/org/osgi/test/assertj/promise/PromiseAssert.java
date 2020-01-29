@@ -1,6 +1,6 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
- * 
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,30 @@ package org.osgi.test.assertj.promise;
 
 import org.osgi.util.promise.Promise;
 
+/**
+ * Assertions for {@link Promise}s.
+ *
+ * @param <RESULT> The type of the value contained in the {@link Promise}.
+ */
 public class PromiseAssert<RESULT>
 		extends AbstractPromiseAssert<PromiseAssert<RESULT>,RESULT> {
 
+	/**
+	 * Create an assertion for a {@link Promise}.
+	 *
+	 * @param actual The {@link Promise}.
+	 */
 	public PromiseAssert(Promise<RESULT> actual) {
 		super(actual, PromiseAssert.class);
 	}
 
+	/**
+	 * Create an assertion for a {@link Promise}.
+	 *
+	 * @param actual The {@link Promise}.
+	 * @param <T> The type of the value contained in the {@link Promise}.
+	 * @return The created assertion.
+	 */
 	public static <T> PromiseAssert<T> assertThat(Promise<T> actual) {
 		return new PromiseAssert<>(actual);
 	}

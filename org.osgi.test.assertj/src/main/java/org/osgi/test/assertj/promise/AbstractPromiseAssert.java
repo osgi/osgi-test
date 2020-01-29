@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,15 +20,23 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractThrowableAssert;
+import org.assertj.core.api.Assert;
+import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.ObjectAssert;
 import org.osgi.util.promise.Promise;
 
+/**
+ * Assertions for {@link Promise}s.
+ *
+ * @param <RESULT> The type of the value contained in the {@link Promise}.
+ */
 public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<SELF, RESULT>, RESULT>
 	extends AbstractAssert<SELF, Promise<RESULT>> {
 
@@ -36,6 +44,13 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		super(actual, selfType);
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved. That is,
+	 * {@link Promise#isDone()} returns {@code true}.
+	 *
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved.
+	 */
 	public SELF isDone() {
 		isNotNull();
 		if (!actual.isDone()) {
@@ -44,6 +59,13 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return myself;
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is unresolved. That is,
+	 * {@link Promise#isDone()} returns {@code false}.
+	 *
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is resolved.
+	 */
 	public SELF isNotDone() {
 		isNotNull();
 		if (actual.isDone()) {
@@ -52,7 +74,17 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return myself;
 	}
 
-	public SELF doesResolve(long timeout, TimeUnit unit) {
+	/**
+	 * Verifies that the {@link Promise} is resolved or does resolve within the
+	 * specified timeout.
+	 *
+	 * @param timeout The specified timeout.
+	 * @param unit The unit for the specified timeout.
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved when the
+	 *             timeout expires.
+	 */
+	public SELF resolvesWithin(long timeout, TimeUnit unit) {
 		isNotNull();
 		if (!actual.isDone()) {
 			final CountDownLatch latch = new CountDownLatch(1);
@@ -69,7 +101,30 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return myself;
 	}
 
-	public SELF doesNotResolve(long timeout, TimeUnit unit) {
+	/**
+	 * Verifies that the {@link Promise} is resolved or does resolve within the
+	 * specified timeout.
+	 *
+	 * @param timeout The specified timeout.
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved when the
+	 *             timeout expires.
+	 */
+	public SELF resolvesWithin(Duration timeout) {
+		return resolvesWithin(timeout.toNanos(), TimeUnit.NANOSECONDS);
+	}
+
+	/**
+	 * Verifies that the {@link Promise} is unresolved and does not resolve
+	 * within the specified timeout.
+	 *
+	 * @param timeout The specified timeout.
+	 * @param unit The unit for the specified timeout.
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is resolved or resolves
+	 *             before the timeout expires.
+	 */
+	public SELF doesNotResolveWithin(long timeout, TimeUnit unit) {
 		isNotDone();
 		final CountDownLatch latch = new CountDownLatch(1);
 		actual.onResolve(latch::countDown);
@@ -84,6 +139,19 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return myself;
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is unresolved and does not resolve
+	 * within the specified timeout.
+	 *
+	 * @param timeout The specified timeout.
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is resolved or resolves
+	 *             before the timeout expires.
+	 */
+	public SELF doesNotResolveWithin(Duration timeout) {
+		return doesNotResolveWithin(timeout.toNanos(), TimeUnit.NANOSECONDS);
+	}
+
 	Throwable getFailure() {
 		try {
 			return actual.getFailure();
@@ -93,16 +161,39 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		}
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved with a failure and returns
+	 * an assertion on the failure.
+	 *
+	 * @return A {@link AbstractThrowableAssert} holding the failure of the
+	 *         {@link Promise}.
+	 * @throws AssertionError If the {@link Promise} is unresolved or is
+	 *             resolved successfully.
+	 */
 	public AbstractThrowableAssert<?, ? extends Throwable> hasFailedWithThrowableThat() {
 		isDone();
 		return assertThat(getFailure()).isNotNull();
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved with a failure.
+	 *
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved or is
+	 *             resolved successfully.
+	 */
 	public SELF hasFailed() {
 		hasFailedWithThrowableThat();
 		return myself;
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is unresolved or is resolved
+	 * successfully.
+	 *
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is resolved with a failure.
+	 */
 	public SELF hasNotFailed() {
 		isNotNull();
 		if (actual.isDone()) {
@@ -114,6 +205,13 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return myself;
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved successfully.
+	 *
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved or is
+	 *             resolved with a failure.
+	 */
 	public SELF isSuccessful() {
 		isDone();
 		hasNotFailed();
@@ -132,26 +230,98 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		}
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved successfully and returns an
+	 * assertion on the value of the {@link Promise}.
+	 *
+	 * @return A {@link ObjectAssert} holding the value of the {@link Promise}.
+	 * @throws AssertionError If the {@link Promise} is unresolved or is
+	 *             resolved with a failure.
+	 */
 	public ObjectAssert<RESULT> hasValueThat() {
 		isSuccessful();
 		return assertThat(getValue());
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved successfully and returns an
+	 * assertion on the value of the {@link Promise} narrowed by the specified
+	 * assertion factory.
+	 *
+	 * @param <ASSERT> The type of the return assertion on the value contained
+	 *            in the {@link Promise}.
+	 * @param assertFactory The factory which verifies the type and creates the
+	 *            new {@link Assert}. See
+	 *            {@link Assert#asInstanceOf(InstanceOfAssertFactory)}.
+	 * @return A narrowed {@link Assert} holding the value of the
+	 *         {@link Promise}.
+	 * @throws AssertionError If the {@link Promise} is unresolved, is resolved
+	 *             with a failure, or if the type of the value of the
+	 *             {@link Promise} is not compatible with the specified
+	 *             assertion factory.
+	 */
+	public <ASSERT extends AbstractAssert<?, ?>> ASSERT hasValueThat(
+		InstanceOfAssertFactory<? super RESULT, ASSERT> assertFactory) {
+		return hasValueThat().asInstanceOf(assertFactory);
+	}
+
+	/**
+	 * Verifies that the {@link Promise} is resolved successfully and has a
+	 * value that is equal to the {@code expected} value.
+	 *
+	 * @param expected The expected value.
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved, is resolved
+	 *             with a failure, or has a value that is not equal to the
+	 *             {@code expected} value.
+	 */
 	public SELF hasValue(RESULT expected) {
 		hasValueThat().isEqualTo(expected);
 		return myself;
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved successfully and has a
+	 * value that is identical, using {@code ==}, to the {@code expected} value.
+	 *
+	 * @param expected The expected value.
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved, is resolved
+	 *             with a failure, or has a value that is not identical to the
+	 *             {@code expected} value.
+	 */
 	public SELF hasSameValue(RESULT expected) {
 		hasValueThat().isSameAs(expected);
 		return myself;
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved successfully and has a
+	 * value for which the {@code predicate} returns {@code true}.
+	 *
+	 * @param predicate The predicate to use on the value.
+	 * @param predicateDescription A description of the predicate to use in an
+	 *            error message.
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved, is resolved
+	 *             with a failure, or if the {@code predicate} returns
+	 *             {@code false}.
+	 */
 	public SELF hasValueMatching(Predicate<? super RESULT> predicate, String predicateDescription) {
 		hasValueThat().matches(predicate, predicateDescription);
 		return myself;
 	}
 
+	/**
+	 * Verifies that the {@link Promise} is resolved successfully and has a
+	 * value for which the {@code predicate} returns {@code true}.
+	 *
+	 * @param predicate The predicate to use on the value.
+	 * @return This assertion object.
+	 * @throws AssertionError If the {@link Promise} is unresolved, is resolved
+	 *             with a failure, or if the {@code predicate} returns
+	 *             {@code false}.
+	 */
 	public SELF hasValueMatching(Predicate<? super RESULT> predicate) {
 		return hasValueMatching(predicate, "given");
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +19,20 @@ package org.osgi.test.assertj.promise;
 import org.assertj.core.api.SoftAssertions;
 import org.osgi.util.promise.Promise;
 
+/**
+ * Soft assertions for {@link Promise}s.
+ */
 public class PromiseSoftAssertions extends SoftAssertions {
 	/**
-	 * Create assertion for {@link org.osgi.util.promise.Promise}.
+	 * Create a soft assertion for a {@link Promise}.
 	 *
-	 * @param actual the actual value.
-	 * @param <RESULT> the type of the value contained in the
-	 *            {@link org.osgi.util.promise.Promise}.
-	 * @return the created assertion object.
+	 * @param actual The {@link Promise}.
+	 * @param <T> The type of the value contained in the {@link Promise}.
+	 * @return The created soft assertion.
 	 */
-	public <RESULT> PromiseAssert<RESULT> assertThat(Promise<RESULT> actual) {
+	public <T> PromiseAssert<T> assertThat(Promise<T> actual) {
 		@SuppressWarnings("unchecked")
-		PromiseAssert<RESULT> softly = proxy(PromiseAssert.class, Promise.class, actual);
+		PromiseAssert<T> softly = proxy(PromiseAssert.class, Promise.class, actual);
 		return softly;
 	}
 }

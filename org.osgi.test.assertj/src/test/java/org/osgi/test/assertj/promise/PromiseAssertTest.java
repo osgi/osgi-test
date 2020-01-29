@@ -2,11 +2,12 @@ package org.osgi.test.assertj.promise;
 
 import static org.osgi.test.assertj.promise.PromiseAssert.assertThat;
 
+import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +16,7 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.PromiseFactory;
 
 public class PromiseAssertTest {
-	public static final long	WAIT_TIME	= 2L;
+	public static final Duration	WAIT_TIME	= Duration.ofSeconds(2L);
 
 	ExecutorService				callbackExecutor;
 	ScheduledExecutorService	scheduledExecutor;
@@ -46,7 +47,7 @@ public class PromiseAssertTest {
 		softly.assertThat(p)
 			.hasNotFailed();
 		softly.assertThat(p)
-			.doesNotResolve(WAIT_TIME, TimeUnit.SECONDS);
+			.doesNotResolveWithin(WAIT_TIME);
 
 		softly.assertThatCode(() -> assertThat(p).isDone())
 			.isInstanceOf(AssertionError.class);
@@ -58,19 +59,21 @@ public class PromiseAssertTest {
 			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasValueThat())
 			.isInstanceOf(AssertionError.class);
+		softly.assertThatCode(() -> assertThat(p).hasValueThat(InstanceOfAssertFactories.STRING))
+			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasValue("value"))
 			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasSameValue("value"))
 			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasValueMatching("value"::equals))
 			.isInstanceOf(AssertionError.class);
-		softly.assertThatCode(() -> assertThat(p).doesResolve(WAIT_TIME, TimeUnit.SECONDS))
+		softly.assertThatCode(() -> assertThat(p).resolvesWithin(WAIT_TIME))
 			.isInstanceOf(AssertionError.class);
 
 		d.resolve(value);
 
 		softly.assertThat(p)
-			.doesResolve(WAIT_TIME, TimeUnit.SECONDS);
+			.resolvesWithin(WAIT_TIME);
 		softly.assertThat(p)
 			.isDone();
 		softly.assertThat(p)
@@ -102,6 +105,14 @@ public class PromiseAssertTest {
 			.hasValueThat()
 			.isSameAs(value);
 		softly.assertThat(p)
+			.hasValueThat(InstanceOfAssertFactories.CHAR_SEQUENCE)
+			.contains("alu")
+			.startsWith("va")
+			.endsWith("ue");
+		softly.assertThat(p)
+			.hasValueThat(InstanceOfAssertFactories.STRING)
+			.isEqualTo("%sl%s", "va", "ue");
+		softly.assertThat(p)
 			.hasValue(new String("value"));
 		softly.assertThat(p)
 			.hasSameValue(value);
@@ -110,7 +121,7 @@ public class PromiseAssertTest {
 		softly.assertThat(p)
 			.hasValueMatching(value::equals);
 		softly.assertThat(p)
-			.doesResolve(WAIT_TIME, TimeUnit.SECONDS);
+			.resolvesWithin(WAIT_TIME);
 
 		softly.assertThatCode(() -> assertThat(p).isNotDone())
 			.isInstanceOf(AssertionError.class);
@@ -127,7 +138,7 @@ public class PromiseAssertTest {
 			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasValueMatching("failed"::equals))
 			.isInstanceOf(AssertionError.class);
-		softly.assertThatCode(() -> assertThat(p).doesNotResolve(WAIT_TIME, TimeUnit.SECONDS))
+		softly.assertThatCode(() -> assertThat(p).doesNotResolveWithin(WAIT_TIME))
 			.isInstanceOf(AssertionError.class);
 
 		softly.assertAll();
@@ -156,7 +167,7 @@ public class PromiseAssertTest {
 			.hasFailedWithThrowableThat()
 			.isSameAs(failed);
 		softly.assertThat(p)
-			.doesResolve(WAIT_TIME, TimeUnit.SECONDS);
+			.resolvesWithin(WAIT_TIME);
 
 		softly.assertThatCode(() -> assertThat(p).isNotDone())
 			.isInstanceOf(AssertionError.class);
@@ -166,13 +177,15 @@ public class PromiseAssertTest {
 			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasValueThat())
 			.isInstanceOf(AssertionError.class);
+		softly.assertThatCode(() -> assertThat(p).hasValueThat(InstanceOfAssertFactories.STRING))
+			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasValue("failed"))
 			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasSameValue(new String("value")))
 			.isInstanceOf(AssertionError.class);
 		softly.assertThatCode(() -> assertThat(p).hasValueMatching("failed"::equals))
 			.isInstanceOf(AssertionError.class);
-		softly.assertThatCode(() -> assertThat(p).doesNotResolve(WAIT_TIME, TimeUnit.SECONDS))
+		softly.assertThatCode(() -> assertThat(p).doesNotResolveWithin(WAIT_TIME))
 			.isInstanceOf(AssertionError.class);
 
 		softly.assertAll();
