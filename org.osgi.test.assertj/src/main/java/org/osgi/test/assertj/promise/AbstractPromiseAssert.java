@@ -16,7 +16,6 @@
 
 package org.osgi.test.assertj.promise;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import java.lang.reflect.InvocationTargetException;
@@ -26,10 +25,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assert;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.ObjectAssert;
+import org.osgi.test.common.exceptions.Exceptions;
 import org.osgi.util.promise.Promise;
 
 /**
@@ -40,8 +42,19 @@ import org.osgi.util.promise.Promise;
 public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<SELF, RESULT>, RESULT>
 	extends AbstractAssert<SELF, Promise<RESULT>> {
 
-	public AbstractPromiseAssert(Promise<RESULT> actual, Class<?> selfType) {
+	@SuppressWarnings("rawtypes")
+	private static final InstanceOfAssertFactory<Promise, ObjectAssert<Promise>> PROMISE_OBJECT = InstanceOfAssertFactories
+		.type(Promise.class);
+
+	protected AbstractPromiseAssert(Promise<RESULT> actual, Class<?> selfType) {
 		super(actual, selfType);
+	}
+
+	@SuppressWarnings({
+		"unchecked", "rawtypes"
+	})
+	private ObjectAssert<Promise<RESULT>> asObjectAssert() {
+		return (ObjectAssert) asInstanceOf(PROMISE_OBJECT);
 	}
 
 	/**
@@ -152,9 +165,9 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return doesNotResolveWithin(timeout.toNanos(), TimeUnit.NANOSECONDS);
 	}
 
-	Throwable getFailure() {
+	Throwable getFailure(Promise<RESULT> promise) {
 		try {
-			return actual.getFailure();
+			return promise.getFailure();
 		} catch (InterruptedException e) {
 			fail("unexpected exception", e);
 			return null;
@@ -172,7 +185,8 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 */
 	public AbstractThrowableAssert<?, ? extends Throwable> hasFailedWithThrowableThat() {
 		isDone();
-		return assertThat(getFailure()).isNotNull();
+		return asObjectAssert().extracting(this::getFailure, InstanceOfAssertFactories.THROWABLE)
+			.isNotNull();
 	}
 
 	/**
@@ -197,9 +211,10 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	public SELF hasNotFailed() {
 		isNotNull();
 		if (actual.isDone()) {
-			Throwable fail = getFailure();
+			Throwable fail = getFailure(actual);
 			if (fail != null) {
-				failWithMessage("%nExpecting%n  <%s>%nto have not failed but failed with <%s>.", actual, fail);
+				failWithMessage("%nExpecting%n  <%s>%nto have not failed but failed with %s", actual,
+					Exceptions.toString(fail));
 			}
 		}
 		return myself;
@@ -218,11 +233,12 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return myself;
 	}
 
-	RESULT getValue() {
+	RESULT getValue(Promise<RESULT> promise) {
 		try {
-			return actual.getValue();
+			return promise.getValue();
 		} catch (InvocationTargetException e) {
-			failWithMessage("%nExpecting%n  <%s>%nto have not failed but failed with <%s>.", actual, e.getCause());
+			failWithMessage("%nExpecting%n  <%s>%nto have not failed but failed with %s", promise,
+				Exceptions.toString(e.getCause()));
 			return null;
 		} catch (InterruptedException e) {
 			fail("unexpected exception", e);
@@ -234,13 +250,14 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 * Verifies that the {@link Promise} is resolved successfully and returns an
 	 * assertion on the value of the {@link Promise}.
 	 *
-	 * @return A {@link ObjectAssert} holding the value of the {@link Promise}.
+	 * @return An {@link AbstractObjectAssert} holding the value of the
+	 *         {@link Promise}.
 	 * @throws AssertionError If the {@link Promise} is unresolved or is
 	 *             resolved with a failure.
 	 */
-	public ObjectAssert<RESULT> hasValueThat() {
+	public AbstractObjectAssert<?, RESULT> hasValueThat() {
 		isSuccessful();
-		return assertThat(getValue());
+		return asObjectAssert().extracting(this::getValue);
 	}
 
 	/**
