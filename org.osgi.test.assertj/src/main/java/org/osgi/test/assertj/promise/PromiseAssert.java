@@ -16,6 +16,10 @@
 
 package org.osgi.test.assertj.promise;
 
+import static java.util.Objects.requireNonNull;
+import static org.assertj.core.error.ShouldNotBeNull.shouldNotBeNull;
+
+import org.assertj.core.api.InstanceOfAssertFactory;
 import org.osgi.util.promise.Promise;
 
 /**
@@ -23,8 +27,7 @@ import org.osgi.util.promise.Promise;
  *
  * @param <RESULT> The type of the value contained in the {@link Promise}.
  */
-public class PromiseAssert<RESULT>
-		extends AbstractPromiseAssert<PromiseAssert<RESULT>,RESULT> {
+public class PromiseAssert<RESULT> extends AbstractPromiseAssert<PromiseAssert<RESULT>, RESULT> {
 
 	/**
 	 * Create an assertion for a {@link Promise}.
@@ -45,4 +48,30 @@ public class PromiseAssert<RESULT>
 	public static <T> PromiseAssert<T> assertThat(Promise<T> actual) {
 		return new PromiseAssert<>(actual);
 	}
+
+	/**
+	 * {@link InstanceOfAssertFactory} for a {@link Promise}.
+	 *
+	 * @param <T> the {@code Promise} result type.
+	 * @param resultType the result type instance.
+	 * @return the factory instance.
+	 * @see #PROMISE
+	 */
+	@SuppressWarnings({
+		"rawtypes", "unused", "unchecked"
+	})
+	public static <T> InstanceOfAssertFactory<Promise, PromiseAssert<T>> promise(Class<T> resultType) {
+		requireNonNull(resultType, shouldNotBeNull("resultType").create());
+		return new InstanceOfAssertFactory<>(Promise.class, PromiseAssert::<T> assertThat);
+	}
+
+	/**
+	 * {@link InstanceOfAssertFactory} for a {@link Promise}, assuming
+	 * {@code Object} as result type.
+	 *
+	 * @see #promise(Class)
+	 */
+	@SuppressWarnings("rawtypes")
+	public static final InstanceOfAssertFactory<Promise, PromiseAssert<Object>> PROMISE = promise(Object.class);
+
 }
