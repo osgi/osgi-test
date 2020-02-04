@@ -27,14 +27,20 @@ import org.osgi.util.promise.Promise;
  *
  * @param <RESULT> The type of the value contained in the {@link Promise}.
  */
-public class PromiseAssert<RESULT> extends AbstractPromiseAssert<PromiseAssert<RESULT>, RESULT> {
+public class PromiseAssert<RESULT>
+	extends AbstractPromiseAssert<PromiseAssert<RESULT>, Promise<? extends RESULT>, RESULT> {
+	/*
+	 * Note: The second generic argument to AbstractPromiseAssert must be
+	 * Promise for soft assertion proxying to work as it uses the second generic
+	 * argument to our super type to determine the ACTUAL type.
+	 */
 
 	/**
 	 * Create an assertion for a {@link Promise}.
 	 *
 	 * @param actual The {@link Promise}.
 	 */
-	public PromiseAssert(Promise<RESULT> actual) {
+	public PromiseAssert(Promise<? extends RESULT> actual) {
 		super(actual, PromiseAssert.class);
 	}
 
@@ -45,7 +51,7 @@ public class PromiseAssert<RESULT> extends AbstractPromiseAssert<PromiseAssert<R
 	 * @param <T> The type of the value contained in the {@link Promise}.
 	 * @return The created assertion.
 	 */
-	public static <T> PromiseAssert<T> assertThat(Promise<T> actual) {
+	public static <T> PromiseAssert<T> assertThat(Promise<? extends T> actual) {
 		return new PromiseAssert<>(actual);
 	}
 

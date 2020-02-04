@@ -1,11 +1,8 @@
 package org.osgi.test.assertj.promise;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.osgi.test.assertj.promise.PromiseAssert.assertThat;
 
 import java.time.Duration;
-import java.util.Optional;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Test;
@@ -14,7 +11,7 @@ import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.Promises;
 
 public class PromiseAssertTest {
-	public static final Duration	WAIT_TIME	= Duration.ofSeconds(2L);
+	public static final Duration WAIT_TIME = Duration.ofSeconds(2L);
 
 	@Test
 	public void testUnresolvedPromise() throws Exception {
@@ -237,19 +234,23 @@ public class PromiseAssertTest {
 	public void testInstanceFactories() throws Exception {
 		final String value = new String("value");
 		final Promise<String> p = Promises.resolved(value);
-		final Optional<Promise<String>> optional = Optional.of(p);
 
-		PromiseAssert<String> stringPromiseAssert = assertThat(optional).get(PromiseAssert.promise(String.class));
+		PromiseSoftAssertions softly = new PromiseSoftAssertions();
+
+		PromiseAssert<String> stringPromiseAssert = softly.assertThatObject(p)
+			.asInstanceOf(PromiseAssert.promise(String.class));
 		stringPromiseAssert.isDone()
 			.hasSameValue(value);
 
-		PromiseAssert<Object> objectPromiseAssert = assertThat(optional).get(PromiseAssert.PROMISE);
-		stringPromiseAssert.isDone()
+		PromiseAssert<Object> objectPromiseAssert = softly.assertThatObject(p)
+			.asInstanceOf(PromiseAssert.PROMISE);
+		objectPromiseAssert.isDone()
 			.hasSameValue(value);
 
-		assertThatNullPointerException().isThrownBy(() -> {
-			PromiseAssert.promise(null);
-		});
+		softly.assertThatCode(() -> PromiseAssert.promise(null))
+			.isInstanceOf(NullPointerException.class);
+
+		softly.assertAll();
 	}
 
 }
