@@ -48,36 +48,38 @@ public class PromiseAssert<RESULT>
 	 * Create an assertion for a {@link Promise}.
 	 *
 	 * @param actual The {@link Promise}.
-	 * @param <T> The type of the value contained in the {@link Promise}.
+	 * @param <RESULT> The type of the value contained in the {@link Promise}.
 	 * @return The created assertion.
 	 */
-	public static <T> PromiseAssert<T> assertThat(Promise<? extends T> actual) {
+	public static <RESULT> PromiseAssert<RESULT> assertThat(Promise<? extends RESULT> actual) {
 		return new PromiseAssert<>(actual);
 	}
 
 	/**
-	 * {@link InstanceOfAssertFactory} for a {@link Promise}.
+	 * {@link InstanceOfAssertFactory} for a {@link PromiseAssert}.
 	 *
-	 * @param <T> the {@code Promise} result type.
-	 * @param resultType the result type instance.
-	 * @return the factory instance.
+	 * @param <RESULT> The {@code Promise} result type.
+	 * @param resultType The result type class.
+	 * @return The factory instance.
 	 * @see #PROMISE
 	 */
-	@SuppressWarnings({
-		"rawtypes", "unused", "unchecked"
-	})
-	public static <T> InstanceOfAssertFactory<Promise, PromiseAssert<T>> promise(Class<T> resultType) {
+	public static <ACTUAL extends Promise<? extends RESULT>, RESULT> InstanceOfAssertFactory<ACTUAL, PromiseAssert<RESULT>> promise(
+		Class<RESULT> resultType) {
 		requireNonNull(resultType, shouldNotBeNull("resultType").create());
-		return new InstanceOfAssertFactory<>(Promise.class, PromiseAssert::<T> assertThat);
+		@SuppressWarnings({
+			"rawtypes", "unchecked"
+		})
+		Class<ACTUAL> type = (Class) Promise.class;
+		return new InstanceOfAssertFactory<>(type, PromiseAssert::<RESULT> assertThat);
 	}
 
 	/**
-	 * {@link InstanceOfAssertFactory} for a {@link Promise}, assuming
-	 * {@code Object} as result type.
+	 * {@link InstanceOfAssertFactory} for a {@link PromiseAssert} using
+	 * {@code Object} as the result type.
 	 *
 	 * @see #promise(Class)
 	 */
-	@SuppressWarnings("rawtypes")
-	public static final InstanceOfAssertFactory<Promise, PromiseAssert<Object>> PROMISE = promise(Object.class);
+	public static final InstanceOfAssertFactory<Promise<?>, PromiseAssert<Object>> PROMISE = promise(
+		Object.class);
 
 }

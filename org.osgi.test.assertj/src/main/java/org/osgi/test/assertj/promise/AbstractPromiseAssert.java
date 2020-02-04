@@ -50,11 +50,18 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		super(actual, selfType);
 	}
 
-	@SuppressWarnings({
-		"unchecked", "rawtypes"
-	})
-	private ObjectAssert<ACTUAL> asObjectAssert() {
-		return (ObjectAssert) asInstanceOf(PROMISE_OBJECT);
+	ObjectAssert<ACTUAL> asObjectAssert() {
+		@SuppressWarnings({
+			"unchecked", "rawtypes"
+		})
+		ObjectAssert<ACTUAL> objectAssert = (ObjectAssert) asInstanceOf(PROMISE_OBJECT);
+		return objectAssert;
+	}
+
+	void assertDone() {
+		if (!actual.isDone()) {
+			failWithMessage("%nExpecting%n  <%s>%nto be done.", actual);
+		}
 	}
 
 	/**
@@ -65,11 +72,14 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 * @throws AssertionError If the {@link Promise} is unresolved.
 	 */
 	public SELF isDone() {
-		isNotNull();
-		if (!actual.isDone()) {
-			failWithMessage("%nExpecting%n  <%s>%nto be done.", actual);
-		}
+		isNotNull().assertDone();
 		return myself;
+	}
+
+	void assertNotDone() {
+		if (actual.isDone()) {
+			failWithMessage("%nExpecting%n  <%s>%nto not be done.", actual);
+		}
 	}
 
 	/**
@@ -80,10 +90,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 * @throws AssertionError If the {@link Promise} is resolved.
 	 */
 	public SELF isNotDone() {
-		isNotNull();
-		if (actual.isDone()) {
-			failWithMessage("%nExpecting%n  <%s>%nto not be done.", actual);
-		}
+		isNotNull().assertNotDone();
 		return myself;
 	}
 
@@ -109,7 +116,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 			} catch (InterruptedException e) {
 				fail("unexpected exception", e);
 			}
-			isDone();
+			assertDone();
 		}
 		return myself;
 	}
@@ -143,12 +150,12 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		actual.onResolve(latch::countDown);
 		try {
 			if (latch.await(timeout, unit)) {
-				failWithMessage("%nExpecting%n  <%s>%nto not resolve.", actual);
+				failWithMessage("%nExpecting%n  <%s>%nto not have resolved.", actual);
 			}
 		} catch (InterruptedException e) {
 			fail("unexpected exception", e);
 		}
-		isNotDone();
+		assertNotDone();
 		return myself;
 	}
 
@@ -174,19 +181,11 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		}
 	}
 
-	/**
-	 * Verifies that the {@link Promise} is resolved with a failure and returns
-	 * an assertion on the failure.
-	 *
-	 * @return A {@link AbstractThrowableAssert} holding the failure of the
-	 *         {@link Promise}.
-	 * @throws AssertionError If the {@link Promise} is unresolved or is
-	 *             resolved successfully.
-	 */
-	public AbstractThrowableAssert<?, ? extends Throwable> hasFailedWithThrowableThat() {
-		isDone();
-		return asObjectAssert().extracting(this::getFailure, InstanceOfAssertFactories.THROWABLE)
-			.isNotNull();
+	void assertFailed() {
+		Throwable fail = getFailure(actual);
+		if (fail == null) {
+			failWithMessage("%nExpecting%n  <%s>%nto have failed.", actual);
+		}
 	}
 
 	/**
@@ -197,8 +196,32 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 *             resolved successfully.
 	 */
 	public SELF hasFailed() {
-		hasFailedWithThrowableThat();
+		isDone().assertFailed();
 		return myself;
+	}
+
+	/**
+	 * Verifies that the {@link Promise} is resolved with a failure and returns
+	 * an assertion on the failure.
+	 *
+	 * @return A {@link AbstractThrowableAssert} holding the failure of the
+	 *         {@link Promise}.
+	 * @throws AssertionError If the {@link Promise} is unresolved or is
+	 *             resolved successfully.
+	 */
+	public AbstractThrowableAssert<?, ? extends Throwable> hasFailedWithThrowableThat() {
+		return hasFailed().asObjectAssert()
+			.extracting(this::getFailure, InstanceOfAssertFactories.THROWABLE);
+	}
+
+	void assertNotFailed() {
+		if (actual.isDone()) {
+			Throwable fail = getFailure(actual);
+			if (fail != null) {
+				failWithMessage("%nExpecting%n  <%s>%nto have not failed but failed with:%n%s", actual,
+					Exceptions.toString(fail));
+			}
+		}
 	}
 
 	/**
@@ -209,14 +232,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 * @throws AssertionError If the {@link Promise} is resolved with a failure.
 	 */
 	public SELF hasNotFailed() {
-		isNotNull();
-		if (actual.isDone()) {
-			Throwable fail = getFailure(actual);
-			if (fail != null) {
-				failWithMessage("%nExpecting%n  <%s>%nto have not failed but failed with %s", actual,
-					Exceptions.toString(fail));
-			}
-		}
+		isNotNull().assertNotFailed();
 		return myself;
 	}
 
@@ -228,8 +244,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 *             resolved with a failure.
 	 */
 	public SELF isSuccessful() {
-		isDone();
-		hasNotFailed();
+		isDone().assertNotFailed();
 		return myself;
 	}
 
@@ -256,8 +271,8 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 *             resolved with a failure.
 	 */
 	public AbstractObjectAssert<?, RESULT> hasValueThat() {
-		isSuccessful();
-		return asObjectAssert().extracting(this::getValue);
+		return isSuccessful().asObjectAssert()
+			.extracting(this::getValue);
 	}
 
 	/**
