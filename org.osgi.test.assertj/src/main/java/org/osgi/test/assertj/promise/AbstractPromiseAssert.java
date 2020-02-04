@@ -39,21 +39,21 @@ import org.osgi.util.promise.Promise;
  *
  * @param <RESULT> The type of the value contained in the {@link Promise}.
  */
-public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<SELF, RESULT>, RESULT>
-	extends AbstractAssert<SELF, Promise<RESULT>> {
+public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<SELF, ACTUAL, RESULT>, ACTUAL extends Promise<? extends RESULT>, RESULT>
+	extends AbstractAssert<SELF, ACTUAL> {
 
 	@SuppressWarnings("rawtypes")
 	private static final InstanceOfAssertFactory<Promise, ObjectAssert<Promise>> PROMISE_OBJECT = InstanceOfAssertFactories
 		.type(Promise.class);
 
-	protected AbstractPromiseAssert(Promise<RESULT> actual, Class<?> selfType) {
+	protected AbstractPromiseAssert(ACTUAL actual, Class<?> selfType) {
 		super(actual, selfType);
 	}
 
 	@SuppressWarnings({
 		"unchecked", "rawtypes"
 	})
-	private ObjectAssert<Promise<RESULT>> asObjectAssert() {
+	private ObjectAssert<ACTUAL> asObjectAssert() {
 		return (ObjectAssert) asInstanceOf(PROMISE_OBJECT);
 	}
 
@@ -165,7 +165,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return doesNotResolveWithin(timeout.toNanos(), TimeUnit.NANOSECONDS);
 	}
 
-	Throwable getFailure(Promise<RESULT> promise) {
+	Throwable getFailure(ACTUAL promise) {
 		try {
 			return promise.getFailure();
 		} catch (InterruptedException e) {
@@ -233,7 +233,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		return myself;
 	}
 
-	RESULT getValue(Promise<RESULT> promise) {
+	RESULT getValue(ACTUAL promise) {
 		try {
 			return promise.getValue();
 		} catch (InvocationTargetException e) {

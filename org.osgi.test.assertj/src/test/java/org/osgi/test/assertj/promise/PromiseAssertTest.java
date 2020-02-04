@@ -1,47 +1,22 @@
 package org.osgi.test.assertj.promise;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.osgi.test.assertj.promise.PromiseAssert.assertThat;
 
 import java.time.Duration;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
-import org.osgi.util.promise.PromiseFactory;
+import org.osgi.util.promise.Promises;
 
 public class PromiseAssertTest {
-	public static final Duration	WAIT_TIME	= Duration.ofSeconds(2L);
-
-	ExecutorService					callbackExecutor;
-	ScheduledExecutorService		scheduledExecutor;
-	PromiseFactory					factory;
-
-	@BeforeEach
-	public void setUp() {
-		callbackExecutor = Executors.newFixedThreadPool(2);
-		scheduledExecutor = Executors.newScheduledThreadPool(2);
-		factory = new PromiseFactory(callbackExecutor, scheduledExecutor);
-	}
-
-	@AfterEach
-	public void tearDown() {
-		callbackExecutor.shutdown();
-		scheduledExecutor.shutdown();
-	}
+	public static final Duration WAIT_TIME = Duration.ofSeconds(2L);
 
 	@Test
 	public void testUnresolvedPromise() throws Exception {
 		final String value = new String("value");
-		final Deferred<String> d = factory.deferred();
+		final Deferred<String> d = new Deferred<>();
 		final Promise<String> p = d.getPromise();
 
 		PromiseSoftAssertions softly = new PromiseSoftAssertions();
@@ -115,7 +90,7 @@ public class PromiseAssertTest {
 	@Test
 	public void testResolvedPromise() throws Exception {
 		final String value = new String("value");
-		final Promise<String> p = factory.resolved(value);
+		final Promise<String> p = Promises.resolved(value);
 
 		PromiseSoftAssertions softly = new PromiseSoftAssertions();
 		softly.assertThat(p)
@@ -202,7 +177,7 @@ public class PromiseAssertTest {
 	public void testFailedPromise() throws Exception {
 		final Throwable cause = new NullPointerException("cause");
 		final Throwable failed = new TestException("failed").initCause(cause);
-		final Promise<String> p = factory.failed(failed);
+		final Promise<String> p = Promises.failed(failed);
 
 		PromiseSoftAssertions softly = new PromiseSoftAssertions();
 		softly.assertThat(p)
@@ -258,20 +233,24 @@ public class PromiseAssertTest {
 	@Test
 	public void testInstanceFactories() throws Exception {
 		final String value = new String("value");
-		final Promise<String> p = factory.resolved(value);
-		final Optional<Promise<String>> optional = Optional.of(p);
+		final Promise<String> p = Promises.resolved(value);
 
-		PromiseAssert<String> stringPromiseAssert = assertThat(optional).get(PromiseAssert.promise(String.class));
+		PromiseSoftAssertions softly = new PromiseSoftAssertions();
+
+		PromiseAssert<String> stringPromiseAssert = softly.assertThatObject(p)
+			.asInstanceOf(PromiseAssert.promise(String.class));
 		stringPromiseAssert.isDone()
 			.hasSameValue(value);
 
-		PromiseAssert<Object> objectPromiseAssert = assertThat(optional).get(PromiseAssert.PROMISE);
-		stringPromiseAssert.isDone()
+		PromiseAssert<Object> objectPromiseAssert = softly.assertThatObject(p)
+			.asInstanceOf(PromiseAssert.PROMISE);
+		objectPromiseAssert.isDone()
 			.hasSameValue(value);
 
-		assertThatNullPointerException().isThrownBy(() -> {
-			PromiseAssert.promise(null);
-		});
+		softly.assertThatCode(() -> PromiseAssert.promise(null))
+			.isInstanceOf(NullPointerException.class);
+
+		softly.assertAll();
 	}
 
 }

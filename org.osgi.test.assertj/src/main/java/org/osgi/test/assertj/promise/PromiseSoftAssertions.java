@@ -30,7 +30,7 @@ public class PromiseSoftAssertions extends SoftAssertions {
 	 * @param <T> The type of the value contained in the {@link Promise}.
 	 * @return The created soft assertion.
 	 */
-	public <T> PromiseAssert<T> assertThat(Promise<T> actual) {
+	public <T> PromiseAssert<T> assertThat(Promise<? extends T> actual) {
 		@SuppressWarnings("unchecked")
 		PromiseAssert<T> softly = proxy(PromiseAssert.class, Promise.class, actual);
 		return softly;
