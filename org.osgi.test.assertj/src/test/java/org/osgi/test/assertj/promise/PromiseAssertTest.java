@@ -241,6 +241,21 @@ public class PromiseAssertTest {
 			.asInstanceOf(PromiseAssert.promise(String.class));
 		stringPromiseAssert.isDone()
 			.hasSameValue(value);
+		stringPromiseAssert.hasValueThat(InstanceOfAssertFactories.STRING)
+			.isEqualTo("%sl%s", "va", "ue");
+		stringPromiseAssert.hasValueThat(InstanceOfAssertFactories.CHAR_SEQUENCE)
+			.contains("alu")
+			.startsWith("va")
+			.endsWith("ue");
+
+		PromiseAssert<CharSequence> charseqPromiseAssert = softly.assertThatObject(p)
+			.asInstanceOf(PromiseAssert.promise(CharSequence.class));
+		charseqPromiseAssert.isDone()
+			.hasSameValue(value);
+		charseqPromiseAssert.hasValueThat(InstanceOfAssertFactories.CHAR_SEQUENCE)
+			.contains("alu")
+			.startsWith("va")
+			.endsWith("ue");
 
 		PromiseAssert<Object> objectPromiseAssert = softly.assertThatObject(p)
 			.asInstanceOf(PromiseAssert.PROMISE);
