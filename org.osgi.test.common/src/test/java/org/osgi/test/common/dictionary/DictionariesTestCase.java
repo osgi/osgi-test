@@ -17,6 +17,7 @@
 package org.osgi.test.common.dictionary;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -253,7 +255,20 @@ public class DictionariesTestCase {
 		assertThatNullPointerException().isThrownBy(() -> {
 			entry.setValue(null);
 		});
+	}
 
+	@Test
+	public void no_null_key_or_value_map() {
+		Map<String, String> noNullKeyValueMap = new ConcurrentHashMap<>();
+		assertThatNullPointerException().isThrownBy(() -> {
+			noNullKeyValueMap.containsKey(null);
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			noNullKeyValueMap.containsValue(null);
+		});
+		assertThatCode(() -> {
+			Dictionaries.asDictionary(noNullKeyValueMap);
+		}).doesNotThrowAnyException();
 	}
 
 	@Test
