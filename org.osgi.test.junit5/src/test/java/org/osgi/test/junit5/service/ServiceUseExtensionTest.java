@@ -206,6 +206,8 @@ public class ServiceUseExtensionTest {
 				.hasSize(1);
 			softly.assertThat(it.getExtension()
 				.getTrackingCount())
+				.as("Services %s", it.getExtension()
+					.getServiceReferences())
 				.isEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
@@ -264,6 +266,8 @@ public class ServiceUseExtensionTest {
 				.isNotEmpty();
 			softly.assertThat(it.getExtension()
 				.getTrackingCount())
+				.as("Services %s", it.getExtension()
+					.getServiceReferences())
 				.isEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
