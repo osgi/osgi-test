@@ -132,28 +132,22 @@
 				<executions>
 					<!-- Integration Test Configuration -->
 					<execution>
-						<id>bnd-process-test</id>
+						<id>bnd-process-tests</id>
 						<phase>process-test-classes</phase>
 						<goals>
-							<goal>bnd-process</goal>
+							<goal>bnd-process-tests</goal>
 						</goals>
 						<configuration>
+							<artifactFragment>true</artifactFragment>
 							<bnd><![CDATA[
-                                        p = org.osgi.test.junit5
-                                        Bundle-SymbolicName: ${project.artifactId}-test
-                                        Bundle-Name: ${project.groupId}:${project.artifactId}-test
-                                        Export-Package: !${p}.tb*,${p}.*
-                                        Fragment-Host: ${project.artifactId}
-                                        Test-Cases: ${classes;CONCRETE;ANNOTATED;org.junit.jupiter.api.Test}
-                                        -fixupmessages: "Host ${project.artifactId}=...";is:=ignore
-                                        -make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
-                                        -includeresource:\
-                                            tb1.jar,\
-                                            foo/tbfoo.jar=tb1.jar
-                                    ]]></bnd>
-							<classesDir>${project.build.testOutputDirectory}</classesDir>
-							<outputDir>${project.build.testOutputDirectory}</outputDir>
-							<manifestPath>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestPath>
+								p = org.osgi.test.junit5
+								Export-Package: !${p}.tb*,${p}.*;-split-package:=first
+								-fixupmessages: "Export-Package duplicate package name..."
+								-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
+								-includeresource:\
+									tb1.jar,\
+									foo/tbfoo.jar=tb1.jar
+							]]></bnd>
 							<includeClassesDir>false</includeClassesDir>
 						</configuration>
 					</execution>
@@ -183,7 +177,7 @@
 								<bndrun>test.bndrun</bndrun>
 							</bndruns>
 							<bundles>
-								<bundle>target/${project.build.finalName}-test.jar</bundle>
+								<bundle>target/${project.build.finalName}-tests.jar</bundle>
 							</bundles>
 							<failOnChanges>false</failOnChanges>
 							<includeDependencyManagement>true</includeDependencyManagement>
@@ -213,7 +207,7 @@
 								<bndrun>test.bndrun</bndrun>
 							</bndruns>
 							<bundles>
-								<bundle>target/${project.build.finalName}-test.jar</bundle>
+								<bundle>target/${project.build.finalName}-tests.jar</bundle>
 							</bundles>
 							<failOnChanges>false</failOnChanges>
 							<includeDependencyManagement>true</includeDependencyManagement>
@@ -234,11 +228,9 @@
 						<id>test-jar</id>
 						<phase>package</phase>
 						<goals>
-							<goal>jar</goal>
+							<goal>test-jar</goal>
 						</goals>
 						<configuration>
-							<classifier>test</classifier>
-							<classesDirectory>${project.build.testOutputDirectory}</classesDirectory>
 							<archive>
 								<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 							</archive>
