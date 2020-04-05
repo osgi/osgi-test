@@ -36,24 +36,6 @@
 		<developerConnection>scm:git:git@github.com:osgi/osgi-test.git</developerConnection>
 	</scm>
 
-	<properties>
-		<junit-jupiter.version>5.3.1</junit-jupiter.version>
-		<junit-platform.version>1.3.1</junit-platform.version>
-		<junit-jupiter-engine.bsn>org.junit.jupiter.engine</junit-jupiter-engine.bsn>
-		<junit-platform-launcher.bsn>org.junit.platform.launcher</junit-platform-launcher.bsn>
-	</properties>
-	<profiles>
-		<profile>
-			<id>bnd-next</id>
-			<properties>
-				<junit-jupiter.version>5.6.0</junit-jupiter.version>
-				<junit-platform.version>1.6.0</junit-platform.version>
-				<junit-jupiter-engine.bsn>junit-jupiter-engine</junit-jupiter-engine.bsn>
-				<junit-platform-launcher.bsn>junit-platform-launcher</junit-platform-launcher.bsn>
-			</properties>
-		</profile>
-	</profiles>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
