@@ -13,7 +13,6 @@
 # limitations under the License.
 
 -runfw: org.eclipse.osgi
--standalone: true
 -resolve.effective: active
 -runproperties: \
 	logback.configurationFile=file:${.}/logback.xml,\
