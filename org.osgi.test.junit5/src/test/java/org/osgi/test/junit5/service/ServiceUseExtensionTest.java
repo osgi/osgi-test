@@ -208,7 +208,7 @@ public class ServiceUseExtensionTest {
 				.getTrackingCount())
 				.as("Services %s", it.getExtension()
 					.getServiceReferences())
-				.isEqualTo(1);
+				.isGreaterThan(0);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
 				.isEqualTo(1);
