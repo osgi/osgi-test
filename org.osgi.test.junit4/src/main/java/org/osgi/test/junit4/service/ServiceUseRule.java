@@ -132,7 +132,7 @@ public class ServiceUseRule<T> extends BaseServiceUse<T>
 	protected ServiceUseRule(Class<T> serviceType, BundleContextRule bundleContextRule, Filter filter, int cardinality,
 		long timeout) {
 		super(serviceType);
-		this.bundleContextRule = bundleContextRule;
+		this.bundleContextRule = requireNonNull(bundleContextRule);
 		this.trackServices = new TrackServices<>(filter, cardinality, timeout);
 	}
 
@@ -165,6 +165,14 @@ public class ServiceUseRule<T> extends BaseServiceUse<T>
 	@Override
 	protected TrackServices<T> getTrackServices() {
 		return trackServices;
+	}
+
+	@Override
+	public String toString() {
+		return String.format(
+			"ServiceUseRule [Class=\"%s\", filter=\"%s\", cardinality=%s, timeout=%s]",
+			getServiceType(),
+			getFilter(), getCardinality(), getTimeout());
 	}
 
 }

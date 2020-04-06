@@ -51,8 +51,8 @@ public class ServiceUseExtensionTest {
 	@ExecutorParameter
 	ScheduledExecutorService	executor;
 
-	ExtensionContext	extensionContext;
-	Store				store;
+	ExtensionContext			extensionContext;
+	Store						store;
 
 	String						testMethodName;
 
@@ -87,12 +87,15 @@ public class ServiceUseExtensionTest {
 
 			softly.assertThat(it.getExtension()
 				.isEmpty())
+				.as("isEmpty %s", it.getExtension())
 				.isTrue();
 			softly.assertThat(it.getExtension()
 				.getTimeout())
+				.as("getTimeout %s", it.getExtension())
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
+				.as("getCardinality %s", it.getExtension())
 				.isEqualTo(0);
 
 			softly.assertAll();
@@ -110,8 +113,7 @@ public class ServiceUseExtensionTest {
 					it.init();
 				}
 			})
-			.withMessageContaining(
-				" services (objectClass=org.osgi.test.junit5.types.Foo) didn't arrive within 200ms");
+			.withMessageContaining(" services (objectClass=org.osgi.test.junit5.types.Foo) didn't arrive within 200ms");
 	}
 
 	@Test
@@ -125,8 +127,7 @@ public class ServiceUseExtensionTest {
 					it.init();
 				}
 			})
-			.withMessageContaining(
-				" services (objectClass=org.osgi.test.junit5.types.Foo) didn't arrive within 50ms");
+			.withMessageContaining(" services (objectClass=org.osgi.test.junit5.types.Foo) didn't arrive within 50ms");
 	}
 
 	@Test
@@ -138,10 +139,9 @@ public class ServiceUseExtensionTest {
 
 			final Foo afoo = new Foo() {};
 
-			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
-				() -> it.getBundleContext()
-					.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)),
-				0, TimeUnit.MILLISECONDS);
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> it.getBundleContext()
+				.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)), 0,
+				TimeUnit.MILLISECONDS);
 
 			it.init();
 			// Make sure the scheduled event is processed
@@ -151,15 +151,19 @@ public class ServiceUseExtensionTest {
 
 			softly.assertThat(it.getExtension()
 				.isEmpty())
+				.as("isEmpty %s", it.getExtension())
 				.isFalse();
 			softly.assertThat(it.getExtension()
 				.size())
+				.as("size %s", it.getExtension())
 				.isEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.getTimeout())
+				.as("getTimeout %s", it.getExtension())
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
+				.as("getCardinality %s", it.getExtension())
 				.isGreaterThan(0);
 
 			softly.assertAll();
@@ -175,10 +179,9 @@ public class ServiceUseExtensionTest {
 
 			final Foo afoo = new Foo() {};
 
-			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
-				() -> it.getBundleContext()
-					.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)),
-				0, TimeUnit.MILLISECONDS);
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> it.getBundleContext()
+				.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)), 0,
+				TimeUnit.MILLISECONDS);
 
 			it.init();
 			// Make sure the scheduled event is processed
@@ -188,38 +191,47 @@ public class ServiceUseExtensionTest {
 
 			softly.assertThat(it.getExtension()
 				.getService())
+				.as("getService %s", it.getExtension())
 				.isEqualTo(afoo);
 			softly.assertThat(it.getExtension()
 				.getServiceReference())
+				.as("getServiceReference %s", it.getExtension())
 				.isNotNull();
 			softly.assertThat(it.getExtension()
 				.getServiceReferences())
+				.as("getServiceReferences %s", it.getExtension())
 				.hasSize(1);
 			softly.assertThat(it.getExtension()
 				.getServices())
+				.as("getServices %s", it.getExtension())
 				.containsExactly(afoo);
 			softly.assertThat(it.getExtension()
 				.getTimeout())
+				.as("getTimeout %s", it.getExtension())
 				.isEqualTo(1000);
 			softly.assertThat(it.getExtension()
 				.getTracked())
+				.as("getTracked %s", it.getExtension())
 				.hasSize(1);
 			softly.assertThat(it.getExtension()
 				.getTrackingCount())
-				.as("Services %s", it.getExtension()
-					.getServiceReferences())
-				.isGreaterThan(0);
+				.as("getTrackingCount %s", it.getExtension())
+				.isGreaterThanOrEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
+				.as("getCardinality %s", it.getExtension())
 				.isEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.size())
+				.as("size %s", it.getExtension())
 				.isEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.isEmpty())
+				.as("isEmpty %s", it.getExtension())
 				.isFalse();
 			softly.assertThat(it.getExtension()
 				.waitForService(20))
+				.as("waitForService %s", it.getExtension())
 				.isEqualTo(afoo);
 
 			softly.assertAll();
@@ -247,39 +259,47 @@ public class ServiceUseExtensionTest {
 
 			softly.assertThat(it.getExtension()
 				.getService())
+				.as("getService %s", it.getExtension())
 				.isNotNull();
 			softly.assertThat(it.getExtension()
 				.getServiceReference())
+				.as("getServiceReference %s", it.getExtension())
 				.isNotNull();
 			softly.assertThat(it.getExtension()
 				.getServiceReferences())
+				.as("getServiceReferences %s", it.getExtension())
 				.isNotNull();
 			softly.assertThat(it.getExtension()
 				.getServices())
-				.isNotEmpty()
+				.as("getServices %s", it.getExtension())
 				.contains(afoo);
 			softly.assertThat(it.getExtension()
 				.getTimeout())
+				.as("getTimeout %s", it.getExtension())
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getTracked())
+				.as("waitForService %s", it.getExtension())
 				.isNotEmpty();
 			softly.assertThat(it.getExtension()
 				.getTrackingCount())
-				.as("Services %s", it.getExtension()
-					.getServiceReferences())
-				.isEqualTo(1);
+				.as("getTrackingCount %s", it.getExtension())
+				.isGreaterThanOrEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
+				.as("getCardinality %s", it.getExtension())
 				.isEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.size())
+				.as("size %s", it.getExtension())
 				.isEqualTo(1);
 			softly.assertThat(it.getExtension()
 				.isEmpty())
+				.as("isEmpty %s", it.getExtension())
 				.isFalse();
 			softly.assertThat(it.getExtension()
 				.waitForService(20))
+				.as("waitForService %s", it.getExtension())
 				.isNotNull();
 
 			softly.assertAll();
@@ -310,47 +330,47 @@ public class ServiceUseExtensionTest {
 
 			softly.assertThat(it.getExtension()
 				.getService())
-				.as("getService")
+				.as("getService %s", it.getExtension())
 				.isIn(s1, s2);
 			softly.assertThat(it.getExtension()
 				.getServiceReference())
-				.as("getServiceReference")
+				.as("getServiceReference %s", it.getExtension())
 				.isNotNull();
 			softly.assertThat(it.getExtension()
 				.getServiceReferences())
-				.as("getServiceReferences")
+				.as("getServiceReferences %s", it.getExtension())
 				.isNotNull();
 			softly.assertThat(it.getExtension()
 				.getServices())
-				.as("getServices")
+				.as("getServices %s", it.getExtension())
 				.containsExactlyInAnyOrder(s1, s2);
 			softly.assertThat(it.getExtension()
 				.getTimeout())
-				.as("getTimeout")
+				.as("getTimeout %s", it.getExtension())
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getTracked())
-				.as("getTracked")
+				.as("getTracked %s", it.getExtension())
 				.isNotEmpty();
 			softly.assertThat(it.getExtension()
 				.getTrackingCount())
-				.as("getTrackingCount")
-				.isEqualTo(2);
+				.as("getTrackingCount %s", it.getExtension())
+				.isGreaterThanOrEqualTo(2);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
-				.as("getCardinality")
+				.as("getCardinality %s", it.getExtension())
 				.isEqualTo(2);
 			softly.assertThat(it.getExtension()
 				.size())
-				.as("size")
+				.as("size %s", it.getExtension())
 				.isEqualTo(2);
 			softly.assertThat(it.getExtension()
 				.isEmpty())
-				.as("isEmpty")
+				.as("isEmpty %s", it.getExtension())
 				.isFalse();
 			softly.assertThat(it.getExtension()
 				.waitForService(20))
-				.as("waitForService(20)")
+				.as("waitForService %s", it.getExtension())
 				.isNotNull();
 
 			softly.assertAll();
@@ -370,8 +390,8 @@ public class ServiceUseExtensionTest {
 
 					ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
 						() -> it.getBundleContext()
-						.registerService(Foo.class, afoo,
-							Dictionaries.dictionaryOf("foo", "bar", "case", testMethodName)),
+							.registerService(Foo.class, afoo,
+								Dictionaries.dictionaryOf("foo", "bar", "case", testMethodName)),
 						0, TimeUnit.MILLISECONDS);
 
 					it.init();
