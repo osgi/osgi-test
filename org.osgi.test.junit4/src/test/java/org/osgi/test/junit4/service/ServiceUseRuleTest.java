@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ import org.osgi.test.junit4.types.Foo;
 public class ServiceUseRuleTest {
 
 	@Rule
-	public ExecutorRule executor = new ExecutorRule();
+	public ExecutorRule	executor	= new ExecutorRule();
 	@Rule
 	public TestName		name		= new TestName();
 
@@ -58,10 +58,13 @@ public class ServiceUseRuleTest {
 			SoftAssertions softly = new SoftAssertions();
 
 			softly.assertThat(foos.isEmpty())
+				.as("isEmpty %s", foos)
 				.isTrue();
 			softly.assertThat(foos.getTimeout())
+				.as("getTimeout %s", foos)
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(foos.getCardinality())
+				.as("getCardinality %s", foos)
 				.isEqualTo(0);
 
 			softly.assertAll();
@@ -85,8 +88,7 @@ public class ServiceUseRuleTest {
 					foos.init(getClass());
 				}
 			})
-			.withMessageContaining(
-				" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 200ms");
+			.withMessageContaining(" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 200ms");
 	}
 
 	@Test
@@ -107,8 +109,7 @@ public class ServiceUseRuleTest {
 					foos.init(getClass());
 				}
 			})
-			.withMessageContaining(
-				" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 50ms");
+			.withMessageContaining(" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 50ms");
 	}
 
 	@Test
@@ -137,13 +138,17 @@ public class ServiceUseRuleTest {
 			SoftAssertions softly = new SoftAssertions();
 
 			softly.assertThat(foos.isEmpty())
+				.as("isEmpty %s", foos)
 				.isFalse();
 			softly.assertThat(foos.size())
+				.as("size %s", foos)
 				.isEqualTo(1);
 			softly.assertThat(foos.getTimeout())
+				.as("getTimeout %s", foos)
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(foos.getCardinality())
-				.isGreaterThan(0);
+				.as("getCardinality %s", foos)
+				.isEqualTo(1);
 
 			softly.assertAll();
 		}
@@ -152,8 +157,7 @@ public class ServiceUseRuleTest {
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
-			ServiceUseRule<Foo> foos = new ServiceUseRule.Builder<>(Foo.class, bcRule)
-				.timeout(1000)
+			ServiceUseRule<Foo> foos = new ServiceUseRule.Builder<>(Foo.class, bcRule).timeout(1000)
 				.build()) {
 
 			bcRule.init(getClass());
@@ -176,26 +180,37 @@ public class ServiceUseRuleTest {
 			SoftAssertions softly = new SoftAssertions();
 
 			softly.assertThat(foos.getService())
+				.as("getService %s", foos)
 				.isEqualTo(afoo);
 			softly.assertThat(foos.getServiceReference())
+				.as("getServiceReference %s", foos)
 				.isNotNull();
 			softly.assertThat(foos.getServiceReferences())
+				.as("getServiceReferences %s", foos)
 				.hasSize(1);
 			softly.assertThat(foos.getServices())
+				.as("getServices %s", foos)
 				.containsExactly(afoo);
 			softly.assertThat(foos.getTimeout())
+				.as("getTimeout %s", foos)
 				.isEqualTo(1000);
 			softly.assertThat(foos.getTracked())
+				.as("getTracked %s", foos)
 				.hasSize(1);
 			softly.assertThat(foos.getTrackingCount())
-				.isGreaterThan(0);
+				.as("getTrackingCount %s", foos)
+				.isGreaterThanOrEqualTo(1);
 			softly.assertThat(foos.getCardinality())
+				.as("getCardinality %s", foos)
 				.isEqualTo(1);
 			softly.assertThat(foos.size())
+				.as("size %s", foos)
 				.isEqualTo(1);
 			softly.assertThat(foos.isEmpty())
+				.as("isEmpty %s", foos)
 				.isFalse();
 			softly.assertThat(foos.waitForService(20))
+				.as("waitForService %s", foos)
 				.isEqualTo(afoo);
 
 			softly.assertAll();
@@ -205,8 +220,7 @@ public class ServiceUseRuleTest {
 	@Test
 	public void matchByFilter() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
-			ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule)
-				.filter("(foo=bar)")
+			ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule).filter("(foo=bar)")
 				.build()) {
 
 			bcRule.init(getClass());
@@ -230,27 +244,37 @@ public class ServiceUseRuleTest {
 			SoftAssertions softly = new SoftAssertions();
 
 			softly.assertThat(fooRule.getService())
+				.as("getService %s", fooRule)
 				.isNotNull();
 			softly.assertThat(fooRule.getServiceReference())
+				.as("getServiceReference %s", fooRule)
 				.isNotNull();
 			softly.assertThat(fooRule.getServiceReferences())
+				.as("getServiceReferences %s", fooRule)
 				.isNotNull();
 			softly.assertThat(fooRule.getServices())
-				.isNotEmpty()
+				.as("getServices %s", fooRule)
 				.contains(afoo);
 			softly.assertThat(fooRule.getTimeout())
+				.as("getTimeout %s", fooRule)
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(fooRule.getTracked())
+				.as("getTracked %s", fooRule)
 				.isNotEmpty();
 			softly.assertThat(fooRule.getTrackingCount())
-				.isGreaterThan(0);
+				.as("getTrackingCount %s", fooRule)
+				.isGreaterThanOrEqualTo(1);
 			softly.assertThat(fooRule.getCardinality())
+				.as("getCardinality %s", fooRule)
 				.isEqualTo(1);
 			softly.assertThat(fooRule.size())
+				.as("size %s", fooRule)
 				.isEqualTo(1);
 			softly.assertThat(fooRule.isEmpty())
+				.as("isEmpty %s", fooRule)
 				.isFalse();
 			softly.assertThat(fooRule.waitForService(20))
+				.as("waitForService %s", fooRule)
 				.isNotNull();
 
 			softly.assertAll();
@@ -291,26 +315,37 @@ public class ServiceUseRuleTest {
 			SoftAssertions softly = new SoftAssertions();
 
 			softly.assertThat(fooRule.getService())
+				.as("getService %s", fooRule)
 				.isIn(s1, s2);
 			softly.assertThat(fooRule.getServiceReference())
+				.as("getServiceReference %s", fooRule)
 				.isNotNull();
 			softly.assertThat(fooRule.getServiceReferences())
+				.as("getServiceReferences %s", fooRule)
 				.isNotNull();
 			softly.assertThat(fooRule.getServices())
+				.as("getServices %s", fooRule)
 				.containsExactlyInAnyOrder(s1, s2);
 			softly.assertThat(fooRule.getTimeout())
+				.as("getTimeout %s", fooRule)
 				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
 			softly.assertThat(fooRule.getTracked())
+				.as("getTracked %s", fooRule)
 				.isNotEmpty();
 			softly.assertThat(fooRule.getTrackingCount())
-				.isGreaterThan(0);
+				.as("getTrackingCount %s", fooRule)
+				.isGreaterThanOrEqualTo(2);
 			softly.assertThat(fooRule.getCardinality())
+				.as("getCardinality %s", fooRule)
 				.isEqualTo(2);
 			softly.assertThat(fooRule.size())
+				.as("size %s", fooRule)
 				.isEqualTo(2);
 			softly.assertThat(fooRule.isEmpty())
+				.as("isEmpty %s", fooRule)
 				.isFalse();
 			softly.assertThat(fooRule.waitForService(20))
+				.as("waitForService %s", fooRule)
 				.isNotNull();
 
 			softly.assertAll();
@@ -334,11 +369,11 @@ public class ServiceUseRuleTest {
 
 					final Foo afoo = new Foo() {};
 
-					ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
-						() -> bcRule.getBundleContext()
+					ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor
+						.schedule(() -> bcRule.getBundleContext()
 							.registerService(Foo.class, afoo,
 								Dictionaries.dictionaryOf("foo", "bar", "case", name.getMethodName())),
-						0);
+							0);
 
 					fooRule.init(getClass());
 

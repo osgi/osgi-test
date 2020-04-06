@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 		 * @param contextExtension the BundleContextExtension if available
 		 */
 		public Builder(Class<T> serviceType, BundleContextExtension contextExtension) {
-			this.serviceType = serviceType;
-			this.contextExtension = contextExtension;
+			this.serviceType = requireNonNull(serviceType);
+			this.contextExtension = requireNonNull(contextExtension);
 			this.filter = format("(objectClass=%s)", serviceType.getName());
 		}
 
@@ -252,4 +252,10 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 
 	}
 
+	@Override
+	public String toString() {
+		return String.format(
+			"ServiceUseExtension [Class=\"%s\", filter=\"%s\", cardinality=%s, timeout=%s]",
+			getServiceType(), getFilter(), getCardinality(), getTimeout());
+	}
 }

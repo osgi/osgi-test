@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class ServiceUseRule<T> extends BaseServiceUse<T>
 	protected ServiceUseRule(Class<T> serviceType, BundleContextRule bundleContextRule, Filter filter, int cardinality,
 		long timeout) {
 		super(serviceType);
-		this.bundleContextRule = bundleContextRule;
+		this.bundleContextRule = requireNonNull(bundleContextRule);
 		this.trackServices = new TrackServices<>(filter, cardinality, timeout);
 	}
 
@@ -165,6 +165,14 @@ public class ServiceUseRule<T> extends BaseServiceUse<T>
 	@Override
 	protected TrackServices<T> getTrackServices() {
 		return trackServices;
+	}
+
+	@Override
+	public String toString() {
+		return String.format(
+			"ServiceUseRule [Class=\"%s\", filter=\"%s\", cardinality=%s, timeout=%s]",
+			getServiceType(),
+			getFilter(), getCardinality(), getTimeout());
 	}
 
 }
