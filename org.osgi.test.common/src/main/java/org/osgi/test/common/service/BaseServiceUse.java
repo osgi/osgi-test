@@ -16,10 +16,9 @@
 
 package org.osgi.test.common.service;
 
-import static java.lang.reflect.Array.newInstance;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 
@@ -30,14 +29,11 @@ import org.osgi.test.common.tracking.TrackingConfig;
 import org.osgi.util.tracker.ServiceTracker;
 
 public abstract class BaseServiceUse<T> implements AutoCloseable, ServiceAware<T>, TrackingConfig {
-
-	private final T[] empty;
 	private final Class<T>	serviceType;
 
 	@SuppressWarnings("unchecked")
 	public BaseServiceUse(Class<T> serviceType) {
-		this.serviceType = serviceType;
-		empty = (T[]) newInstance(serviceType, 0);
+		this.serviceType = requireNonNull(serviceType);
 	}
 
 	protected abstract TrackServices<T> getTrackServices();
@@ -75,12 +71,28 @@ public abstract class BaseServiceUse<T> implements AutoCloseable, ServiceAware<T
 	@Override
 	public List<ServiceReference<T>> getServiceReferences() {
 		ServiceReference<T>[] serviceReferences = getTracker().getServiceReferences();
-		return (serviceReferences == null) ? emptyList() : asList(serviceReferences);
+		if (serviceReferences == null) {
+			return new ArrayList<>();
+		}
+		List<ServiceReference<T>> result = new ArrayList<>(serviceReferences.length);
+		for (ServiceReference<T> serviceReference : serviceReferences) {
+			result.add(serviceReference);
+		}
+		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<T> getServices() {
-		return asList(getTracker().getServices(empty));
+		Object[] services = getTracker().getServices();
+		if (services == null) {
+			return new ArrayList<>();
+		}
+		List<T> result = new ArrayList<>(services.length);
+		for (Object service : services) {
+			result.add((T) service);
+		}
+		return result;
 	}
 
 	@Override
