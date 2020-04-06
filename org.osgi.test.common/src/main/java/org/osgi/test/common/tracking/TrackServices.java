@@ -36,7 +36,7 @@ public class TrackServices<T> implements AutoCloseable, TrackingConfig {
 	private final Filter			filter;
 	private final long				timeout;
 
-	private ServiceTracker<T, T>	tracker;
+	private volatile ServiceTracker<T, T>	tracker;
 
 	public TrackServices(Filter filter, int cardinality, long timeout) {
 		this.filter = requireNonNull(filter);
@@ -54,16 +54,18 @@ public class TrackServices<T> implements AutoCloseable, TrackingConfig {
 
 	@Override
 	public void close() throws Exception {
+		ServiceTracker<T, T> tracker = tracker();
 		if (tracker != null) {
 			tracker.close();
 		}
 	}
 
 	public void init(BundleContext bundleContext) {
-		final long endTime = System.currentTimeMillis() + timeout;
+		final long endTime = System.currentTimeMillis() + getTimeout();
 		CountDownLatch countDownLatch = new CountDownLatch(getCardinality());
 
-		tracker = new ServiceTracker<>(bundleContext, getFilter(),
+		ServiceTracker<T, T> tracker = new ServiceTracker<>(bundleContext,
+			getFilter(),
 			new InnerCustomizer(bundleContext, countDownLatch, getCustomizer()));
 		tracker.open();
 
@@ -87,6 +89,7 @@ public class TrackServices<T> implements AutoCloseable, TrackingConfig {
 		} catch (InterruptedException e) {
 			throw new AssertionError(e);
 		}
+		this.tracker = tracker;
 	}
 
 	public ServiceTracker<T, T> tracker() {
@@ -120,11 +123,12 @@ public class TrackServices<T> implements AutoCloseable, TrackingConfig {
 
 	private class InnerCustomizer implements ServiceTrackerCustomizer<T, T> {
 
-		private BundleContext								bundleContext;
-		private CountDownLatch								countDownLatch;
-		private Optional<ServiceTrackerCustomizer<T, T>>	delegate;
+		private final BundleContext								bundleContext;
+		private final CountDownLatch							countDownLatch;
+		private final Optional<ServiceTrackerCustomizer<T, T>>	delegate;
 
-		public InnerCustomizer(BundleContext bundleContext, CountDownLatch countDownLatch,
+		InnerCustomizer(BundleContext bundleContext,
+			CountDownLatch countDownLatch,
 			ServiceTrackerCustomizer<T, T> delegate) {
 			this.bundleContext = bundleContext;
 			this.countDownLatch = countDownLatch;
