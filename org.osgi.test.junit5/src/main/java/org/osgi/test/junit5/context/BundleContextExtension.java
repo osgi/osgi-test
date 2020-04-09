@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package org.osgi.test.junit5.context;
 
-import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
-import static org.junit.platform.commons.util.ReflectionUtils.isPrivate;
-import static org.junit.platform.commons.util.ReflectionUtils.makeAccessible;
-import static org.osgi.test.common.exceptions.Exceptions.unchecked;
+import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFields;
+import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
-import java.util.function.Predicate;
+import java.util.List;
 
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -35,12 +34,36 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.junit.platform.commons.util.ReflectionUtils;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectInstallBundle;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.install.InstallBundle;
 
+/**
+ * A JUnit 5 Extension to get the OSGi {@link BundleContext} of the test bundle.
+ * <p>
+ * The {@link BundleContext} implementation provided by this rule will
+ * automatically clean up all service registrations, bundle, service and
+ * framework listeners, as well as installed bundles left behind.
+ * <p>
+ * Example:
+ *
+ * <pre>
+ * &#64;ExtendWith(BundleContextExtension.class)
+ * class MyTests {
+ *
+ * 	&#64;InjectBundleContext
+ * 	BundleContext bundleContext;
+ *
+ * 	&#64;Test
+ * 	public void aTest() {
+ * 		Bundle bundle = bundleContext.getBundle();
+ * 	}
+ * }
+ * </pre>
+ */
 public class BundleContextExtension implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
 	public static final String		BUNDLE_CONTEXT_KEY	= "bundle.context";
@@ -49,7 +72,20 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		injectFields(extensionContext, extensionContext.getRequiredTestInstance(), ReflectionUtils::isNotStatic);
+		List<Field> fields = findAnnotatedNonStaticFields(extensionContext.getRequiredTestClass(),
+			InjectBundleContext.class);
+
+		fields.forEach(field -> {
+			assertFieldIsBundleContext(field);
+			setField(field, extensionContext.getRequiredTestInstance(), getBundleContext(extensionContext));
+		});
+
+		fields = findAnnotatedNonStaticFields(extensionContext.getRequiredTestClass(), InjectInstallBundle.class);
+
+		fields.forEach(field -> {
+			assertFieldIsInstallBundle(field);
+			setField(field, extensionContext.getRequiredTestInstance(), getInstallbundle(extensionContext));
+		});
 	}
 
 	@Override
@@ -69,8 +105,8 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 
 	/**
 	 * Resolve {@link Parameter} annotated with
-	 * {@link BundleContextParameter @BundleContextParameter} OR
-	 * {@link InstallBundleParameter @InstallBundleParameter} in the supplied
+	 * {@link InjectBundleContext @BundleContextParameter} OR
+	 * {@link InjectInstallBundle @InstallBundleParameter} in the supplied
 	 * {@link ParameterContext}.
 	 */
 	@Override
@@ -78,11 +114,11 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 		Class<?> parameterType = parameterContext.getParameter()
 			.getType();
 
-		if (parameterContext.isAnnotated(BundleContextParameter.class)) {
-			assertSupportedType("parameter", parameterType, BundleContext.class);
+		if (parameterContext.isAnnotated(InjectBundleContext.class)) {
+			assertIsBundleContext("parameter", parameterType);
 			return getBundleContext(extensionContext);
-		} else if (parameterContext.isAnnotated(InstallBundleParameter.class)) {
-			assertSupportedType("parameter", parameterType, InstallBundle.class);
+		} else if (parameterContext.isAnnotated(InjectInstallBundle.class)) {
+			assertIsInstallBundle("parameter", parameterType);
 			return getInstallbundle(extensionContext);
 		}
 
@@ -92,13 +128,13 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 	/**
 	 * Determine if the {@link Parameter} in the supplied
 	 * {@link ParameterContext} is annotated with
-	 * {@link BundleContextParameter @BundleContextParameter} OR
-	 * {@link InstallBundleParameter @InstallBundleParameter}.
+	 * {@link InjectBundleContext @BundleContextParameter} OR
+	 * {@link InjectInstallBundle @InstallBundleParameter}.
 	 */
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		boolean annotatedBundleContextParameter = parameterContext.isAnnotated(BundleContextParameter.class);
-		boolean annotatedInstallBundleParameter = parameterContext.isAnnotated(InstallBundleParameter.class);
+		boolean annotatedBundleContextParameter = parameterContext.isAnnotated(InjectBundleContext.class);
+		boolean annotatedInstallBundleParameter = parameterContext.isAnnotated(InjectInstallBundle.class);
 		if ((annotatedBundleContextParameter || annotatedInstallBundleParameter)
 			&& (parameterContext.getDeclaringExecutable() instanceof Constructor)) {
 			throw new ParameterResolutionException(
@@ -107,18 +143,35 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 		return annotatedBundleContextParameter || annotatedInstallBundleParameter;
 	}
 
-	private void assertSupportedType(String target, Class<?> type, Class<?> typeToCheckFor) {
-		if (type != typeToCheckFor) {
-			throw new ExtensionConfigurationException("Can only resolve @" + typeToCheckFor.getSimpleName() + " "
-				+ target + " of type " + typeToCheckFor.getName() + " but was: " + type.getName());
+	private void assertIsBundleContext(String target, Class<?> type) {
+		if (type != BundleContext.class) {
+			throw new ExtensionConfigurationException("Can only resolve @" + InjectBundleContext.class.getSimpleName()
+				+ " " + target + " of type " + BundleContext.class.getName() + " but was: " + type.getName());
 		}
 	}
 
-	private void assertValidFieldCandidate(Field field, Class<?> typeToCheckFor) {
-		assertSupportedType("field", field.getType(), typeToCheckFor);
-		if (isPrivate(field)) {
+	private void assertIsInstallBundle(String target, Class<?> type) {
+		if (type != InstallBundle.class) {
+			throw new ExtensionConfigurationException("Can only resolve @" + InjectInstallBundle.class.getSimpleName()
+				+ " " + target + " of type " + InstallBundle.class.getName() + " but was: " + type.getName());
+		}
+	}
+
+	private void assertFieldIsBundleContext(Field field) {
+		assertIsBundleContext("field", field.getType());
+		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
+			|| Modifier.isStatic(field.getModifiers())) {
 			throw new ExtensionConfigurationException(
-				"@BundleContextParameter field [" + field + "] must not be private.");
+				InjectBundleContext.class.getName() + " field [" + field + "] must not be final, private or static.");
+		}
+	}
+
+	private void assertFieldIsInstallBundle(Field field) {
+		assertIsInstallBundle("field", field.getType());
+		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
+			|| Modifier.isStatic(field.getModifiers())) {
+			throw new ExtensionConfigurationException(
+				InjectInstallBundle.class.getName() + " field [" + field + "] must not be final, private or static.");
 		}
 	}
 
@@ -138,19 +191,6 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 		return extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(INSTALL_BUNDLE_KEY,
 				key -> new ExtensionInstallBundle(getBundleContext(extensionContext)), ExtensionInstallBundle.class);
-	}
-
-	private void injectFields(ExtensionContext extensionContext, Object testInstance, Predicate<Field> predicate) {
-		findAnnotatedFields(extensionContext.getRequiredTestClass(), BundleContextParameter.class, predicate)
-			.forEach(field -> {
-				assertValidFieldCandidate(field, BundleContext.class);
-				unchecked(() -> makeAccessible(field).set(testInstance, getBundleContext(extensionContext)));
-			});
-		findAnnotatedFields(extensionContext.getRequiredTestClass(), InstallBundleParameter.class, predicate)
-			.forEach(field -> {
-				assertValidFieldCandidate(field, InstallBundle.class);
-				unchecked(() -> makeAccessible(field).set(testInstance, getInstallbundle(extensionContext)));
-			});
 	}
 
 	public static class ExtensionInstallBundle implements InstallBundle {

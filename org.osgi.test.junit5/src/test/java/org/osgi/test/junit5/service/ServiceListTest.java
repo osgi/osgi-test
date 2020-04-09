@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,12 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.log.LogService;
+import org.osgi.test.common.annotation.InjectService;
 
-@ExtendWith(ServiceUseExtension.class)
+@ExtendWith(ServiceExtension.class)
 public class ServiceListTest {
 
-	@ServiceUseParameter
+	@InjectService
 	List<LogService>				logServices;
 
 	@Test
@@ -37,7 +38,7 @@ public class ServiceListTest {
 	}
 
 	@Test
-	public void testParam(@ServiceUseParameter List<LogService> logServices) throws Exception {
+	public void testParam(@InjectService List<LogService> logServices) throws Exception {
 		assertThat(logServices).size()
 			.isEqualTo(1);
 	}

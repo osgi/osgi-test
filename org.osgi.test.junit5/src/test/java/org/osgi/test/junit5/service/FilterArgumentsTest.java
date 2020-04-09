@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,16 +25,23 @@ import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
 
 @ExtendWith(ServiceExtension.class)
-public class SingleServiceTest {
+public class FilterArgumentsTest {
 
-	@InjectService
+	@InjectService(filter = "(%s=%s)", filterArguments = {
+		"objectClass", "org.osgi.service.log.LoggerFactory"
+	})
 	LogService					logService;
-	@InjectService
+	@InjectService(filter = "(%s=%s)", filterArguments = {
+		"objectClass", "org.osgi.service.log.LoggerFactory"
+	})
 	ServiceAware<LogService>	lsServiceAware;
 
 	@Test
 	public void testWithLogServiceUse() throws Exception {
 		assertThat(lsServiceAware.getService()).isNotNull();
+		assertThat(lsServiceAware.getFilter()
+			.toString()).isEqualTo(
+				"(&(objectClass=org.osgi.service.log.LogService)(objectClass=org.osgi.service.log.LoggerFactory))");
 	}
 
 	@Test
@@ -43,7 +50,9 @@ public class SingleServiceTest {
 	}
 
 	@Test
-	public void testWithLogServiceParameter(@InjectService LogService logService) throws Exception {
+	public void testWithLogServiceParameter(@InjectService(filter = "(%s=%s)", filterArguments = {
+		"objectClass", "org.osgi.service.log.LoggerFactory"
+	}) LogService logService) throws Exception {
 		assertThat(logService).isNotNull();
 	}
 

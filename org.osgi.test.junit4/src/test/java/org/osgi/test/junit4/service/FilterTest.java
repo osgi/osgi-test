@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,36 +14,36 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit5.service;
+package org.osgi.test.junit4.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Rule;
+import org.junit.Test;
 import org.osgi.service.log.LogService;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
 
-@ExtendWith(ServiceExtension.class)
-public class SingleServiceTest {
+public class FilterTest {
 
-	@InjectService
+	@Rule
+	public ServiceRule			sur	= new ServiceRule();
+
+	@InjectService(filter = "(objectClass=org.osgi.service.log.LoggerFactory)")
 	LogService					logService;
-	@InjectService
+	@InjectService(filter = "(objectClass=org.osgi.service.log.LoggerFactory)")
 	ServiceAware<LogService>	lsServiceAware;
 
 	@Test
 	public void testWithLogServiceUse() throws Exception {
 		assertThat(lsServiceAware.getService()).isNotNull();
+		assertThat(lsServiceAware.getFilter()
+			.toString()).isEqualTo(
+				"(&(objectClass=org.osgi.service.log.LogService)(objectClass=org.osgi.service.log.LoggerFactory))");
 	}
 
 	@Test
 	public void testWithLogServiceField() throws Exception {
-		assertThat(logService).isNotNull();
-	}
-
-	@Test
-	public void testWithLogServiceParameter(@InjectService LogService logService) throws Exception {
 		assertThat(logService).isNotNull();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,24 @@
 
 package org.osgi.test.junit5.service;
 
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.osgi.framework.BundleContext;
-import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.common.service.ServiceConfiguration;
 
-class WithServiceUseExtension<T> implements AutoCloseable {
-	private final ExtensionContext	extensionContext;
-	final ServiceUseConfiguration<T>	serviceUseConfiguration;
+class WithServiceExtension<T> implements AutoCloseable {
+	final ServiceConfiguration<T>	serviceUseConfiguration;
 
-	public WithServiceUseExtension(ExtensionContext extensionContext, Class<T> serviceType, String filterString,
+	public WithServiceExtension(Class<T> serviceType,
+		String filterString,
 		int cardinality, long timeout)
 		throws Exception {
 
-		this.extensionContext = extensionContext;
-
-		this.serviceUseConfiguration = new ServiceUseConfiguration<>(serviceType, extensionContext,
+		this.serviceUseConfiguration = new ServiceConfiguration<>(
+			serviceType,
 			(filterString == null) ? "" : filterString, new String[0], cardinality, timeout);
 	}
 
-	public void init() throws Exception {
-		serviceUseConfiguration.init();
+	public void init(BundleContext bundleContext) throws Exception {
+		serviceUseConfiguration.init(bundleContext);
 	}
 
 	@Override
@@ -43,11 +41,7 @@ class WithServiceUseExtension<T> implements AutoCloseable {
 		serviceUseConfiguration.close();
 	}
 
-	public BundleContext getBundleContext() {
-		return BundleContextExtension.getBundleContext(extensionContext);
-	}
-
-	public ServiceUseConfiguration<T> getExtension() {
+	public ServiceConfiguration<T> getExtension() {
 		return serviceUseConfiguration;
 	}
 }

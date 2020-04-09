@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit5.service;
+package org.osgi.test.junit4.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.osgi.service.log.LoggerFactory;
+import org.junit.Rule;
+import org.junit.Test;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.junit4.types.Foo;
 
-@ExtendWith(ServiceUseExtension.class)
-public class ServiceUseExtensionLoggerFactoryTest {
+public class ServiceRuleExampleTest {
+
+	@Rule
+	public ServiceRule	serviceUseRule	= new ServiceRule();
+
+	@InjectService(cardinality = 0)
+	ServiceAware<Foo>		fServiceAware;
 
 	@Test
-	public void test(@ServiceUseParameter LoggerFactory loggerFactory) throws Exception {
-		assertThat(loggerFactory).isInstanceOf(LoggerFactory.class);
+	public void test() throws Exception {
+		assertThat(fServiceAware.getService()).isNull();
 	}
 
 }

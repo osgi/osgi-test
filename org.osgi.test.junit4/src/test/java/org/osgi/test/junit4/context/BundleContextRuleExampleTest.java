@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.test.common.annotation.InjectBundleContext;
 
 /**
  * This is how a real test class should use {@link BundleContextRule}.
@@ -40,4 +41,13 @@ public class BundleContextRuleExampleTest {
 			.isEqualTo(FrameworkUtil.getBundle(getClass()));
 	}
 
+	@InjectBundleContext
+	BundleContext bundleContext;
+
+	@Test
+	public void testUsingField() throws Exception {
+		assertThat(bundleContext).isNotNull()
+			.extracting(BundleContext::getBundle)
+			.isEqualTo(FrameworkUtil.getBundle(getClass()));
+	}
 }

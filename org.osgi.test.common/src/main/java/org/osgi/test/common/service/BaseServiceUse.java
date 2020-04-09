@@ -28,10 +28,9 @@ import java.util.function.Function;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.test.common.tracking.TrackServices;
-import org.osgi.test.common.tracking.TrackingConfig;
 import org.osgi.util.tracker.ServiceTracker;
 
-public abstract class BaseServiceUse<T> implements AutoCloseable, ServiceAware<T>, TrackingConfig {
+public abstract class BaseServiceUse<T> implements AutoCloseable, ServiceAware<T> {
 	private final Class<T> serviceType;
 
 	@SuppressWarnings("unchecked")

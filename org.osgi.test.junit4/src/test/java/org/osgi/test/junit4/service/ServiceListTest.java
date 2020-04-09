@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,29 @@
  * limitations under the License.
  */
 
-package org.osgi.test.common.tracking;
+package org.osgi.test.junit4.service;
 
-import org.osgi.annotation.versioning.ProviderType;
-import org.osgi.framework.Filter;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@ProviderType
-public interface TrackingConfig {
+import java.util.List;
 
-	int getCardinality();
+import org.junit.Rule;
+import org.junit.Test;
+import org.osgi.service.log.LogService;
+import org.osgi.test.common.annotation.InjectService;
 
-	Filter getFilter();
+public class ServiceListTest {
 
-	long getTimeout();
+	@Rule
+	public ServiceRule	sur	= new ServiceRule();
+
+	@InjectService
+	List<LogService>				logServices;
+
+	@Test
+	public void testField() throws Exception {
+		assertThat(logServices).size()
+			.isEqualTo(1);
+	}
 
 }
