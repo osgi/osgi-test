@@ -63,7 +63,7 @@ public class BundleContextExtensionTest {
 		Bundle bundle = null;
 
 		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
-			bundle = it.getExtension()
+			bundle = BundleContextExtension
 				.getInstallbundle(extensionContext)
 				.installBundle("foo/tbfoo.jar", false);
 
@@ -80,7 +80,7 @@ public class BundleContextExtensionTest {
 		Bundle bundle = null;
 
 		try (WithBundleContextExtension it = new WithBundleContextExtension(extensionContext)) {
-			bundle = it.getExtension()
+			bundle = BundleContextExtension
 				.getInstallbundle(extensionContext)
 				.installBundle("tb1.jar", false);
 

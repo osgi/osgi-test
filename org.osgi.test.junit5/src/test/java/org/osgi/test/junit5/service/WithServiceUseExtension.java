@@ -25,7 +25,6 @@ import org.osgi.test.junit5.context.BundleContextExtension;
 
 class WithServiceUseExtension<T> implements AutoCloseable {
 	private final ExtensionContext	extensionContext;
-	final BundleContextExtension	bundleContextExtension;
 	final ServiceUseExtension<T>	serviceUseExtension;
 
 	public WithServiceUseExtension(ExtensionContext extensionContext, Class<T> serviceType, String filterString,
@@ -33,17 +32,12 @@ class WithServiceUseExtension<T> implements AutoCloseable {
 		throws Exception {
 
 		this.extensionContext = extensionContext;
-		this.bundleContextExtension = new BundleContextExtension();
 
 		Filter filter = (filterString == null) ? format("(objectClass=%s)", serviceType.getName())
 			: format("(&(objectClass=%s)%s)", serviceType.getName(), filterString);
 
-		this.serviceUseExtension = new ServiceUseExtension<>(serviceType, bundleContextExtension,
+		this.serviceUseExtension = new ServiceUseExtension<>(serviceType,
 			filter, cardinality, timeout);
-	}
-
-	public void bceInit() throws Exception {
-		this.bundleContextExtension.beforeEach(extensionContext);
 	}
 
 	public void init() throws Exception {
@@ -56,7 +50,7 @@ class WithServiceUseExtension<T> implements AutoCloseable {
 	}
 
 	public BundleContext getBundleContext() {
-		return bundleContextExtension.getBundleContext(extensionContext);
+		return BundleContextExtension.getBundleContext(extensionContext);
 	}
 
 	public ServiceUseExtension<T> getExtension() {

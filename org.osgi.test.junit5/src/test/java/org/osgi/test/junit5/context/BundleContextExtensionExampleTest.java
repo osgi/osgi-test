@@ -33,7 +33,8 @@ public class BundleContextExtensionExampleTest {
 
 	@Test
 	public void testBundleContext1(@BundleContextParameter BundleContext bundleContext1) {
-		assertThat(bundleContext1).isNotNull();
+		assertThat(bundleContext1).isNotNull()
+			.isSameAs(bundleContext2);
 	}
 
 	// OR
@@ -50,7 +51,8 @@ public class BundleContextExtensionExampleTest {
 
 	@Test
 	public void testInstallBundle(@InstallBundleParameter InstallBundle installBundle1) {
-		assertThat(installBundle1).isNotNull();
+		assertThat(installBundle1).isNotNull()
+			.isSameAs(installBundle2);
 	}
 
 	// OR

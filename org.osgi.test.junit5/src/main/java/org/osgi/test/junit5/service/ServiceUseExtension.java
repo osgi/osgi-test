@@ -47,29 +47,17 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 	public static class Builder<T> {
 
 		private final Class<T>	serviceType;
-		private final BundleContextExtension	contextExtension;
 		private Filter			filter;
 		private int				cardinality	= 1;
 		private long			timeout		= TrackServices.DEFAULT_TIMEOUT;
 
 		/**
-		 * Create with default BundleContextExtension.
+		 * Create with the given service type.
 		 *
 		 * @param serviceType of the service
 		 */
 		public Builder(Class<T> serviceType) {
-			this(serviceType, new BundleContextExtension());
-		}
-
-		/**
-		 * Create with available BundleContextExtension.
-		 *
-		 * @param serviceType of the service
-		 * @param contextExtension the BundleContextExtension if available
-		 */
-		public Builder(Class<T> serviceType, BundleContextExtension contextExtension) {
 			this.serviceType = requireNonNull(serviceType);
-			this.contextExtension = requireNonNull(contextExtension);
 			this.filter = format("(objectClass=%s)", serviceType.getName());
 		}
 
@@ -125,23 +113,20 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 		}
 
 		public ServiceUseExtension<T> build() {
-			return new ServiceUseExtension<>(serviceType, contextExtension, filter, cardinality, timeout);
+			return new ServiceUseExtension<>(serviceType, filter, cardinality, timeout);
 		}
 
 	}
 
 	final static Namespace					NAMESPACE	= Namespace.create(ServiceUseExtension.class);
 
-	private final BundleContextExtension	contextExtension;
 	private final Filter					filter;
 	private final int						cardinality;
 	private final long						timeout;
 	private volatile TrackServices<T>		trackServices;
 
-	protected ServiceUseExtension(Class<T> serviceType, BundleContextExtension contextExtension, Filter filter,
-		int cardinality, long timeout) {
+	protected ServiceUseExtension(Class<T> serviceType, Filter filter, int cardinality, long timeout) {
 		super(serviceType);
-		this.contextExtension = contextExtension;
 		this.filter = filter;
 		this.cardinality = cardinality;
 		this.timeout = timeout;
@@ -149,7 +134,6 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		contextExtension.beforeEach(extensionContext);
 		// set this in order to be able to honour the BaseServiceUse contract
 		trackServices = getTrackServices(extensionContext);
 		injectFields(trackServices, extensionContext, extensionContext.getRequiredTestInstance(),
@@ -164,7 +148,7 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 			closeableTrackServices.close();
 		}
 		trackServices = null;
-		contextExtension.afterEach(extensionContext);
+		BundleContextExtension.cleanup(extensionContext);
 	}
 
 	@Override
@@ -222,7 +206,7 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 		CloseableTrackServices<T> closeableTrackServices = extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(filter.toString(), k -> {
 				TrackServices<T> ts = new TrackServices<>(filter, cardinality, timeout);
-				ts.init(contextExtension.getBundleContext(extensionContext));
+				ts.init(BundleContextExtension.getBundleContext(extensionContext));
 				return new CloseableTrackServices<T>(ts);
 			}, CloseableTrackServices.class);
 		return closeableTrackServices.get();

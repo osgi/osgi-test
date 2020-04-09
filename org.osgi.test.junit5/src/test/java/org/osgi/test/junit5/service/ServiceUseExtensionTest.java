@@ -80,7 +80,6 @@ public class ServiceUseExtensionTest {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
 			Foo.class, null, 0, TrackServices.DEFAULT_TIMEOUT)) {
 
-			it.bceInit();
 			it.init();
 
 			SoftAssertions softly = new SoftAssertions();
@@ -109,7 +108,6 @@ public class ServiceUseExtensionTest {
 				try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
 					Foo.class, null, 1, TrackServices.DEFAULT_TIMEOUT)) {
 
-					it.bceInit();
 					it.init();
 				}
 			})
@@ -123,7 +121,6 @@ public class ServiceUseExtensionTest {
 				try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
 					Foo.class, null, 1, 50)) {
 
-					it.bceInit();
 					it.init();
 				}
 			})
@@ -134,8 +131,6 @@ public class ServiceUseExtensionTest {
 	public void successWhenService() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
 			Foo.class, null, 1, TrackServices.DEFAULT_TIMEOUT)) {
-
-			it.bceInit();
 
 			final Foo afoo = new Foo() {};
 
@@ -174,8 +169,6 @@ public class ServiceUseExtensionTest {
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
 			Foo.class, null, 1, 1000)) {
-
-			it.bceInit();
 
 			final Foo afoo = new Foo() {};
 
@@ -243,8 +236,6 @@ public class ServiceUseExtensionTest {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
 			Foo.class, "(foo=bar)", 1, TrackServices.DEFAULT_TIMEOUT)) {
 
-			it.bceInit();
-
 			final Foo afoo = new Foo() {};
 
 			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> it.getBundleContext()
@@ -310,8 +301,6 @@ public class ServiceUseExtensionTest {
 	public void matchMultiple() throws Exception {
 		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
 			Foo.class, null, 2, TrackServices.DEFAULT_TIMEOUT)) {
-
-			it.bceInit();
 
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
 			ScheduledFuture<ServiceRegistration<?>> scheduledFuture1 = executor.schedule(() -> it.getBundleContext()
@@ -383,8 +372,6 @@ public class ServiceUseExtensionTest {
 			.isThrownBy(() -> {
 				try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
 					Foo.class, "(foo=baz)", 1, TrackServices.DEFAULT_TIMEOUT)) {
-
-					it.bceInit();
 
 					final Foo afoo = new Foo() {};
 

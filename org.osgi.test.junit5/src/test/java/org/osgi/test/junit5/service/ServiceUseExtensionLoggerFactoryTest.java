@@ -26,11 +26,10 @@ import org.osgi.test.junit5.context.BundleContextExtension;
 public class ServiceUseExtensionLoggerFactoryTest {
 
 	@RegisterExtension
-	public BundleContextExtension		bundleContextExtension	= new BundleContextExtension();
+	public BundleContextExtension				bundleContextExtension	= new BundleContextExtension();
 	@RegisterExtension
-	public ServiceUseExtension<LoggerFactory>	loggerFactoryExtension			= new ServiceUseExtension.Builder<>(	//
-		LoggerFactory.class, bundleContextExtension)
-			.build();
+	public ServiceUseExtension<LoggerFactory>	loggerFactoryExtension	= new ServiceUseExtension.Builder<>(	//
+		LoggerFactory.class).build();
 
 	@Test
 	public void test(@ServiceUseParameter LoggerFactory loggerFactory) throws Exception {

@@ -41,12 +41,11 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.install.InstallBundle;
 
-public class BundleContextExtension
-	implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
+public class BundleContextExtension implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
-	public static final String		BUNDLE_CONTEXT_KEY		= "bundle.context";
-	public static final String		INSTALL_BUNLDE_KEY		= "install.bundle";
-	public static final Namespace	NAMESPACE	= Namespace.create(BundleContextExtension.class);
+	public static final String		BUNDLE_CONTEXT_KEY	= "bundle.context";
+	public static final String		INSTALL_BUNDLE_KEY	= "install.bundle";
+	public static final Namespace	NAMESPACE			= Namespace.create(BundleContextExtension.class);
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
@@ -55,8 +54,12 @@ public class BundleContextExtension
 
 	@Override
 	public void afterEach(ExtensionContext extensionContext) throws Exception {
+		cleanup(extensionContext);
+	}
+
+	public static void cleanup(ExtensionContext extensionContext) throws Exception {
 		extensionContext.getStore(NAMESPACE)
-			.remove(INSTALL_BUNLDE_KEY, ExtensionInstallBundle.class);
+			.remove(INSTALL_BUNDLE_KEY, ExtensionInstallBundle.class);
 		CloseableResourceBundleContext closeableResourceBundleContext = extensionContext.getStore(NAMESPACE)
 			.remove(BUNDLE_CONTEXT_KEY, CloseableResourceBundleContext.class);
 		if (closeableResourceBundleContext != null) {
@@ -119,22 +122,22 @@ public class BundleContextExtension
 		}
 	}
 
-	public BundleContext getBundleContext(ExtensionContext extensionContext) {
+	public static BundleContext getBundleContext(ExtensionContext extensionContext) {
 		BundleContext bundleContext = extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
 				key -> new CloseableResourceBundleContext(extensionContext.getRequiredTestClass(),
 					FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
-					.getBundleContext()),
+						.getBundleContext()),
 				CloseableResourceBundleContext.class)
 			.get();
 
 		return bundleContext;
 	}
 
-	public InstallBundle getInstallbundle(ExtensionContext extensionContext) {
+	public static InstallBundle getInstallbundle(ExtensionContext extensionContext) {
 		return extensionContext.getStore(NAMESPACE)
-			.getOrComputeIfAbsent(INSTALL_BUNLDE_KEY, key -> new ExtensionInstallBundle(getBundleContext(extensionContext)),
-				ExtensionInstallBundle.class);
+			.getOrComputeIfAbsent(INSTALL_BUNDLE_KEY,
+				key -> new ExtensionInstallBundle(getBundleContext(extensionContext)), ExtensionInstallBundle.class);
 	}
 
 	private void injectFields(ExtensionContext extensionContext, Object testInstance, Predicate<Field> predicate) {

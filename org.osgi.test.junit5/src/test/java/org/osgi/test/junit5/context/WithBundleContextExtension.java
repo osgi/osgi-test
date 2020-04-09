@@ -35,7 +35,7 @@ public class WithBundleContextExtension implements AutoCloseable {
 	}
 
 	BundleContext getBundleContext() {
-		return bundleContextExtension.getBundleContext(extensionContext);
+		return BundleContextExtension.getBundleContext(extensionContext);
 	}
 
 	public BundleContextExtension getExtension() {
