@@ -22,11 +22,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.osgi.framework.Bundle.INSTALLED;
 import static org.osgi.framework.Bundle.UNINSTALLED;
+import static org.osgi.test.assertj.bundle.BundleAssert.assertThat;
 import static org.osgi.test.junit5.TestUtil.getBundle;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -67,12 +67,12 @@ public class BundleContextExtensionTest {
 				.getInstallbundle(extensionContext)
 				.installBundle("foo/tbfoo.jar", false);
 
-			assertThat(bundle).extracting(Bundle::getState)
-				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
+			assertThat(bundle).as("during")
+				.isInState(INSTALLED);
 		}
 
-		assertThat(bundle).extracting(Bundle::getState)
-			.is(new Condition<Integer>(state -> (state & UNINSTALLED) == UNINSTALLED, "Uninstalled"));
+		assertThat(bundle).as("after")
+			.isInState(UNINSTALLED);
 	}
 
 	@Test
@@ -84,12 +84,12 @@ public class BundleContextExtensionTest {
 				.getInstallbundle(extensionContext)
 				.installBundle("tb1.jar", false);
 
-			assertThat(bundle).extracting(Bundle::getState)
-				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
+			assertThat(bundle).as("during")
+				.isInState(INSTALLED);
 		}
 
-		assertThat(bundle).extracting(Bundle::getState)
-			.is(new Condition<Integer>(state -> (state & UNINSTALLED) == UNINSTALLED, "Uninstalled"));
+		assertThat(bundle).as("after")
+			.isInState(UNINSTALLED);
 	}
 
 	@Test
@@ -139,9 +139,7 @@ public class BundleContextExtensionTest {
 
 		assertThat(bundle.getBundleContext()
 			.getBundle(bundleId)).isNull();
-		assertThat(installedBundle).isNotNull()
-			.extracting(Bundle::getState)
-			.isEqualTo(Bundle.UNINSTALLED);
+		assertThat(installedBundle).isInState(UNINSTALLED);
 	}
 
 	@Test
@@ -170,9 +168,7 @@ public class BundleContextExtensionTest {
 				.isEqualTo(installedBundle);
 		}
 
-		assertThat(installedBundle).isNotNull()
-			.extracting(Bundle::getState)
-			.isEqualTo(Bundle.UNINSTALLED);
+		assertThat(installedBundle).isInState(UNINSTALLED);
 
 		// now reset the ref
 		ref.set(null);
