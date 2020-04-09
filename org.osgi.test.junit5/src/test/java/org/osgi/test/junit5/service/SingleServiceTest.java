@@ -19,32 +19,21 @@ package org.osgi.test.junit5.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.log.LogService;
-import org.osgi.test.junit5.types.Foo;
+import org.osgi.test.common.service.ServiceAware;
 
-public class ServiceExtensionExampleTest {
-
-	@RegisterExtension
-	ServiceUseExtension<Foo>	fExt	= new ServiceUseExtension.Builder<>(	//
-		Foo.class)																	//
-			.cardinality(0)
-			.build();
-	@RegisterExtension
-	ServiceUseExtension<LogService>	lsExt	= new ServiceUseExtension.Builder<>(	//
-		LogService.class).build();
+@ExtendWith(ServiceUseExtension.class)
+public class SingleServiceTest {
 
 	@ServiceUseParameter
-	LogService						logService;
-
-	@Test
-	public void testNoService() throws Exception {
-		assertThat(fExt.getService()).isNull();
-	}
+	LogService					logService;
+	@ServiceUseParameter
+	ServiceAware<LogService>	lsServiceAware;
 
 	@Test
 	public void testWithLogServiceUse() throws Exception {
-		assertThat(lsExt.getService()).isNotNull();
+		assertThat(lsServiceAware.getService()).isNotNull();
 	}
 
 	@Test

@@ -20,14 +20,30 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.osgi.service.log.LoggerFactory;
+import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.junit5.types.Foo;
 
 @ExtendWith(ServiceUseExtension.class)
-public class ServiceUseExtensionLoggerFactoryTest {
+public class ZeroCardinalityServiceTest {
+
+	@ServiceUseParameter(cardinality = 0)
+	Foo					foo;
+	@ServiceUseParameter(cardinality = 0)
+	ServiceAware<Foo>	fServiceAware;
 
 	@Test
-	public void test(@ServiceUseParameter LoggerFactory loggerFactory) throws Exception {
-		assertThat(loggerFactory).isInstanceOf(LoggerFactory.class);
+	public void testNoService() throws Exception {
+		assertThat(fServiceAware.getService()).isNull();
+	}
+
+	@Test
+	public void testNullField() throws Exception {
+		assertThat(foo).isNull();
+	}
+
+	@Test
+	public void testWithLogServiceParameter(@ServiceUseParameter(cardinality = 0) Foo foo) throws Exception {
+		assertThat(foo).isNull();
 	}
 
 }
