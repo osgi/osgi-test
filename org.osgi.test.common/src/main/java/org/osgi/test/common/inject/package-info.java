@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit4.context;
-
-public class WithContextRule implements AutoCloseable {
-	final BundleContextRule rule;
-
-	public WithContextRule(Object testInstance) {
-		this.rule = new BundleContextRule();
-		this.rule.init(testInstance);
-	}
-
-	@Override
-	public void close() throws Exception {
-		rule.close();
-	}
-
-}
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.0")
+package org.osgi.test.common.inject;

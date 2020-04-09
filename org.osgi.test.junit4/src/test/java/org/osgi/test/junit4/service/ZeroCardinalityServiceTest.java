@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,21 +20,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.osgi.test.junit4.context.BundleContextRule;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit4.types.Foo;
 
-public class ServiceUseRuleExampleTest {
+public class ZeroCardinalityServiceTest {
 
 	@Rule
-	public BundleContextRule	bundleContextRule	= new BundleContextRule();
-	@Rule
-	public ServiceUseRule<Foo>	fooUse				= new ServiceUseRule.Builder<>(Foo.class, bundleContextRule)
-		.cardinality(0)
-		.build();
+	public ServiceRule	sur	= new ServiceRule();
+
+	@InjectService(cardinality = 0)
+	Foo					foo;
+	@InjectService(cardinality = 0)
+	ServiceAware<Foo>	fServiceAware;
 
 	@Test
-	public void test() throws Exception {
-		assertThat(fooUse.getService()).isNull();
+	public void testNoService() throws Exception {
+		assertThat(fServiceAware.getService()).isNull();
+	}
+
+	@Test
+	public void testNullField() throws Exception {
+		assertThat(foo).isNull();
 	}
 
 }

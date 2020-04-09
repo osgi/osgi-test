@@ -28,7 +28,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class TrackServices<T> implements AutoCloseable, TrackingConfig {
+public class TrackServices<T> implements AutoCloseable {
 
 	public static final long		DEFAULT_TIMEOUT	= 200;
 
@@ -106,17 +106,14 @@ public class TrackServices<T> implements AutoCloseable, TrackingConfig {
 		return null;
 	}
 
-	@Override
 	public int getCardinality() {
 		return cardinality;
 	}
 
-	@Override
 	public Filter getFilter() {
 		return filter;
 	}
 
-	@Override
 	public long getTimeout() {
 		return timeout;
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class BundleContextRuleTest {
 	public void testInstallBundle_B() throws Exception {
 		Bundle bundle = null;
 
-		try (WithContextRule it = new WithContextRule(getClass())) {
+		try (WithContextRule it = new WithContextRule(this)) {
 			bundle = it.rule.installBundle("foo/tbfoo.jar", false);
 
 			assertThat(bundle).extracting(Bundle::getState)
@@ -64,7 +64,7 @@ public class BundleContextRuleTest {
 	public void testInstallBundle() throws Exception {
 		Bundle bundle = null;
 
-		try (WithContextRule it = new WithContextRule(getClass())) {
+		try (WithContextRule it = new WithContextRule(this)) {
 			bundle = it.rule.installBundle("tb1.jar", false);
 
 			assertThat(bundle).extracting(Bundle::getState)
@@ -77,7 +77,7 @@ public class BundleContextRuleTest {
 
 	@Test
 	public void test() throws Exception {
-		try (WithContextRule it = new WithContextRule(getClass())) {
+		try (WithContextRule it = new WithContextRule(this)) {
 			BundleContext bundleContext = it.rule.getBundleContext();
 
 			assertThat(bundleContext).isNotNull()
@@ -90,7 +90,7 @@ public class BundleContextRuleTest {
 	public void cleansUpServices() throws Exception {
 		Bundle bundle = FrameworkUtil.getBundle(getClass());
 
-		try (WithContextRule it = new WithContextRule(getClass())) {
+		try (WithContextRule it = new WithContextRule(this)) {
 			BundleContext bundleContext = it.rule.getBundleContext();
 
 			ServiceRegistration<Foo> serviceRegistration = bundleContext.registerService(Foo.class, new Foo() {},
@@ -108,7 +108,7 @@ public class BundleContextRuleTest {
 		Bundle installedBundle = null;
 		long bundleId = -1;
 
-		try (WithContextRule it = new WithContextRule(getClass())) {
+		try (WithContextRule it = new WithContextRule(this)) {
 			BundleContext bundleContext = it.rule.getBundleContext();
 
 			installedBundle = bundleContext.installBundle("it", getBundle("tb1.jar"));
@@ -141,7 +141,7 @@ public class BundleContextRuleTest {
 			}
 		};
 
-		try (WithContextRule it = new WithContextRule(getClass())) {
+		try (WithContextRule it = new WithContextRule(this)) {
 			BundleContext bundleContext = it.rule.getBundleContext();
 
 			bundleContext.addBundleListener(bl);
@@ -179,7 +179,7 @@ public class BundleContextRuleTest {
 			.installBundle("it", getBundle("tb1.jar"));
 		installedBundle.start();
 
-		try (WithContextRule it = new WithContextRule(getClass())) {
+		try (WithContextRule it = new WithContextRule(this)) {
 			BundleContext bundleContext = it.rule.getBundleContext();
 
 			ServiceReference<Foo> serviceReference = bundleContext.getServiceReference(Foo.class);
@@ -203,7 +203,7 @@ public class BundleContextRuleTest {
 			.installBundle("it", getBundle("tb1.jar"));
 		installedBundle.start();
 
-		try (WithContextRule it = new WithContextRule(getClass())) {
+		try (WithContextRule it = new WithContextRule(this)) {
 			BundleContext bundleContext = it.rule.getBundleContext();
 
 			ServiceReference<Foo> serviceReference = bundleContext.getServiceReference(Foo.class);

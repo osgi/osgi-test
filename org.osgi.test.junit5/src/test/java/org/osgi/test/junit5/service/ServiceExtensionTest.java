@@ -35,6 +35,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.mockito.stubbing.Answer;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
@@ -42,11 +43,13 @@ import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit5.ExecutorExtension;
 import org.osgi.test.junit5.ExecutorParameter;
+import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.WithBundleContextExtension;
 import org.osgi.test.junit5.types.Foo;
 import org.osgi.test.junit5.types.MockStore;
 
 @ExtendWith(ExecutorExtension.class)
-public class ServiceUseExtensionTest {
+public class ServiceExtensionTest {
 
 	@ExecutorParameter
 	ScheduledExecutorService	executor;
@@ -77,10 +80,10 @@ public class ServiceUseExtensionTest {
 
 	@Test
 	public void basicAssumptions() throws Exception {
-		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-			Foo.class, null, 0, TrackServices.DEFAULT_TIMEOUT)) {
+		try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null, 0,
+			TrackServices.DEFAULT_TIMEOUT)) {
 
-			it.init();
+			it.init(BundleContextExtension.getBundleContext(extensionContext));
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -105,10 +108,9 @@ public class ServiceUseExtensionTest {
 	public void requiredFailsWhenNoService() throws Exception {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
-				try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-					Foo.class, null, 1, TrackServices.DEFAULT_TIMEOUT)) {
-
-					it.init();
+				try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null, 1,
+					TrackServices.DEFAULT_TIMEOUT)) {
+					it.init(BundleContextExtension.getBundleContext(extensionContext));
 				}
 			})
 			.withMessageContaining(" services (objectClass=org.osgi.test.junit5.types.Foo) didn't arrive within 200ms");
@@ -118,10 +120,8 @@ public class ServiceUseExtensionTest {
 	public void requiredFailsWhenNoServiceWithTimeout() throws Exception {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
-				try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-					Foo.class, null, 1, 50)) {
-
-					it.init();
+				try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null, 1, 50)) {
+					it.init(BundleContextExtension.getBundleContext(extensionContext));
 				}
 			})
 			.withMessageContaining(" services (objectClass=org.osgi.test.junit5.types.Foo) didn't arrive within 50ms");
@@ -129,16 +129,20 @@ public class ServiceUseExtensionTest {
 
 	@Test
 	public void successWhenService() throws Exception {
-		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-			Foo.class, null, 1, TrackServices.DEFAULT_TIMEOUT)) {
+		try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
+			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null,
+				1,
+			TrackServices.DEFAULT_TIMEOUT)) {
 
 			final Foo afoo = new Foo() {};
 
-			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> it.getBundleContext()
-				.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)), 0,
-				TimeUnit.MILLISECONDS);
+			BundleContext bundleContext = bce.getBundleContext();
 
-			it.init();
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
+				() -> bundleContext.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)),
+				0, TimeUnit.MILLISECONDS);
+
+			it.init(bundleContext);
 			// Make sure the scheduled event is processed
 			assertThat(scheduledFuture.get()).isNotNull();
 
@@ -167,16 +171,18 @@ public class ServiceUseExtensionTest {
 
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
-		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-			Foo.class, null, 1, 1000)) {
+		try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
+			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null, 1, 1000)) {
 
 			final Foo afoo = new Foo() {};
 
-			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> it.getBundleContext()
-				.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)), 0,
-				TimeUnit.MILLISECONDS);
+			BundleContext bundleContext = bce.getBundleContext();
 
-			it.init();
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
+				() -> bundleContext.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", testMethodName)),
+				0, TimeUnit.MILLISECONDS);
+
+			it.init(bundleContext);
 			// Make sure the scheduled event is processed
 			assertThat(scheduledFuture.get()).isNotNull();
 
@@ -233,16 +239,20 @@ public class ServiceUseExtensionTest {
 
 	@Test
 	public void matchByFilter() throws Exception {
-		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-			Foo.class, "(foo=bar)", 1, TrackServices.DEFAULT_TIMEOUT)) {
+		try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
+			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "(foo=bar)",
+				1,
+			TrackServices.DEFAULT_TIMEOUT)) {
 
 			final Foo afoo = new Foo() {};
 
-			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> it.getBundleContext()
+			BundleContext bundleContext = bce.getBundleContext();
+
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(() -> bundleContext
 				.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("foo", "bar", "case", testMethodName)), 0,
 				TimeUnit.MILLISECONDS);
 
-			it.init();
+			it.init(bundleContext);
 			// Make sure the scheduled event is processed
 			assertThat(scheduledFuture.get()).isNotNull();
 
@@ -299,18 +309,22 @@ public class ServiceUseExtensionTest {
 
 	@Test
 	public void matchMultiple() throws Exception {
-		try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-			Foo.class, null, 2, TrackServices.DEFAULT_TIMEOUT)) {
+		try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
+			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null,
+				2,
+			TrackServices.DEFAULT_TIMEOUT)) {
 
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
-			ScheduledFuture<ServiceRegistration<?>> scheduledFuture1 = executor.schedule(() -> it.getBundleContext()
+			BundleContext bundleContext = bce.getBundleContext();
+
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture1 = executor.schedule(() -> bundleContext
 				.registerService(Foo.class, s1, Dictionaries.dictionaryOf("foo", testMethodName.concat("_1"))), 0,
 				TimeUnit.MILLISECONDS);
-			ScheduledFuture<ServiceRegistration<?>> scheduledFuture2 = executor.schedule(() -> it.getBundleContext()
+			ScheduledFuture<ServiceRegistration<?>> scheduledFuture2 = executor.schedule(() -> bundleContext
 				.registerService(Foo.class, s2, Dictionaries.dictionaryOf("foo", testMethodName.concat("_2"))), 0,
 				TimeUnit.MILLISECONDS);
 
-			it.init();
+			it.init(bundleContext);
 			// Make sure the scheduled event is processed
 			assertThat(scheduledFuture1.get()).isNotNull();
 			assertThat(scheduledFuture2.get()).isNotNull();
@@ -370,18 +384,20 @@ public class ServiceUseExtensionTest {
 	public void nomatchByFilter() throws Exception {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
-				try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-					Foo.class, "(foo=baz)", 1, TrackServices.DEFAULT_TIMEOUT)) {
+				try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
+					WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "(foo=baz)",
+						1,
+					TrackServices.DEFAULT_TIMEOUT)) {
 
 					final Foo afoo = new Foo() {};
+						BundleContext bundleContext = bce.getBundleContext();
 
-					ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
-						() -> it.getBundleContext()
-							.registerService(Foo.class, afoo,
+						ScheduledFuture<ServiceRegistration<?>> scheduledFuture = executor.schedule(
+							() -> bundleContext.registerService(Foo.class, afoo,
 								Dictionaries.dictionaryOf("foo", "bar", "case", testMethodName)),
-						0, TimeUnit.MILLISECONDS);
+							0, TimeUnit.MILLISECONDS);
 
-					it.init();
+						it.init(bundleContext);
 					// Make sure the scheduled event is processed
 					assertThat(scheduledFuture.get()).isNotNull();
 				}
@@ -392,9 +408,27 @@ public class ServiceUseExtensionTest {
 	public void malformedFilter() throws Exception {
 		assertThatExceptionOfType(InvalidSyntaxException.class) //
 			.isThrownBy(() -> {
-				try (WithServiceUseExtension<Foo> it = new WithServiceUseExtension<Foo>(extensionContext, //
-					Foo.class, "(foo=baz", 1, TrackServices.DEFAULT_TIMEOUT)) {
+				try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "(foo=baz", 1,
+					TrackServices.DEFAULT_TIMEOUT)) {
+				}
+			});
+	}
 
+	@Test
+	public void negativeCardinality() throws Exception {
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+			.isThrownBy(() -> {
+				try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "", -1,
+					TrackServices.DEFAULT_TIMEOUT)) {
+				}
+			});
+	}
+
+	@Test
+	public void negativeTimeout() throws Exception {
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+			.isThrownBy(() -> {
+				try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "", 1, -1)) {
 				}
 			});
 	}

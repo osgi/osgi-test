@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectInstallBundle;
 import org.osgi.test.common.install.InstallBundle;
 
 /**
@@ -32,14 +34,14 @@ public class BundleContextExtensionExampleTest {
 	// BundleContext injection
 
 	@Test
-	public void testBundleContext1(@BundleContextParameter BundleContext bundleContext1) {
+	public void testBundleContext1(@InjectBundleContext BundleContext bundleContext1) {
 		assertThat(bundleContext1).isNotNull()
 			.isSameAs(bundleContext2);
 	}
 
 	// OR
 
-	@BundleContextParameter
+	@InjectBundleContext
 	BundleContext bundleContext2;
 
 	@Test
@@ -50,14 +52,14 @@ public class BundleContextExtensionExampleTest {
 	// InstallBundle injection
 
 	@Test
-	public void testInstallBundle(@InstallBundleParameter InstallBundle installBundle1) {
+	public void testInstallBundle(@InjectInstallBundle InstallBundle installBundle1) {
 		assertThat(installBundle1).isNotNull()
 			.isSameAs(installBundle2);
 	}
 
 	// OR
 
-	@InstallBundleParameter
+	@InjectInstallBundle
 	InstallBundle installBundle2;
 
 	@Test

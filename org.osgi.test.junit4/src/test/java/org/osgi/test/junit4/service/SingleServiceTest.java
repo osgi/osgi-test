@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,34 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit5.service;
+package org.osgi.test.junit4.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Rule;
+import org.junit.Test;
+import org.osgi.service.log.LogService;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
-import org.osgi.test.junit5.types.Foo;
 
-@ExtendWith(ServiceExtension.class)
-public class ZeroCardinalityServiceTest {
+public class SingleServiceTest {
 
-	@InjectService(cardinality = 0)
-	Foo					foo;
-	@InjectService(cardinality = 0)
-	ServiceAware<Foo>	fServiceAware;
+	@Rule
+	public ServiceRule		sur	= new ServiceRule();
+
+	@InjectService
+	LogService					logService;
+	@InjectService
+	ServiceAware<LogService>	lsServiceAware;
 
 	@Test
-	public void testNoService() throws Exception {
-		assertThat(fServiceAware.getService()).isNull();
+	public void testWithLogServiceUse() throws Exception {
+		assertThat(lsServiceAware.getService()).isNotNull();
 	}
 
 	@Test
-	public void testNullField() throws Exception {
-		assertThat(foo).isNull();
-	}
-
-	@Test
-	public void testWithLogServiceParameter(@InjectService(cardinality = 0) Foo foo) throws Exception {
-		assertThat(foo).isNull();
+	public void testWithLogServiceField() throws Exception {
+		assertThat(logService).isNotNull();
 	}
 
 }

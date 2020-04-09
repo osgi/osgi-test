@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,49 @@
  * limitations under the License.
  */
 
-package org.osgi.test.junit5.context;
+package org.osgi.test.common.annotation;
 
 import static java.lang.annotation.ElementType.FIELD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.osgi.test.common.install.InstallBundle;
+
+/**
+ * Inject {@link InstallBundle} into test classes and methods.
+ * <p>
+ * The {@link InstallBundle} implementation provided by this rule simplifies
+ * installation of embedded bundles.
+ * <p>
+ * Example:
+ *
+ * <pre>
+ * // For JUnit5
+ * &#64;ExtendWith(BundleContextExtension.class)
+ * class MyTests {
+ * 	// For JUnit4
+ * 	&#64;Rule
+ * 	BundleContextRule bcr = new BundleContextRule();
+ *
+ * 	&#64;InjectInstallBundle
+ * 	InstallBundle installBundle;
+ *
+ * 	&#64;Test
+ * 	public void test() {
+ * 		// use installBundle
+ * 	}
+ * }
+ * </pre>
+ */
+@Inherited
 @Target({
 	FIELD, PARAMETER
 })
 @Retention(RUNTIME)
 @Documented
-public @interface InstallBundleParameter {}
+public @interface InjectInstallBundle {}

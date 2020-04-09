@@ -16,11 +16,20 @@
 
 package org.osgi.test.junit4.context;
 
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
+import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFields;
+import static org.osgi.test.common.inject.FieldInjector.setField;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.List;
+
+import org.junit.rules.MethodRule;
+import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectInstallBundle;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.install.InstallBundle;
 
@@ -37,27 +46,53 @@ import org.osgi.test.common.install.InstallBundle;
  * &#64;Rule
  * public BundleContextRule rule = new BundleContextRule();
  *
+ * &#64;InjectBundleContext
+ * BundleContext bundleContext;
+ *
  * &#64;Test
  * public void aTest() {
- * 	Bundle bundle = rule.get()
- * 		.getBundle();
+ * 	Bundle bundle = bundleContext.getBundle();
  * }
  * </pre>
  */
-public class BundleContextRule implements AutoCloseable, InstallBundle, TestRule {
+public class BundleContextRule implements AutoCloseable, InstallBundle, MethodRule {
 
-	private BundleContext bundleContext;
+	private volatile BundleContext	bundleContext;
+	private volatile InstallBundle	installBundle;
 
 	@Override
 	public BundleContext getBundleContext() {
 		return bundleContext;
 	}
 
-	public void init(Class<?> testClass) {
-		if (bundleContext == null) {
-			bundleContext = CloseableBundleContext.proxy(testClass, FrameworkUtil.getBundle(testClass)
-				.getBundleContext());
+	public BundleContextRule init(Object testInstance) {
+		if (this.bundleContext != null) {
+			return this;
 		}
+
+		BundleContext bundleContext = CloseableBundleContext.proxy(testInstance
+			.getClass(),
+			FrameworkUtil.getBundle(testInstance.getClass())
+				.getBundleContext());
+
+		installBundle = new InstallBundleImpl(bundleContext);
+
+		List<Field> fields = findAnnotatedNonStaticFields(testInstance.getClass(), InjectBundleContext.class);
+
+		fields.forEach(field -> {
+			assertFieldIsBundleContext(field);
+			setField(field, testInstance, bundleContext);
+		});
+
+		fields = findAnnotatedNonStaticFields(testInstance.getClass(), InjectInstallBundle.class);
+
+		fields.forEach(field -> {
+			assertFieldIsInstallBundle(field);
+			setField(field, testInstance, installBundle);
+		});
+
+		this.bundleContext = bundleContext;
+		return this;
 	}
 
 	@Override
@@ -65,15 +100,16 @@ public class BundleContextRule implements AutoCloseable, InstallBundle, TestRule
 		if (bundleContext != null) {
 			((AutoCloseable) bundleContext).close();
 			bundleContext = null;
+			installBundle = null;
 		}
 	}
 
 	@Override
-	public Statement apply(Statement statement, Description description) {
+	public Statement apply(Statement statement, FrameworkMethod method, Object testInstance) {
+		init(testInstance);
 		return new Statement() {
 			@Override
 			public void evaluate() throws Throwable {
-				init(description.getTestClass());
 				try {
 					statement.evaluate();
 				} finally {
@@ -81,6 +117,53 @@ public class BundleContextRule implements AutoCloseable, InstallBundle, TestRule
 				}
 			}
 		};
+	}
+
+	private void assertIsBundleContext(Class<?> type) {
+		if (type != BundleContext.class) {
+			throw new RuntimeException("Can only resolve @" + InjectBundleContext.class.getSimpleName()
+				+ " field of type " + BundleContext.class.getName() + " but was: " + type.getName());
+		}
+	}
+
+	private void assertIsInstallBundle(Class<?> type) {
+		if (type != InstallBundle.class) {
+			throw new RuntimeException("Can only resolve @" + InjectInstallBundle.class.getSimpleName()
+				+ " field of type " + InstallBundle.class.getName() + " but was: " + type.getName());
+		}
+	}
+
+	private void assertFieldIsBundleContext(Field field) {
+		assertIsBundleContext(field.getType());
+		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
+			|| Modifier.isStatic(field.getModifiers())) {
+			throw new RuntimeException(
+				InjectBundleContext.class.getName() + " field [" + field + "] must not be final, private or static.");
+		}
+	}
+
+	private void assertFieldIsInstallBundle(Field field) {
+		assertIsInstallBundle(field.getType());
+		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
+			|| Modifier.isStatic(field.getModifiers())) {
+			throw new RuntimeException(
+				InjectInstallBundle.class.getName() + " field [" + field + "] must not be final, private or static.");
+		}
+	}
+
+	public static class InstallBundleImpl implements InstallBundle {
+
+		private final BundleContext bundleContext;
+
+		InstallBundleImpl(BundleContext proxiedBundleContext) {
+			this.bundleContext = proxiedBundleContext;
+		}
+
+		@Override
+		public BundleContext getBundleContext() {
+			return bundleContext;
+		}
+
 	}
 
 }

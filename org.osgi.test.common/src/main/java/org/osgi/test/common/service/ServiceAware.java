@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.SortedMap;
 
 import org.osgi.annotation.versioning.ProviderType;
+import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 
 @ProviderType
@@ -46,5 +47,11 @@ public interface ServiceAware<T> {
 	int size();
 
 	T waitForService(long timeout) throws InterruptedException;
+
+	int getCardinality();
+
+	Filter getFilter();
+
+	long getTimeout();
 
 }

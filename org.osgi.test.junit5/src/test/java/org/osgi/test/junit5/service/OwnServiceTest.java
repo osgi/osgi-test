@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,31 +20,26 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.framework.BundleContext;
+import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.types.Foo;
 
+@ExtendWith(BundleContextExtension.class)
 @ExtendWith(ServiceExtension.class)
-public class ZeroCardinalityServiceTest {
+public class OwnServiceTest {
 
+	@InjectBundleContext
+	BundleContext				bundleContext;
 	@InjectService(cardinality = 0)
-	Foo					foo;
-	@InjectService(cardinality = 0)
-	ServiceAware<Foo>	fServiceAware;
+	ServiceAware<Foo>	fooServiceAware;
 
 	@Test
-	public void testNoService() throws Exception {
-		assertThat(fServiceAware.getService()).isNull();
-	}
-
-	@Test
-	public void testNullField() throws Exception {
-		assertThat(foo).isNull();
-	}
-
-	@Test
-	public void testWithLogServiceParameter(@InjectService(cardinality = 0) Foo foo) throws Exception {
-		assertThat(foo).isNull();
+	public void testWithLogServiceUse() throws Exception {
+		bundleContext.registerService(Foo.class, new Foo() {}, null);
+		assertThat(fooServiceAware.isEmpty()).isFalse();
 	}
 
 }

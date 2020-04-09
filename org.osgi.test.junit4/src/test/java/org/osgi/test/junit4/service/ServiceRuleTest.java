@@ -18,6 +18,7 @@ package org.osgi.test.junit4.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.osgi.test.common.tracking.TrackServices.DEFAULT_TIMEOUT;
 
 import java.util.concurrent.ScheduledFuture;
 
@@ -28,12 +29,13 @@ import org.junit.rules.TestName;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.dictionary.Dictionaries;
+import org.osgi.test.common.service.ServiceConfiguration;
 import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit4.ExecutorRule;
 import org.osgi.test.junit4.context.BundleContextRule;
 import org.osgi.test.junit4.types.Foo;
 
-public class ServiceUseRuleTest {
+public class ServiceRuleTest {
 
 	@Rule
 	public ExecutorRule	executor	= new ExecutorRule();
@@ -43,17 +45,16 @@ public class ServiceUseRuleTest {
 	@Test
 	public void basicAssumptions() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
-			ServiceUseRule<Foo> foos = new ServiceUseRule.Builder<>(Foo.class, bcRule) //
-				.cardinality(0)
-				.build()) {
+			ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 0,
+				TrackServices.DEFAULT_TIMEOUT)) {
 
-			bcRule.init(getClass());
+			bcRule.init(this);
 
 			assertThat(bcRule.getBundleContext()
 				.getBundle()
 				.getRegisteredServices()).isNull();
 
-			foos.init(getClass());
+			foos.init(bcRule.getBundleContext());
 
 			SoftAssertions softly = new SoftAssertions();
 
@@ -76,16 +77,16 @@ public class ServiceUseRuleTest {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
 				try (BundleContextRule bcRule = new BundleContextRule();
-					ServiceUseRule<Foo> foos = new ServiceUseRule.Builder<>(Foo.class, bcRule) //
-						.build()) {
+						ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1,
+							TrackServices.DEFAULT_TIMEOUT)) {
 
-					bcRule.init(getClass());
+						bcRule.init(this);
 
 					assertThat(bcRule.getBundleContext()
 						.getBundle()
 						.getRegisteredServices()).isNull();
 
-					foos.init(getClass());
+						foos.init(bcRule.getBundleContext());
 				}
 			})
 			.withMessageContaining(" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 200ms");
@@ -96,17 +97,15 @@ public class ServiceUseRuleTest {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
 				try (BundleContextRule bcRule = new BundleContextRule();
-					ServiceUseRule<Foo> foos = new ServiceUseRule.Builder<>(Foo.class, bcRule) //
-						.timeout(50)
-						.build()) {
+					ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1, 50)) {
 
-					bcRule.init(getClass());
+					bcRule.init(this);
 
 					assertThat(bcRule.getBundleContext()
 						.getBundle()
 						.getRegisteredServices()).isNull();
 
-					foos.init(getClass());
+						foos.init(bcRule.getBundleContext());
 				}
 			})
 			.withMessageContaining(" services (objectClass=org.osgi.test.junit4.types.Foo) didn't arrive within 50ms");
@@ -115,10 +114,10 @@ public class ServiceUseRuleTest {
 	@Test
 	public void successWhenService() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
-			ServiceUseRule<Foo> foos = new ServiceUseRule.Builder<>(Foo.class, bcRule) //
-				.build();) {
+			ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1,
+				TrackServices.DEFAULT_TIMEOUT)) {
 
-			bcRule.init(getClass());
+			bcRule.init(this);
 
 			assertThat(bcRule.getBundleContext()
 				.getBundle()
@@ -130,7 +129,7 @@ public class ServiceUseRuleTest {
 				.schedule(() -> bcRule.getBundleContext()
 					.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", name.getMethodName())), 0);
 
-			foos.init(getClass());
+			foos.init(bcRule.getBundleContext());
 
 			// Make sure the scheduled event is processed
 			assertThat(scheduledFuture.get()).isNotNull();
@@ -157,10 +156,9 @@ public class ServiceUseRuleTest {
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
-			ServiceUseRule<Foo> foos = new ServiceUseRule.Builder<>(Foo.class, bcRule).timeout(1000)
-				.build()) {
+			ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1, 1000)) {
 
-			bcRule.init(getClass());
+			bcRule.init(this);
 
 			assertThat(bcRule.getBundleContext()
 				.getBundle()
@@ -172,7 +170,7 @@ public class ServiceUseRuleTest {
 				.schedule(() -> bcRule.getBundleContext()
 					.registerService(Foo.class, afoo, Dictionaries.dictionaryOf("case", name.getMethodName())), 0);
 
-			foos.init(getClass());
+			foos.init(bcRule.getBundleContext());
 
 			// Make sure the scheduled event is processed
 			assertThat(scheduledFuture.get()).isNotNull();
@@ -220,10 +218,10 @@ public class ServiceUseRuleTest {
 	@Test
 	public void matchByFilter() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
-			ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule).filter("(foo=bar)")
-				.build()) {
+			ServiceConfiguration<Foo> fooRule = new ServiceConfiguration<>(Foo.class, "(foo=bar)", new String[0], 1,
+				TrackServices.DEFAULT_TIMEOUT)) {
 
-			bcRule.init(getClass());
+			bcRule.init(this);
 
 			assertThat(bcRule.getBundleContext()
 				.getBundle()
@@ -236,7 +234,7 @@ public class ServiceUseRuleTest {
 					Dictionaries.dictionaryOf("foo", "bar", "case", name.getMethodName())),
 				0);
 
-			fooRule.init(getClass());
+			fooRule.init(bcRule.getBundleContext());
 
 			// Make sure the scheduled event is processed
 			assertThat(scheduledFuture.get()).isNotNull();
@@ -284,11 +282,10 @@ public class ServiceUseRuleTest {
 	@Test
 	public void matchMultiple() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
-			ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule) //
-				.cardinality(2)
-				.build()) {
+			ServiceConfiguration<Foo> fooRule = new ServiceConfiguration<>(Foo.class, "", new String[0], 2,
+				DEFAULT_TIMEOUT)) {
 
-			bcRule.init(getClass());
+			bcRule.init(this);
 
 			assertThat(bcRule.getBundleContext()
 				.getBundle()
@@ -306,7 +303,7 @@ public class ServiceUseRuleTest {
 						.concat("_2"))),
 					0);
 
-			fooRule.init(getClass());
+			fooRule.init(bcRule.getBundleContext());
 
 			// Make sure the scheduled event is processed
 			assertThat(scheduledFuture1.get()).isNotNull();
@@ -357,11 +354,10 @@ public class ServiceUseRuleTest {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
 				try (BundleContextRule bcRule = new BundleContextRule();
-					ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule) //
-						.filter("(foo=baz)")
-						.build()) {
+						ServiceConfiguration<Foo> fooRule = new ServiceConfiguration<>(Foo.class, "(foo=baz)",
+							new String[0], 1, DEFAULT_TIMEOUT)) {
 
-					bcRule.init(getClass());
+						bcRule.init(this);
 
 					assertThat(bcRule.getBundleContext()
 						.getBundle()
@@ -375,7 +371,7 @@ public class ServiceUseRuleTest {
 								Dictionaries.dictionaryOf("foo", "bar", "case", name.getMethodName())),
 							0);
 
-					fooRule.init(getClass());
+						fooRule.init(bcRule.getBundleContext());
 
 					// Make sure the scheduled event is processed
 					assertThat(scheduledFuture.get()).isNotNull();
@@ -388,17 +384,29 @@ public class ServiceUseRuleTest {
 		assertThatExceptionOfType(InvalidSyntaxException.class) //
 			.isThrownBy(() -> {
 				try (BundleContextRule bcRule = new BundleContextRule();
-					ServiceUseRule<Foo> fooRule = new ServiceUseRule.Builder<>(Foo.class, bcRule) //
-						.filter("(foo=baz")
-						.build()) {
+						ServiceConfiguration<Foo> fooRule = new ServiceConfiguration<>(Foo.class, "(foo=baz",
+							new String[0], 1, DEFAULT_TIMEOUT)) {
+				}
+			});
+	}
 
-					bcRule.init(getClass());
+	@Test
+	public void negativeCardinality() throws Exception {
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+			.isThrownBy(() -> {
+				try (BundleContextRule bcRule = new BundleContextRule();
+						ServiceConfiguration<Foo> fooRule = new ServiceConfiguration<>(Foo.class, "", new String[0], -1,
+							DEFAULT_TIMEOUT)) {}
+			});
+	}
 
-					assertThat(bcRule.getBundleContext()
-						.getBundle()
-						.getRegisteredServices()).isNull();
-
-					fooRule.init(getClass());
+	@Test
+	public void negativeTimeout() throws Exception {
+		assertThatExceptionOfType(IllegalArgumentException.class) //
+			.isThrownBy(() -> {
+				try (BundleContextRule bcRule = new BundleContextRule();
+						ServiceConfiguration<Foo> fooRule = new ServiceConfiguration<>(Foo.class, "", new String[0], 1,
+							-1)) {
 				}
 			});
 	}
