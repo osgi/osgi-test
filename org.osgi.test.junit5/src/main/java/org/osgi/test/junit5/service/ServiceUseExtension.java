@@ -16,14 +16,17 @@
 
 package org.osgi.test.junit5.service;
 
-import static java.util.Objects.requireNonNull;
 import static org.junit.platform.commons.util.AnnotationUtils.findAnnotatedFields;
-import static org.junit.platform.commons.util.ReflectionUtils.isPrivate;
 import static org.junit.platform.commons.util.ReflectionUtils.makeAccessible;
 import static org.osgi.test.common.exceptions.Exceptions.unchecked;
-import static org.osgi.test.common.filter.Filters.format;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -31,123 +34,26 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.platform.commons.util.ReflectionUtils;
-import org.osgi.framework.Filter;
-import org.osgi.test.common.service.BaseServiceUse;
-import org.osgi.test.common.tracking.TrackServices;
+import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit5.context.BundleContextExtension;
 
-public class ServiceUseExtension<T> extends BaseServiceUse<T>
+public class ServiceUseExtension<T>
 	implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
-
-	public static class Builder<T> {
-
-		private final Class<T>	serviceType;
-		private Filter			filter;
-		private int				cardinality	= 1;
-		private long			timeout		= TrackServices.DEFAULT_TIMEOUT;
-
-		/**
-		 * Create with the given service type.
-		 *
-		 * @param serviceType of the service
-		 */
-		public Builder(Class<T> serviceType) {
-			this.serviceType = requireNonNull(serviceType);
-			this.filter = format("(objectClass=%s)", serviceType.getName());
-		}
-
-		/**
-		 * Filter string used to target more specific services.
-		 *
-		 * @param filter string used to target more specific services
-		 */
-		public Builder<T> filter(String filter) {
-			this.filter = format("(&%s%s)", this.filter.toString(), requireNonNull(filter));
-			return this;
-		}
-
-		/**
-		 * Filter string used to target more specific services using the
-		 * {@code String.format} pattern.
-		 *
-		 * @param format a format string
-		 * @param args arguments to the format string
-		 */
-		public Builder<T> filter(String format, Object... args) {
-			this.filter = format("(&%s%s)", this.filter.toString(), String.format(requireNonNull(format), args));
-			return this;
-		}
-
-		/**
-		 * Indicate the number of services that are required to arrive within
-		 * the specified timeout before starting the test.
-		 *
-		 * @param cardinality the number of services required before starting
-		 *            the test
-		 */
-		public Builder<T> cardinality(int cardinality) {
-			if (cardinality < 0) {
-				throw new IllegalArgumentException("cardinality must be zero or greater");
-			}
-			this.cardinality = cardinality;
-			return this;
-		}
-
-		/**
-		 * Indicate require services must arrive within the specified timeout.
-		 *
-		 * @param timeout the timeout after which {@link AssertionError} is
-		 *            thrown
-		 */
-		public Builder<T> timeout(long timeout) {
-			if (timeout < 0) {
-				throw new IllegalArgumentException("timeout must be zero or greater");
-			}
-			this.timeout = timeout;
-			return this;
-		}
-
-		public ServiceUseExtension<T> build() {
-			return new ServiceUseExtension<>(serviceType, filter, cardinality, timeout);
-		}
-
-	}
 
 	final static Namespace					NAMESPACE	= Namespace.create(ServiceUseExtension.class);
 
-	private final Filter					filter;
-	private final int						cardinality;
-	private final long						timeout;
-	private volatile TrackServices<T>		trackServices;
-
-	protected ServiceUseExtension(Class<T> serviceType, Filter filter, int cardinality, long timeout) {
-		super(serviceType);
-		this.filter = filter;
-		this.cardinality = cardinality;
-		this.timeout = timeout;
-	}
-
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		// set this in order to be able to honour the BaseServiceUse contract
-		trackServices = getTrackServices(extensionContext);
-		injectFields(trackServices, extensionContext, extensionContext.getRequiredTestInstance(),
+		injectFields(extensionContext, extensionContext.getRequiredTestInstance(),
 			ReflectionUtils::isNotStatic);
 	}
 
 	@Override
 	public void afterEach(ExtensionContext extensionContext) throws Exception {
-		CloseableTrackServices<?> closeableTrackServices = extensionContext.getStore(NAMESPACE)
-			.remove(filter.toString(), CloseableTrackServices.class);
-		if (closeableTrackServices != null) {
-			closeableTrackServices.close();
-		}
-		trackServices = null;
 		BundleContextExtension.cleanup(extensionContext);
 	}
 
@@ -155,91 +61,108 @@ public class ServiceUseExtension<T> extends BaseServiceUse<T>
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
 
-		assertRequired();
-		return getTrackServices(extensionContext).tracker()
-			.getService();
+		Optional<ServiceUseParameter> supo = parameterContext.findAnnotation(ServiceUseParameter.class);
+		Parameter parameter = parameterContext.getParameter();
+		Class<?> memberType = parameter.getType();
+		Type genericMemberType = parameter.getParameterizedType();
+
+		return resolveReturnValue(memberType, genericMemberType, supo.get(), extensionContext);
 	}
 
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
-		boolean annotated = parameterContext.isAnnotated(ServiceUseParameter.class);
-		if (annotated && parameterContext.getParameter()
-			.getType()
-			.equals(getServiceType())) {
 
+		if (!parameterContext.isAnnotated(ServiceUseParameter.class)) {
+			return false;
+		}
+
+		Parameter parameter = parameterContext.getParameter();
+		Class<?> memberType = parameter.getType();
+		Type genericMemberType = parameter.getParameterizedType();
+		Type serviceType = genericMemberType;
+
+		if (List.class.isAssignableFrom(memberType) && (genericMemberType instanceof ParameterizedType)) {
+			serviceType = ((ParameterizedType) genericMemberType).getActualTypeArguments()[0];
+		}
+		else if (ServiceAware.class.isAssignableFrom(memberType) && (genericMemberType instanceof ParameterizedType)) {
+			serviceType = ((ParameterizedType) genericMemberType).getActualTypeArguments()[0];
+		}
+		// The service type must be a raw type
+		if (serviceType instanceof Class) {
 			return true;
 		}
+
 		return false;
 	}
 
-	private void assertRequired() {
-		if (cardinality < 1) {
+	static void assertValidFieldCandidate(Field field) {
+		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
+			|| Modifier.isStatic(field.getModifiers())) {
 			throw new ExtensionConfigurationException(
-				"Can only resolve @ServiceParameter when cardinality is greater than 0.");
+				"@ServiceParameter field [" + field + "] must not be final, private or static.");
 		}
 	}
 
-	private void assertValidFieldCandidate(Field field, TrackServices<T> trackServices) {
-		assertRequired();
-		if (isPrivate(field)) {
-			throw new ExtensionConfigurationException("@ServiceParameter field [" + field + "] must not be private.");
-		}
-	}
-
-	private void injectFields(TrackServices<T> ts, ExtensionContext extensionContext, Object testInstance,
+	static void injectFields(
+		ExtensionContext extensionContext,
+		Object testInstance,
 		Predicate<Field> predicate) {
-		findAnnotatedFields(extensionContext.getRequiredTestClass(), ServiceUseParameter.class, predicate)
-			.forEach(field -> {
-				if (!field.getType()
-					.equals(getServiceType())) {
-					return;
-				}
-				assertValidFieldCandidate(field, ts);
-				unchecked(() -> makeAccessible(field).set(testInstance, ts.tracker()
-					.getService()));
+
+		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), ServiceUseParameter.class,
+			predicate);
+
+		fields.forEach(field -> {
+				assertValidFieldCandidate(field);
+
+				ServiceUseParameter serviceUseParameter = field.getAnnotation(ServiceUseParameter.class);
+				Class<?> memberType = field.getType();
+				Type genericMemberType = field.getGenericType();
+
+				unchecked(() -> makeAccessible(field).set(testInstance,
+					resolveReturnValue(memberType, genericMemberType, serviceUseParameter, extensionContext)));
 			});
 	}
 
-	private TrackServices<T> getTrackServices(ExtensionContext extensionContext) {
+	static <X> ServiceUseConfiguration<X> getServiceUseConfiguration(
+		ServiceUseParameter serviceUseParameter,
+		Class<X> serviceType,
+		ExtensionContext extensionContext) {
 		@SuppressWarnings("unchecked")
-		CloseableTrackServices<T> closeableTrackServices = extensionContext.getStore(NAMESPACE)
-			.getOrComputeIfAbsent(filter.toString(), k -> {
-				TrackServices<T> ts = new TrackServices<>(filter, cardinality, timeout);
-				ts.init(BundleContextExtension.getBundleContext(extensionContext));
-				return new CloseableTrackServices<T>(ts);
-			}, CloseableTrackServices.class);
-		return closeableTrackServices.get();
+		ServiceUseConfiguration<X> closeableTrackServices = extensionContext.getStore(
+			NAMESPACE)
+			.getOrComputeIfAbsent(serviceUseParameter,
+				k -> new ServiceUseConfiguration<>(serviceType, extensionContext, serviceUseParameter.filter(),
+					serviceUseParameter.filterArguments(), serviceUseParameter.cardinality(),
+					serviceUseParameter.timeout()).init(),
+				ServiceUseConfiguration.class);
+		return closeableTrackServices;
 	}
 
-	@Override
-	protected TrackServices<T> getTrackServices() {
-		return trackServices;
-	}
+	static Object resolveReturnValue(Class<?> memberType, Type genericMemberType,
+		ServiceUseParameter serviceUseParameter,
+		ExtensionContext extensionContext) throws ParameterResolutionException {
 
-	public static class CloseableTrackServices<T> implements CloseableResource {
+		Type serviceType = genericMemberType;
 
-		private final TrackServices<T> trackServices;
-
-		CloseableTrackServices(TrackServices<T> trackServices) {
-			this.trackServices = trackServices;
+		if (List.class.isAssignableFrom(memberType) && (genericMemberType instanceof ParameterizedType)) {
+			serviceType = ((ParameterizedType) serviceType).getActualTypeArguments()[0];
+		} else if (ServiceAware.class.isAssignableFrom(memberType)
+			&& (genericMemberType instanceof ParameterizedType)) {
+			serviceType = ((ParameterizedType) serviceType).getActualTypeArguments()[0];
 		}
 
-		@Override
-		public void close() throws Exception {
-			trackServices.close();
+		ServiceUseConfiguration<?> configuration = getServiceUseConfiguration(serviceUseParameter,
+			(Class<?>) serviceType, extensionContext);
+
+		if (List.class.isAssignableFrom(memberType) && (genericMemberType instanceof ParameterizedType)) {
+			return configuration.getServices();
+		} else if (ServiceAware.class.isAssignableFrom(memberType)
+			&& (genericMemberType instanceof ParameterizedType)) {
+			return configuration;
 		}
 
-		public TrackServices<T> get() {
-			return trackServices;
-		}
-
+		return configuration.getService();
 	}
 
-	@Override
-	public String toString() {
-		return String.format(
-			"ServiceUseExtension [Class=\"%s\", filter=\"%s\", cardinality=%s, timeout=%s]",
-			getServiceType(), getFilter(), getCardinality(), getTimeout());
-	}
 }

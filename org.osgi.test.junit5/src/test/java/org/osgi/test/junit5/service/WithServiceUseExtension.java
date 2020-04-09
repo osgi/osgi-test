@@ -16,16 +16,13 @@
 
 package org.osgi.test.junit5.service;
 
-import static org.osgi.test.common.filter.Filters.format;
-
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Filter;
 import org.osgi.test.junit5.context.BundleContextExtension;
 
 class WithServiceUseExtension<T> implements AutoCloseable {
 	private final ExtensionContext	extensionContext;
-	final ServiceUseExtension<T>	serviceUseExtension;
+	final ServiceUseConfiguration<T>	serviceUseConfiguration;
 
 	public WithServiceUseExtension(ExtensionContext extensionContext, Class<T> serviceType, String filterString,
 		int cardinality, long timeout)
@@ -33,27 +30,24 @@ class WithServiceUseExtension<T> implements AutoCloseable {
 
 		this.extensionContext = extensionContext;
 
-		Filter filter = (filterString == null) ? format("(objectClass=%s)", serviceType.getName())
-			: format("(&(objectClass=%s)%s)", serviceType.getName(), filterString);
-
-		this.serviceUseExtension = new ServiceUseExtension<>(serviceType,
-			filter, cardinality, timeout);
+		this.serviceUseConfiguration = new ServiceUseConfiguration<>(serviceType, extensionContext,
+			(filterString == null) ? "" : filterString, new String[0], cardinality, timeout);
 	}
 
 	public void init() throws Exception {
-		this.serviceUseExtension.beforeEach(extensionContext);
+		serviceUseConfiguration.init();
 	}
 
 	@Override
 	public void close() throws Exception {
-		serviceUseExtension.afterEach(extensionContext);
+		serviceUseConfiguration.close();
 	}
 
 	public BundleContext getBundleContext() {
 		return BundleContextExtension.getBundleContext(extensionContext);
 	}
 
-	public ServiceUseExtension<T> getExtension() {
-		return serviceUseExtension;
+	public ServiceUseConfiguration<T> getExtension() {
+		return serviceUseConfiguration;
 	}
 }
