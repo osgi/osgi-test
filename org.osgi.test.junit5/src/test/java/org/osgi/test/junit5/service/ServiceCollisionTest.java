@@ -30,11 +30,10 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.dictionary.Dictionaries;
-import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit5.types.Foo;
 
 @ExtendWith(ServiceExtension.class)
-public class MultiCardinalityServiceTest {
+public class ServiceCollisionTest {
 
 	private static List<ServiceRegistration<?>> registrations = new CopyOnWriteArrayList<>();
 
@@ -42,15 +41,11 @@ public class MultiCardinalityServiceTest {
 	public static void beforeEach() {
 		// We can't use the @InjectBundleContext because we're testing the test
 		// support
-		BundleContext bundleContext = FrameworkUtil.getBundle(
-			MultiCardinalityServiceTest.class)
+		BundleContext bundleContext = FrameworkUtil.getBundle(MultiCardinalityServiceTest.class)
 			.getBundleContext();
-		registrations.add(bundleContext.registerService(Foo.class, new Foo() {},
-			Dictionaries.dictionaryOf("entry", "1")));
-		registrations.add(bundleContext.registerService(Foo.class, new Foo() {},
-			Dictionaries.dictionaryOf("entry", "2")));
-		registrations.add(bundleContext.registerService(Foo.class, new Foo() {},
-			Dictionaries.dictionaryOf("entry", "3")));
+		registrations
+			.add(bundleContext.registerService(Foo.class, new Foo() {}, Dictionaries.dictionaryOf("entry", "1")));
+		registrations.add(bundleContext.registerService(String.class, "bar", Dictionaries.dictionaryOf("entry", "2")));
 	}
 
 	@AfterAll
@@ -63,36 +58,15 @@ public class MultiCardinalityServiceTest {
 		});
 	}
 
-	@InjectService(cardinality = 3)
-	ServiceAware<Foo> fServiceAware;
+	@InjectService
+	Foo		foo;
+	@InjectService
+	String	bar;
 
 	@Test
-	public void testServiceAware3ServicesField() throws Exception {
-		assertThat(fServiceAware.getServices()).size()
-			.isEqualTo(3);
-	}
-
-	@Test
-	public void testServiceAware3ServicesParam(
-		@InjectService(cardinality = 3) ServiceAware<Foo> fServiceAware)
-		throws Exception {
-		assertThat(fServiceAware.getServices()).size()
-			.isEqualTo(3);
-	}
-
-	@InjectService(cardinality = 3)
-	List<Foo> foos;
-
-	@Test
-	public void testList3ServicesField() throws Exception {
-		assertThat(foos).size()
-			.isEqualTo(3);
-	}
-
-	@Test
-	public void testList3Services(@InjectService(cardinality = 3) List<Foo> foos) throws Exception {
-		assertThat(foos).size()
-			.isEqualTo(3);
+	public void testServiceAware3Services() throws Exception {
+		assertThat(foo).isNotNull();
+		assertThat(bar).isNotNull();
 	}
 
 }

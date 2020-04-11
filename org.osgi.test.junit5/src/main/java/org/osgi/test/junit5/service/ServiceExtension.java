@@ -39,6 +39,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.common.service.ServiceConfiguration;
+import org.osgi.test.common.service.ServiceConfigurationKey;
 
 /**
  * A JUnit 5 Extension to depend on OSGi services.
@@ -140,7 +141,7 @@ public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 		ExtensionContext extensionContext) {
 		@SuppressWarnings("unchecked")
 		ServiceConfiguration<X> serviceConfiguration = extensionContext.getStore(NAMESPACE)
-			.getOrComputeIfAbsent(injectService,
+			.getOrComputeIfAbsent(new ServiceConfigurationKey(serviceType, injectService),
 				k -> new ServiceConfiguration<>(serviceType, injectService.filter(), injectService.filterArguments(),
 					injectService.cardinality(), injectService.timeout()).init(bundleContext),
 				ServiceConfiguration.class);
