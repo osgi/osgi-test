@@ -37,6 +37,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.common.service.ServiceConfiguration;
+import org.osgi.test.common.service.ServiceConfigurationKey;
 
 /**
  * A JUnit 4 Rule to depend on OSGi services.
@@ -58,7 +59,7 @@ import org.osgi.test.common.service.ServiceConfiguration;
  */
 public class ServiceRule implements AutoCloseable, MethodRule {
 
-	private final Map<InjectService, ServiceConfiguration<?>>	configurations	= new ConcurrentHashMap<>();
+	private final Map<ServiceConfigurationKey, ServiceConfiguration<?>> configurations = new ConcurrentHashMap<>();
 
 	public ServiceRule init(Object testInstance) {
 		BundleContext bundleContext = FrameworkUtil.getBundle(testInstance
@@ -82,9 +83,10 @@ public class ServiceRule implements AutoCloseable, MethodRule {
 
 	@Override
 	public void close() throws Exception {
-		for (Iterator<Entry<InjectService, ServiceConfiguration<?>>> itr = configurations.entrySet()
+		for (Iterator<Entry<ServiceConfigurationKey, ServiceConfiguration<?>>> itr = configurations
+			.entrySet()
 			.iterator(); itr.hasNext();) {
-			Entry<InjectService, ServiceConfiguration<?>> entry = itr.next();
+			Entry<ServiceConfigurationKey, ServiceConfiguration<?>> entry = itr.next();
 			entry.getValue()
 				.close();
 			itr.remove();
@@ -118,17 +120,17 @@ public class ServiceRule implements AutoCloseable, MethodRule {
 		InjectService injectService,
 		Class<X> serviceType,
 		BundleContext bundleContext,
-		Map<InjectService, ServiceConfiguration<?>> configurations) {
+		Map<ServiceConfigurationKey, ServiceConfiguration<?>> configurations) {
 		@SuppressWarnings("unchecked")
 		ServiceConfiguration<X> closeableTrackServices = (ServiceConfiguration<X>) configurations.computeIfAbsent(
-			injectService,
+			new ServiceConfigurationKey(serviceType, injectService),
 			k -> new ServiceConfiguration<>(serviceType, injectService.filter(), injectService.filterArguments(),
 				injectService.cardinality(), injectService.timeout()).init(bundleContext));
 		return closeableTrackServices;
 	}
 
 	static Object resolveReturnValue(Class<?> memberType, Type genericMemberType, InjectService serviceUseParameter,
-		BundleContext bundleContext, Map<InjectService, ServiceConfiguration<?>> configurations) {
+		BundleContext bundleContext, Map<ServiceConfigurationKey, ServiceConfiguration<?>> configurations) {
 
 		Type serviceType = genericMemberType;
 
