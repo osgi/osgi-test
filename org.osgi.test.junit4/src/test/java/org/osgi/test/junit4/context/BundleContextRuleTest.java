@@ -38,6 +38,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.dictionary.Dictionaries;
+import org.osgi.test.common.install.InstallBundle;
 import org.osgi.test.junit4.types.Foo;
 
 public class BundleContextRuleTest {
@@ -50,7 +51,9 @@ public class BundleContextRuleTest {
 		Bundle bundle = null;
 
 		try (WithContextRule it = new WithContextRule(this)) {
-			bundle = it.rule.installBundle("foo/tbfoo.jar", false);
+			InstallBundle installBundle = new InstallBundle(it.rule.getBundleContext());
+
+			bundle = installBundle.installBundle("foo/tbfoo.jar", false);
 
 			assertThat(bundle).extracting(Bundle::getState)
 				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));
@@ -65,7 +68,9 @@ public class BundleContextRuleTest {
 		Bundle bundle = null;
 
 		try (WithContextRule it = new WithContextRule(this)) {
-			bundle = it.rule.installBundle("tb1.jar", false);
+			InstallBundle installBundle = new InstallBundle(it.rule.getBundleContext());
+
+			bundle = installBundle.installBundle("tb1.jar", false);
 
 			assertThat(bundle).extracting(Bundle::getState)
 				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));

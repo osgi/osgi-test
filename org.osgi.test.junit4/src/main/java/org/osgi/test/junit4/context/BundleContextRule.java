@@ -55,12 +55,11 @@ import org.osgi.test.common.install.InstallBundle;
  * }
  * </pre>
  */
-public class BundleContextRule implements AutoCloseable, InstallBundle, MethodRule {
+public class BundleContextRule implements AutoCloseable, MethodRule {
 
 	private volatile BundleContext	bundleContext;
 	private volatile InstallBundle	installBundle;
 
-	@Override
 	public BundleContext getBundleContext() {
 		return bundleContext;
 	}
@@ -75,7 +74,7 @@ public class BundleContextRule implements AutoCloseable, InstallBundle, MethodRu
 			FrameworkUtil.getBundle(testInstance.getClass())
 				.getBundleContext());
 
-		installBundle = new InstallBundleImpl(bundleContext);
+		installBundle = new InstallBundle(bundleContext);
 
 		List<Field> fields = findAnnotatedNonStaticFields(testInstance.getClass(), InjectBundleContext.class);
 
@@ -149,21 +148,6 @@ public class BundleContextRule implements AutoCloseable, InstallBundle, MethodRu
 			throw new RuntimeException(
 				InjectInstallBundle.class.getName() + " field [" + field + "] must not be final, private or static.");
 		}
-	}
-
-	public static class InstallBundleImpl implements InstallBundle {
-
-		private final BundleContext bundleContext;
-
-		InstallBundleImpl(BundleContext proxiedBundleContext) {
-			this.bundleContext = proxiedBundleContext;
-		}
-
-		@Override
-		public BundleContext getBundleContext() {
-			return bundleContext;
-		}
-
 	}
 
 }
