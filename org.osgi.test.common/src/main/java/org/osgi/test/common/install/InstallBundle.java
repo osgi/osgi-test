@@ -25,9 +25,13 @@ import java.util.Enumeration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
-public interface InstallBundle {
+public class InstallBundle {
 
-	BundleContext getBundleContext();
+	private final BundleContext bundleContext;
+
+	public InstallBundle(BundleContext bundleContext) {
+		this.bundleContext = bundleContext;
+	}
 
 	/**
 	 * Install and start a bundle embedded within the current bundle.
@@ -44,7 +48,7 @@ public interface InstallBundle {
 	 * @return installed and started bundle
 	 * @throws AssertionError if no bundle is found
 	 */
-	default Bundle installBundle(String pathToEmbeddedJar) {
+	public Bundle installBundle(String pathToEmbeddedJar) {
 		return installBundle(pathToEmbeddedJar, true);
 	}
 
@@ -64,22 +68,23 @@ public interface InstallBundle {
 	 * @return installed bundle
 	 * @throws AssertionError if no bundle is found
 	 */
-	default Bundle installBundle(String pathToEmbeddedJar, boolean startBundle) {
+	public Bundle installBundle(String pathToEmbeddedJar, boolean startBundle) {
 		int lastIndexOf = pathToEmbeddedJar.lastIndexOf('/');
-		String[] parts = new String[] {"/", pathToEmbeddedJar};
+		String[] parts = new String[] {
+			"/", pathToEmbeddedJar
+		};
 		if (lastIndexOf != -1) {
 			parts = new String[] {
 				pathToEmbeddedJar.substring(0, lastIndexOf), pathToEmbeddedJar.substring(lastIndexOf + 1)
 			};
 		}
-		Enumeration<URL> entries = getBundleContext().getBundle()
+		Enumeration<URL> entries = bundleContext.getBundle()
 			.findEntries(parts[0], parts[1], false);
 		if (!entries.hasMoreElements())
-			throw new AssertionError(
-				"No bundle entry " + pathToEmbeddedJar + " found in " + getBundleContext().getBundle());
+			throw new AssertionError("No bundle entry " + pathToEmbeddedJar + " found in " + bundleContext.getBundle());
 		try (InputStream is = entries.nextElement()
 			.openStream()) {
-			Bundle bundle = getBundleContext().installBundle(pathToEmbeddedJar, is);
+			Bundle bundle = bundleContext.installBundle(pathToEmbeddedJar, is);
 			if (startBundle) {
 				bundle.start();
 			}

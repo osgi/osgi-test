@@ -17,18 +17,28 @@
 package org.osgi.test.common.service;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.osgi.test.common.filter.Filters.format;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.function.Function;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
+import org.osgi.framework.ServiceReference;
 import org.osgi.test.common.tracking.TrackServices;
+import org.osgi.util.tracker.ServiceTracker;
 
-public class ServiceConfiguration<S> extends BaseServiceUse<S> {
+public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 
+	private final Class<S>			serviceType;
 	private final TrackServices<S>	trackServices;
 
 	public ServiceConfiguration(Class<S> serviceType, String format, String[] args, int cardinality, long timeout) {
-		super(serviceType);
+		this.serviceType = requireNonNull(serviceType);
 
 		Filter filter = format("(objectClass=%s)", serviceType.getName());
 		format = String.format(requireNonNull(format), (Object[]) requireNonNull(args));
@@ -52,12 +62,7 @@ public class ServiceConfiguration<S> extends BaseServiceUse<S> {
 
 	@Override
 	public void close() throws Exception {
-		super.close();
-	}
-
-	@Override
-	protected TrackServices<S> getTrackServices() {
-		return trackServices;
+		trackServices.close();
 	}
 
 	@Override
@@ -65,6 +70,91 @@ public class ServiceConfiguration<S> extends BaseServiceUse<S> {
 		return String.format(
 			"ServiceConfiguration [Class=\"%s\", filter=\"%s\", cardinality=%s, timeout=%s]",
 			getServiceType(), getFilter(), getCardinality(), getTimeout());
+	}
+
+	@Override
+	public int getCardinality() {
+		return trackServices.getCardinality();
+	}
+
+	@Override
+	public Filter getFilter() {
+		return trackServices.getFilter();
+	}
+
+	@Override
+	public S getService() {
+		return getTracker().getService();
+	}
+
+	@Override
+	public S getService(ServiceReference<S> reference) {
+		return getTracker().getService(reference);
+	}
+
+	@Override
+	public ServiceReference<S> getServiceReference() {
+		return getTracker().getServiceReference();
+	}
+
+	private <R> List<R> listOf(Function<ServiceReference<S>, R> mapper) {
+		ServiceReference<S>[] serviceReferences = getTracker().getServiceReferences();
+		if (serviceReferences == null) {
+			return new ArrayList<>();
+		}
+		return Arrays.stream(serviceReferences)
+			.sorted()
+			.map(mapper)
+			.collect(toList());
+	}
+
+	@Override
+	public List<ServiceReference<S>> getServiceReferences() {
+		return listOf(Function.identity());
+	}
+
+	@Override
+	public List<S> getServices() {
+		return listOf(this::getService);
+	}
+
+	@Override
+	public Class<S> getServiceType() {
+		return serviceType;
+	}
+
+	@Override
+	public long getTimeout() {
+		return trackServices.getTimeout();
+	}
+
+	@Override
+	public int getTrackingCount() {
+		return getTracker().getTrackingCount();
+	}
+
+	@Override
+	public SortedMap<ServiceReference<S>, S> getTracked() {
+		return getTracker().getTracked();
+	}
+
+	@Override
+	public boolean isEmpty() {
+		return getTracker().isEmpty();
+	}
+
+	@Override
+	public int size() {
+		return getTracker().size();
+	}
+
+	@Override
+	public S waitForService(long timeout) throws InterruptedException {
+		return getTracker().waitForService(timeout);
+	}
+
+	private ServiceTracker<S, S> getTracker() {
+		return trackServices.tracker();
 	}
 
 }

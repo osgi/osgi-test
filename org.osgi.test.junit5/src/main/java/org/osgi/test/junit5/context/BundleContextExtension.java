@@ -95,7 +95,7 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 
 	public static void cleanup(ExtensionContext extensionContext) throws Exception {
 		extensionContext.getStore(NAMESPACE)
-			.remove(INSTALL_BUNDLE_KEY, ExtensionInstallBundle.class);
+			.remove(INSTALL_BUNDLE_KEY, InstallBundle.class);
 		CloseableResourceBundleContext closeableResourceBundleContext = extensionContext.getStore(NAMESPACE)
 			.remove(BUNDLE_CONTEXT_KEY, CloseableResourceBundleContext.class);
 		if (closeableResourceBundleContext != null) {
@@ -190,22 +190,7 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 	public static InstallBundle getInstallbundle(ExtensionContext extensionContext) {
 		return extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(INSTALL_BUNDLE_KEY,
-				key -> new ExtensionInstallBundle(getBundleContext(extensionContext)), ExtensionInstallBundle.class);
-	}
-
-	public static class ExtensionInstallBundle implements InstallBundle {
-
-		private final BundleContext bundleContext;
-
-		ExtensionInstallBundle(BundleContext proxiedBundleContext) {
-			this.bundleContext = proxiedBundleContext;
-		}
-
-		@Override
-		public BundleContext getBundleContext() {
-			return bundleContext;
-		}
-
+				key -> new InstallBundle(getBundleContext(extensionContext)), InstallBundle.class);
 	}
 
 	public static class CloseableResourceBundleContext implements CloseableResource {
