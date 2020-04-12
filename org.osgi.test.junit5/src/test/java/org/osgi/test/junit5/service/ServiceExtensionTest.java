@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.osgi.test.common.annotation.InjectService.DEFAULT_TIMEOUT;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -40,7 +41,6 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.dictionary.Dictionaries;
-import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit5.ExecutorExtension;
 import org.osgi.test.junit5.ExecutorParameter;
 import org.osgi.test.junit5.context.BundleContextExtension;
@@ -81,7 +81,7 @@ public class ServiceExtensionTest {
 	@Test
 	public void basicAssumptions() throws Exception {
 		try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null, 0,
-			TrackServices.DEFAULT_TIMEOUT)) {
+			DEFAULT_TIMEOUT)) {
 
 			it.init(BundleContextExtension.getBundleContext(extensionContext));
 
@@ -94,7 +94,7 @@ public class ServiceExtensionTest {
 			softly.assertThat(it.getExtension()
 				.getTimeout())
 				.as("getTimeout %s", it.getExtension())
-				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
+				.isEqualTo(DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
 				.as("getCardinality %s", it.getExtension())
@@ -109,7 +109,7 @@ public class ServiceExtensionTest {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
 				try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null, 1,
-					TrackServices.DEFAULT_TIMEOUT)) {
+						DEFAULT_TIMEOUT)) {
 					it.init(BundleContextExtension.getBundleContext(extensionContext));
 				}
 			})
@@ -130,9 +130,7 @@ public class ServiceExtensionTest {
 	@Test
 	public void successWhenService() throws Exception {
 		try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
-			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null,
-				1,
-			TrackServices.DEFAULT_TIMEOUT)) {
+			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null, 1, DEFAULT_TIMEOUT)) {
 
 			final Foo afoo = new Foo() {};
 
@@ -159,7 +157,7 @@ public class ServiceExtensionTest {
 			softly.assertThat(it.getExtension()
 				.getTimeout())
 				.as("getTimeout %s", it.getExtension())
-				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
+				.isEqualTo(DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getCardinality())
 				.as("getCardinality %s", it.getExtension())
@@ -240,9 +238,7 @@ public class ServiceExtensionTest {
 	@Test
 	public void matchByFilter() throws Exception {
 		try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
-			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "(foo=bar)",
-				1,
-			TrackServices.DEFAULT_TIMEOUT)) {
+			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "(foo=bar)", 1, DEFAULT_TIMEOUT)) {
 
 			final Foo afoo = new Foo() {};
 
@@ -277,7 +273,7 @@ public class ServiceExtensionTest {
 			softly.assertThat(it.getExtension()
 				.getTimeout())
 				.as("getTimeout %s", it.getExtension())
-				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
+				.isEqualTo(DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getTracked())
 				.as("waitForService %s", it.getExtension())
@@ -310,9 +306,7 @@ public class ServiceExtensionTest {
 	@Test
 	public void matchMultiple() throws Exception {
 		try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
-			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null,
-				2,
-			TrackServices.DEFAULT_TIMEOUT)) {
+			WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, null, 2, DEFAULT_TIMEOUT)) {
 
 			Foo s1 = new Foo() {}, s2 = new Foo() {};
 			BundleContext bundleContext = bce.getBundleContext();
@@ -350,7 +344,7 @@ public class ServiceExtensionTest {
 			softly.assertThat(it.getExtension()
 				.getTimeout())
 				.as("getTimeout %s", it.getExtension())
-				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
+				.isEqualTo(DEFAULT_TIMEOUT);
 			softly.assertThat(it.getExtension()
 				.getTracked())
 				.as("getTracked %s", it.getExtension())
@@ -385,9 +379,8 @@ public class ServiceExtensionTest {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
 				try (WithBundleContextExtension bce = new WithBundleContextExtension(extensionContext);
-					WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "(foo=baz)",
-						1,
-					TrackServices.DEFAULT_TIMEOUT)) {
+						WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "(foo=baz)", 1,
+							DEFAULT_TIMEOUT)) {
 
 					final Foo afoo = new Foo() {};
 						BundleContext bundleContext = bce.getBundleContext();
@@ -409,7 +402,7 @@ public class ServiceExtensionTest {
 		assertThatExceptionOfType(InvalidSyntaxException.class) //
 			.isThrownBy(() -> {
 				try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "(foo=baz", 1,
-					TrackServices.DEFAULT_TIMEOUT)) {
+					DEFAULT_TIMEOUT)) {
 				}
 			});
 	}
@@ -418,8 +411,8 @@ public class ServiceExtensionTest {
 	public void negativeCardinality() throws Exception {
 		assertThatExceptionOfType(IllegalArgumentException.class) //
 			.isThrownBy(() -> {
-				try (WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "", -1,
-					TrackServices.DEFAULT_TIMEOUT)) {
+				try (
+					WithServiceExtension<Foo> it = new WithServiceExtension<Foo>(Foo.class, "", -1, DEFAULT_TIMEOUT)) {
 				}
 			});
 	}

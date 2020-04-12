@@ -56,6 +56,8 @@ import java.lang.annotation.Target;
 @Documented
 public @interface InjectService {
 
+	static long DEFAULT_TIMEOUT = 200l;
+
 	/**
 	 * Filter string used to target more specific services using the
 	 * {@code String.format} pattern. Must use valid OSGi filter syntax.
@@ -76,6 +78,6 @@ public @interface InjectService {
 	/**
 	 * Indicate require services must arrive within the specified timeout.
 	 */
-	long timeout() default 200l;
+	long timeout() default DEFAULT_TIMEOUT;
 
 }
