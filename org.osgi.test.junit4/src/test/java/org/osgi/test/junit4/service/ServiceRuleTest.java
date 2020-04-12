@@ -18,7 +18,7 @@ package org.osgi.test.junit4.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.osgi.test.common.tracking.TrackServices.DEFAULT_TIMEOUT;
+import static org.osgi.test.common.annotation.InjectService.DEFAULT_TIMEOUT;
 
 import java.util.concurrent.ScheduledFuture;
 
@@ -30,7 +30,6 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.service.ServiceConfiguration;
-import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.test.junit4.ExecutorRule;
 import org.osgi.test.junit4.context.BundleContextRule;
 import org.osgi.test.junit4.types.Foo;
@@ -46,7 +45,7 @@ public class ServiceRuleTest {
 	public void basicAssumptions() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
 			ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 0,
-				TrackServices.DEFAULT_TIMEOUT)) {
+				DEFAULT_TIMEOUT)) {
 
 			bcRule.init(this);
 
@@ -63,7 +62,7 @@ public class ServiceRuleTest {
 				.isTrue();
 			softly.assertThat(foos.getTimeout())
 				.as("getTimeout %s", foos)
-				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
+				.isEqualTo(DEFAULT_TIMEOUT);
 			softly.assertThat(foos.getCardinality())
 				.as("getCardinality %s", foos)
 				.isEqualTo(0);
@@ -78,7 +77,7 @@ public class ServiceRuleTest {
 			.isThrownBy(() -> {
 				try (BundleContextRule bcRule = new BundleContextRule();
 						ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1,
-							TrackServices.DEFAULT_TIMEOUT)) {
+							DEFAULT_TIMEOUT)) {
 
 						bcRule.init(this);
 
@@ -115,7 +114,7 @@ public class ServiceRuleTest {
 	public void successWhenService() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
 			ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1,
-				TrackServices.DEFAULT_TIMEOUT)) {
+				DEFAULT_TIMEOUT)) {
 
 			bcRule.init(this);
 
@@ -144,7 +143,7 @@ public class ServiceRuleTest {
 				.isEqualTo(1);
 			softly.assertThat(foos.getTimeout())
 				.as("getTimeout %s", foos)
-				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
+				.isEqualTo(DEFAULT_TIMEOUT);
 			softly.assertThat(foos.getCardinality())
 				.as("getCardinality %s", foos)
 				.isEqualTo(1);
@@ -219,7 +218,7 @@ public class ServiceRuleTest {
 	public void matchByFilter() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
 			ServiceConfiguration<Foo> fooRule = new ServiceConfiguration<>(Foo.class, "(foo=bar)", new String[0], 1,
-				TrackServices.DEFAULT_TIMEOUT)) {
+				DEFAULT_TIMEOUT)) {
 
 			bcRule.init(this);
 
@@ -255,7 +254,7 @@ public class ServiceRuleTest {
 				.contains(afoo);
 			softly.assertThat(fooRule.getTimeout())
 				.as("getTimeout %s", fooRule)
-				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
+				.isEqualTo(DEFAULT_TIMEOUT);
 			softly.assertThat(fooRule.getTracked())
 				.as("getTracked %s", fooRule)
 				.isNotEmpty();
@@ -325,7 +324,7 @@ public class ServiceRuleTest {
 				.containsExactlyInAnyOrder(s1, s2);
 			softly.assertThat(fooRule.getTimeout())
 				.as("getTimeout %s", fooRule)
-				.isEqualTo(TrackServices.DEFAULT_TIMEOUT);
+				.isEqualTo(DEFAULT_TIMEOUT);
 			softly.assertThat(fooRule.getTracked())
 				.as("getTracked %s", fooRule)
 				.isNotEmpty();

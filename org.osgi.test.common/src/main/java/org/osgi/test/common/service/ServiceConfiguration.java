@@ -20,22 +20,29 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.osgi.test.common.filter.Filters.format;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.SortedMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-import org.osgi.test.common.tracking.TrackServices;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 
-	private final Class<S>			serviceType;
-	private final TrackServices<S>	trackServices;
+	private final int						cardinality;
+	private final Filter					filter;
+	private final Class<S>					serviceType;
+	private final long						timeout;
+	private volatile ServiceTracker<S, S>	tracker;
 
 	public ServiceConfiguration(Class<S> serviceType, String format, String[] args, int cardinality, long timeout) {
 		this.serviceType = requireNonNull(serviceType);
@@ -45,24 +52,60 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 		if (!format.isEmpty()) {
 			filter = format("(&%s%s)", filter.toString(), format);
 		}
+		this.filter = filter;
+
 		if (cardinality < 0) {
 			throw new IllegalArgumentException("cardinality must be zero or greater");
 		}
+		this.cardinality = cardinality;
+
 		if (timeout < 0) {
 			throw new IllegalArgumentException("timeout must be zero or greater");
 		}
-
-		trackServices = new TrackServices<>(filter, cardinality, timeout);
+		this.timeout = timeout;
 	}
 
 	public ServiceConfiguration<S> init(BundleContext bundleContext) {
-		trackServices.init(bundleContext);
+		CountDownLatch countDownLatch = new CountDownLatch(getCardinality());
+
+		ServiceTracker<S, S> tracker = new ServiceTracker<>(bundleContext, getFilter(),
+			new InnerCustomizer<>(bundleContext, countDownLatch, getCustomizer()));
+		tracker.open();
+
+		try {
+			final Instant endTime = Instant.now()
+				.plusMillis(getTimeout());
+			if (!countDownLatch.await(getTimeout(), TimeUnit.MILLISECONDS)) {
+				throw new AssertionError(
+					getCardinality() + " services " + getFilter() + " didn't arrive within " + getTimeout() + "ms");
+			}
+
+			// CountDownLatch is fired when the last addingService() is called,
+			// but this completes before the service is actually added to the
+			// tracker. Need to poll-wait for a bit while the actual addition
+			// completes (shouldn't be long).
+			while (tracker.size() < cardinality) {
+				if (Instant.now()
+					.isAfter(endTime)) {
+
+					throw new AssertionError(
+						getCardinality() + " services " + getFilter() + " didn't arrive within " + getTimeout() + "ms");
+				}
+				Thread.sleep(10);
+			}
+		} catch (InterruptedException e) {
+			throw new AssertionError(e);
+		}
+		this.tracker = tracker;
 		return this;
 	}
 
 	@Override
 	public void close() throws Exception {
-		trackServices.close();
+		final ServiceTracker<S, S> tracker = this.tracker;
+		if (tracker != null) {
+			tracker.close();
+		}
 	}
 
 	@Override
@@ -74,31 +117,41 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 
 	@Override
 	public int getCardinality() {
-		return trackServices.getCardinality();
+		return cardinality;
+	}
+
+	/**
+	 * Override by sub types in order to return a customizer used by the
+	 * tracker. The default implementation returns {@code null}.
+	 *
+	 * @return customizer used by the tracker
+	 */
+	public ServiceTrackerCustomizer<S, S> getCustomizer() {
+		return null;
 	}
 
 	@Override
 	public Filter getFilter() {
-		return trackServices.getFilter();
+		return filter;
 	}
 
 	@Override
 	public S getService() {
-		return getTracker().getService();
+		return tracker.getService();
 	}
 
 	@Override
 	public S getService(ServiceReference<S> reference) {
-		return getTracker().getService(reference);
+		return tracker.getService(reference);
 	}
 
 	@Override
 	public ServiceReference<S> getServiceReference() {
-		return getTracker().getServiceReference();
+		return tracker.getServiceReference();
 	}
 
 	private <R> List<R> listOf(Function<ServiceReference<S>, R> mapper) {
-		ServiceReference<S>[] serviceReferences = getTracker().getServiceReferences();
+		ServiceReference<S>[] serviceReferences = tracker.getServiceReferences();
 		if (serviceReferences == null) {
 			return new ArrayList<>();
 		}
@@ -125,36 +178,75 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 
 	@Override
 	public long getTimeout() {
-		return trackServices.getTimeout();
+		return timeout;
 	}
 
 	@Override
 	public int getTrackingCount() {
-		return getTracker().getTrackingCount();
+		return tracker.getTrackingCount();
 	}
 
 	@Override
 	public SortedMap<ServiceReference<S>, S> getTracked() {
-		return getTracker().getTracked();
+		return tracker.getTracked();
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return getTracker().isEmpty();
+		return tracker.isEmpty();
 	}
 
 	@Override
 	public int size() {
-		return getTracker().size();
+		return tracker.size();
 	}
 
 	@Override
 	public S waitForService(long timeout) throws InterruptedException {
-		return getTracker().waitForService(timeout);
+		return tracker.waitForService(timeout);
 	}
 
-	private ServiceTracker<S, S> getTracker() {
-		return trackServices.tracker();
+	private static class InnerCustomizer<S> implements ServiceTrackerCustomizer<S, S> {
+
+		private final BundleContext								bundleContext;
+		private final CountDownLatch							countDownLatch;
+		private final Optional<ServiceTrackerCustomizer<S, S>>	delegate;
+
+		InnerCustomizer(BundleContext bundleContext, CountDownLatch countDownLatch,
+			ServiceTrackerCustomizer<S, S> delegate) {
+			this.bundleContext = bundleContext;
+			this.countDownLatch = countDownLatch;
+			this.delegate = Optional.ofNullable(delegate);
+		}
+
+		@Override
+		public S addingService(ServiceReference<S> reference) {
+			final S service = delegate.map(c -> c.addingService(reference))
+				.orElseGet(() -> bundleContext.getService(reference));
+
+			try {
+				return service;
+			} finally {
+				if (service != null) {
+					countDownLatch.countDown();
+				}
+			}
+		}
+
+		@Override
+		public void modifiedService(ServiceReference<S> reference, S service) {
+			delegate.ifPresent(c -> c.modifiedService(reference, service));
+		}
+
+		@Override
+		public void removedService(ServiceReference<S> reference, S service) {
+			delegate.map(c -> {
+				c.removedService(reference, service);
+				return true;
+			})
+				.orElseGet(() -> bundleContext.ungetService(reference));
+		}
+
 	}
 
 }
