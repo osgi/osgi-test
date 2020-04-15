@@ -37,18 +37,18 @@
 	bnd.identity;id='junit-platform-launcher'
 -runbundles: \
 	assertj-core;version='[3.15.0,3.15.1)',\
-	junit-jupiter-api;version='[5.6.1,5.6.2)',\
-	junit-jupiter-engine;version='[5.6.1,5.6.2)',\
-	junit-platform-commons;version='[1.6.1,1.6.2)',\
-	junit-platform-engine;version='[1.6.1,1.6.2)',\
-	junit-platform-launcher;version='[1.6.1,1.6.2)',\
+	junit-jupiter-api;version='[5.6.2,5.6.3)',\
+	junit-jupiter-engine;version='[5.6.2,5.6.3)',\
+	junit-platform-commons;version='[1.6.2,1.6.3)',\
+	junit-platform-engine;version='[1.6.2,1.6.3)',\
+	junit-platform-launcher;version='[1.6.2,1.6.3)'\
 	net.bytebuddy.byte-buddy-agent;version='[1.10.5,1.10.6)',\
 	net.bytebuddy.byte-buddy;version='[1.10.5,1.10.6)',\
 	org.mockito.mockito-core;version='[3.3.3,3.3.4)',\
 	org.objenesis;version='[2.6.0,2.6.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.osgi.test.assertj;version='[0.9.0,0.9.1)',\
 	org.osgi.test.common;version='[0.9.0,0.9.1)',\
 	org.osgi.test.junit5-tests;version='[0.9.0,0.9.1)',\
 	org.osgi.test.junit5;version='[0.9.0,0.9.1)',\
-	org.osgi.test.assertj;version='[0.9.0,0.9.1)',\
 	osgi.promise;version='[6.0.0,6.0.1)'
