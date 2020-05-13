@@ -22,17 +22,4 @@ import org.osgi.util.promise.Promise;
 /**
  * Soft assertions for {@link Promise}s.
  */
-public class PromiseSoftAssertions extends SoftAssertions {
-	/**
-	 * Create a soft assertion for a {@link Promise}.
-	 *
-	 * @param actual The {@link Promise}.
-	 * @param <T> The type of the value contained in the {@link Promise}.
-	 * @return The created soft assertion.
-	 */
-	public <T> PromiseAssert<T> assertThat(Promise<? extends T> actual) {
-		@SuppressWarnings("unchecked")
-		PromiseAssert<T> softly = proxy(PromiseAssert.class, Promise.class, actual);
-		return softly;
-	}
-}
+public class PromiseSoftAssertions extends SoftAssertions implements PromiseSoftAssertionsProvider {}
