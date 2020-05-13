@@ -106,7 +106,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasSymbolicName(String expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getSymbolicName(), expected)) {
-			failWithMessage("%nExpecting%n  <%s>%nto have symbolic name:%n  <%s>%n but was:%n  <%s>", actual, expected,
+			failWithActualExpectedAndMessage(actual.getSymbolicName(), expected,
+				"%nExpecting%n  <%s>%nto have symbolic name:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getSymbolicName());
 		}
 		return myself;
@@ -121,7 +122,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasLocation(String expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getLocation(), expected)) {
-			failWithMessage("%nExpecting%n  <%s>%nto have location:%n  <%s>%n but was:%n  <%s>", actual, expected,
+			failWithActualExpectedAndMessage(actual.getLocation(), expected,
+				"%nExpecting%n  <%s>%nto have location:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getLocation());
 		}
 		return myself;
@@ -172,7 +174,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasBundleId(long expected) {
 		isNotNull();
 		if (actual.getBundleId() != expected) {
-			failWithMessage("%nExpecting%n  <%s>%nto have bundle ID:%n  <%d>%n but was:%n  <%d>", actual, expected,
+			failWithActualExpectedAndMessage(actual.getBundleId(), expected,
+				"%nExpecting%n  <%s>%nto have bundle ID:%n  <%d>%n but was:%n  <%d>", actual, expected,
 				actual.getBundleId());
 		}
 		return myself;
@@ -202,7 +205,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		isNotNull();
 		Version expectedVersion = getVersion(expected);
 		if (!Objects.equals(actual.getVersion(), expectedVersion)) {
-			failWithMessage("%nExpecting%n  <%s>%nto have version:%n  <%s>%n but was:%n  <%s>", actual, expected,
+			failWithActualExpectedAndMessage(actual.getVersion(), expected,
+				"%nExpecting%n  <%s>%nto have version:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getVersion());
 		}
 		return myself;
@@ -297,7 +301,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		return myself;
 	}
 
-	private static final int[] STATES = {
+	private static final int[]	STATES			= {
 		UNINSTALLED, INSTALLED, RESOLVED, STARTING, STOPPING, ACTIVE
 	};
 

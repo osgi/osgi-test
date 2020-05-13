@@ -60,7 +60,8 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		isNotNull();
 		int a = actual.getMajor();
 		if (expected != a) {
-			failWithMessage("%nExpecting%n <%s>%nto have major version:%n  <%d>%n but it was:%n  <%d>", actual,
+			failWithActualExpectedAndMessage(a, expected,
+				"%nExpecting%n <%s>%nto have major version:%n  <%d>%n but it was:%n  <%d>", actual,
 				expected, a);
 		}
 		return myself;
@@ -75,7 +76,8 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		isNotNull();
 		int a = actual.getMinor();
 		if (expected != a) {
-			failWithMessage("%nExpecting%n <%s>%nto have minor version:%n  <%d>%n but it was:%n  <%d>", actual,
+			failWithActualExpectedAndMessage(a, expected,
+				"%nExpecting%n <%s>%nto have minor version:%n  <%d>%n but it was:%n  <%d>", actual,
 				expected, a);
 		}
 		return myself;
@@ -90,7 +92,8 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		isNotNull();
 		int a = actual.getMicro();
 		if (expected != a) {
-			failWithMessage("%nExpecting%n <%s>%nto have micro version:%n <%d>%n but it was:%n <%d>", actual, expected,
+			failWithActualExpectedAndMessage(a, expected,
+				"%nExpecting%n <%s>%nto have micro version:%n <%d>%n but it was:%n <%d>", actual, expected,
 				a);
 		}
 		return myself;
@@ -105,7 +108,8 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		isNotNull();
 		String a = actual.getQualifier();
 		if (!Objects.equals(a, expected)) {
-			failWithMessage("%nExpecting%n <%s>%nto have qualifier:%n <%s>%n but it was:%n <%s>", actual, expected, a);
+			failWithActualExpectedAndMessage(a, expected,
+				"%nExpecting%n <%s>%nto have qualifier:%n <%s>%n but it was:%n <%s>", actual, expected, a);
 		}
 		return myself;
 	}
