@@ -25,9 +25,6 @@ import org.assertj.core.api.AbstractComparableAssert;
 import org.assertj.core.api.AbstractIntegerAssert;
 import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.ComparableAssert;
-import org.assertj.core.api.InstanceOfAssertFactories;
-import org.assertj.core.api.InstanceOfAssertFactory;
-import org.assertj.core.api.ObjectAssert;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 
@@ -38,22 +35,8 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		super(actual, selfType);
 	}
 
-	private static final InstanceOfAssertFactory<Version, ObjectAssert<Version>> VERSION_OBJECT = InstanceOfAssertFactories
-		.type(Version.class);
-
-	// TODO: when AssertJ 3.16 becomes available, get rid of this method and
-	// VERSION_OBJECT as it's only used for exposing extracting()
-	ObjectAssert<ACTUAL> asObjectAssert() {
-		@SuppressWarnings({
-			"unchecked", "rawtypes"
-		})
-		ObjectAssert<ACTUAL> objectAssert = (ObjectAssert) asInstanceOf(VERSION_OBJECT);
-		return objectAssert;
-	}
-
 	public AbstractIntegerAssert<?> hasMajorThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Version::getMajor, INTEGER);
+		return isNotNull().extracting(Version::getMajor, INTEGER);
 	}
 
 	public SELF hasMajor(int expected) {
@@ -61,15 +44,13 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		int a = actual.getMajor();
 		if (expected != a) {
 			failWithActualExpectedAndMessage(a, expected,
-				"%nExpecting%n <%s>%nto have major version:%n  <%d>%n but it was:%n  <%d>", actual,
-				expected, a);
+				"%nExpecting%n <%s>%nto have major version:%n  <%d>%n but it was:%n  <%d>", actual, expected, a);
 		}
 		return myself;
 	}
 
 	public AbstractIntegerAssert<?> hasMinorThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Version::getMinor, INTEGER);
+		return isNotNull().extracting(Version::getMinor, INTEGER);
 	}
 
 	public SELF hasMinor(int expected) {
@@ -77,15 +58,13 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		int a = actual.getMinor();
 		if (expected != a) {
 			failWithActualExpectedAndMessage(a, expected,
-				"%nExpecting%n <%s>%nto have minor version:%n  <%d>%n but it was:%n  <%d>", actual,
-				expected, a);
+				"%nExpecting%n <%s>%nto have minor version:%n  <%d>%n but it was:%n  <%d>", actual, expected, a);
 		}
 		return myself;
 	}
 
 	public AbstractIntegerAssert<?> hasMicroThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Version::getMicro, INTEGER);
+		return isNotNull().extracting(Version::getMicro, INTEGER);
 	}
 
 	public SELF hasMicro(int expected) {
@@ -93,15 +72,13 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		int a = actual.getMicro();
 		if (expected != a) {
 			failWithActualExpectedAndMessage(a, expected,
-				"%nExpecting%n <%s>%nto have micro version:%n <%d>%n but it was:%n <%d>", actual, expected,
-				a);
+				"%nExpecting%n <%s>%nto have micro version:%n <%d>%n but it was:%n <%d>", actual, expected, a);
 		}
 		return myself;
 	}
 
 	public AbstractStringAssert<?> hasQualifierThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Version::getQualifier, STRING);
+		return isNotNull().extracting(Version::getQualifier, STRING);
 	}
 
 	public SELF hasQualifier(String expected) {
