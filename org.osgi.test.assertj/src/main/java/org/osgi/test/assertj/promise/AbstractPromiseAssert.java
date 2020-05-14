@@ -28,9 +28,9 @@ import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assert;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
-import org.assertj.core.api.ObjectAssert;
 import org.osgi.test.common.exceptions.Exceptions;
 import org.osgi.util.promise.Promise;
 
@@ -42,20 +42,8 @@ import org.osgi.util.promise.Promise;
 public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<SELF, ACTUAL, RESULT>, ACTUAL extends Promise<? extends RESULT>, RESULT>
 	extends AbstractAssert<SELF, ACTUAL> {
 
-	@SuppressWarnings("rawtypes")
-	private static final InstanceOfAssertFactory<Promise, ObjectAssert<Promise>> PROMISE_OBJECT = InstanceOfAssertFactories
-		.type(Promise.class);
-
 	protected AbstractPromiseAssert(ACTUAL actual, Class<?> selfType) {
 		super(actual, selfType);
-	}
-
-	ObjectAssert<ACTUAL> asObjectAssert() {
-		@SuppressWarnings({
-			"unchecked", "rawtypes"
-		})
-		ObjectAssert<ACTUAL> objectAssert = (ObjectAssert) asInstanceOf(PROMISE_OBJECT);
-		return objectAssert;
 	}
 
 	void assertDone() {
@@ -114,6 +102,8 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 					failWithMessage("%nExpecting%n  <%s>%nto have resolved.", actual);
 				}
 			} catch (InterruptedException e) {
+				Thread.currentThread()
+					.interrupt();
 				fail("unexpected exception", e);
 			}
 			assertDone();
@@ -153,6 +143,8 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 				failWithMessage("%nExpecting%n  <%s>%nto not have resolved.", actual);
 			}
 		} catch (InterruptedException e) {
+			Thread.currentThread()
+				.interrupt();
 			fail("unexpected exception", e);
 		}
 		assertNotDone();
@@ -176,6 +168,8 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		try {
 			return promise.getFailure();
 		} catch (InterruptedException e) {
+			Thread.currentThread()
+				.interrupt();
 			fail("unexpected exception", e);
 			return null;
 		}
@@ -210,8 +204,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 *             resolved successfully.
 	 */
 	public AbstractThrowableAssert<?, ? extends Throwable> hasFailedWithThrowableThat() {
-		return hasFailed().asObjectAssert()
-			.extracting(this::getFailure, InstanceOfAssertFactories.THROWABLE);
+		return hasFailed().extracting(this::getFailure, InstanceOfAssertFactories.THROWABLE);
 	}
 
 	void assertNotFailed() {
@@ -256,6 +249,8 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 				Exceptions.toString(e.getCause()));
 			return null;
 		} catch (InterruptedException e) {
+			Thread.currentThread()
+				.interrupt();
 			fail("unexpected exception", e);
 			return null;
 		}
@@ -271,8 +266,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 *             resolved with a failure.
 	 */
 	public AbstractObjectAssert<?, RESULT> hasValueThat() {
-		return isSuccessful().asObjectAssert()
-			.extracting(this::getValue);
+		return isSuccessful().extracting(this::getValue, Assertions::<RESULT> assertThat);
 	}
 
 	/**
@@ -294,7 +288,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 */
 	public <ASSERT extends AbstractAssert<?, ?>> ASSERT hasValueThat(
 		InstanceOfAssertFactory<? super RESULT, ASSERT> assertFactory) {
-		return hasValueThat().asInstanceOf(assertFactory);
+		return isSuccessful().extracting(this::getValue, assertFactory);
 	}
 
 	/**
