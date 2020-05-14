@@ -5,21 +5,23 @@ import static org.osgi.test.assertj.promise.PromiseAssert.assertThat;
 import java.time.Duration;
 
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.util.promise.Deferred;
 import org.osgi.util.promise.Promise;
 import org.osgi.util.promise.Promises;
 
+@ExtendWith(SoftAssertionsExtension.class)
 public class PromiseAssertTest {
 	public static final Duration WAIT_TIME = Duration.ofSeconds(2L);
 
 	@Test
-	public void testUnresolvedPromise() throws Exception {
+	public void testUnresolvedPromise(PromiseSoftAssertions softly) throws Exception {
 		final String value = new String("value");
 		final Deferred<String> d = new Deferred<>();
 		final Promise<String> p = d.getPromise();
 
-		PromiseSoftAssertions softly = new PromiseSoftAssertions();
 		softly.assertThat(p)
 			.isNotDone();
 		softly.assertThat(p)
@@ -83,16 +85,13 @@ public class PromiseAssertTest {
 			.hasSameValue(value);
 		softly.assertThat(p)
 			.hasNotFailed();
-
-		softly.assertAll();
 	}
 
 	@Test
-	public void testResolvedPromise() throws Exception {
+	public void testResolvedPromise(PromiseSoftAssertions softly) throws Exception {
 		final String value = new String("value");
 		final Promise<String> p = Promises.resolved(value);
 
-		PromiseSoftAssertions softly = new PromiseSoftAssertions();
 		softly.assertThat(p)
 			.isDone();
 		softly.assertThat(p)
@@ -161,8 +160,6 @@ public class PromiseAssertTest {
 			.endsWith("ue"))
 			.isInstanceOf(AssertionError.class)
 			.hasMessageContaining("foo");
-
-		softly.assertAll();
 	}
 
 	public static class TestException extends Exception {
@@ -174,12 +171,11 @@ public class PromiseAssertTest {
 	}
 
 	@Test
-	public void testFailedPromise() throws Exception {
+	public void testFailedPromise(PromiseSoftAssertions softly) throws Exception {
 		final Throwable cause = new NullPointerException("cause");
 		final Throwable failed = new TestException("failed").initCause(cause);
 		final Promise<String> p = Promises.failed(failed);
 
-		PromiseSoftAssertions softly = new PromiseSoftAssertions();
 		softly.assertThat(p)
 			.isDone();
 		softly.assertThat(p)
@@ -226,16 +222,12 @@ public class PromiseAssertTest {
 			.doesNotResolveWithin(WAIT_TIME))
 			.isInstanceOf(AssertionError.class)
 			.hasMessageContaining("foo");
-
-		softly.assertAll();
 	}
 
 	@Test
-	public void testInstanceFactories() throws Exception {
+	public void testInstanceFactories(PromiseSoftAssertions softly) throws Exception {
 		final String value = new String("value");
 		final Promise<String> p = Promises.resolved(value);
-
-		PromiseSoftAssertions softly = new PromiseSoftAssertions();
 
 		PromiseAssert<String> stringPromiseAssert = softly.assertThatObject(p)
 			.asInstanceOf(PromiseAssert.promise(String.class));
@@ -264,8 +256,6 @@ public class PromiseAssertTest {
 
 		softly.assertThatCode(() -> PromiseAssert.promise(null))
 			.isInstanceOf(NullPointerException.class);
-
-		softly.assertAll();
 	}
 
 }
