@@ -1,5 +1,6 @@
 package org.osgi.test.assertj.testutil;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -8,6 +9,8 @@ import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assert;
 import org.assertj.core.api.SoftAssertions;
+import org.opentest4j.AssertionFailedError;
+import org.osgi.test.common.exceptions.Exceptions;
 
 public interface AssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL> {
 
@@ -57,8 +60,29 @@ public interface AssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL> {
 	default <T> AbstractThrowableAssert<?, ?> assertEqualityAssertion(String msg, String field,
 		Function<T, SELF> assertion, T actual, T failing) {
 		assertPassing(msg, assertion, actual);
-		return assertFailing(msg, assertion, failing)
-			.hasMessageMatching("(?si).*expecting.*" + field + ".*" + failing + ".*but.*was.*" + actual + ".*");
+		AbstractThrowableAssert<?, ?> retval = assertFailing(msg, assertion, failing)
+			.hasMessageMatching("(?si).*expecting.*" + field + ".*" + failing + ".*but.*was.*" + actual + ".*")
+			.isInstanceOf(AssertionFailedError.class);
+		try {
+			Field f = AbstractAssert.class.getDeclaredField("actual");
+			f.setAccessible(true);
+			Object a = f.get(retval);
+			if (!(a instanceof AssertionFailedError)) {
+				return retval;
+			}
+			AssertionFailedError afe = (AssertionFailedError) a;
+			softly().assertThat(afe.getActual()
+				.getStringRepresentation())
+				.as("actual")
+				.isEqualTo(String.valueOf(actual));
+			softly().assertThat(afe.getExpected()
+				.getStringRepresentation())
+				.as("expected")
+				.isEqualTo(String.valueOf(failing));
+		} catch (Exception e) {
+			throw Exceptions.duck(e);
+		}
+		return retval;
 	}
 
 	default <T> void assertPassing(Function<T, SELF> assertion, T passing) {

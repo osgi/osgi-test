@@ -39,9 +39,7 @@ import org.assertj.core.api.AbstractDateAssert;
 import org.assertj.core.api.AbstractLongAssert;
 import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.DateAssert;
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
-import org.assertj.core.api.ObjectAssert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
@@ -49,19 +47,6 @@ import org.osgi.test.assertj.version.VersionAssert;
 
 public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SELF, ACTUAL>, ACTUAL extends Bundle>
 	extends AbstractAssert<SELF, ACTUAL> {
-
-	private static final InstanceOfAssertFactory<Bundle, ObjectAssert<Bundle>> BUNDLE_OBJECT = InstanceOfAssertFactories
-		.type(Bundle.class);
-
-	// TODO: when AssertJ 3.16 becomes available, get rid of this method and
-	// BUNDLE_OBJECT as it's only used for exposing extracting()
-	ObjectAssert<ACTUAL> asObjectAssert() {
-		@SuppressWarnings({
-			"unchecked", "rawtypes"
-		})
-		ObjectAssert<ACTUAL> objectAssert = (ObjectAssert) asInstanceOf(BUNDLE_OBJECT);
-		return objectAssert;
-	}
 
 	protected AbstractBundleAssert(ACTUAL actual, Class<SELF> selfType) {
 		super(actual, selfType);
@@ -106,30 +91,30 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasSymbolicName(String expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getSymbolicName(), expected)) {
-			failWithMessage("%nExpecting%n  <%s>%nto have symbolic name:%n  <%s>%n but was:%n  <%s>", actual, expected,
+			failWithActualExpectedAndMessage(actual.getSymbolicName(), expected,
+				"%nExpecting%n  <%s>%nto have symbolic name:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getSymbolicName());
 		}
 		return myself;
 	}
 
 	public AbstractStringAssert<?> hasSymbolicNameThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Bundle::getSymbolicName, STRING)
+		return isNotNull().extracting(Bundle::getSymbolicName, STRING)
 			.as(actual + ".symbolicName");
 	}
 
 	public SELF hasLocation(String expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getLocation(), expected)) {
-			failWithMessage("%nExpecting%n  <%s>%nto have location:%n  <%s>%n but was:%n  <%s>", actual, expected,
+			failWithActualExpectedAndMessage(actual.getLocation(), expected,
+				"%nExpecting%n  <%s>%nto have location:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getLocation());
 		}
 		return myself;
 	}
 
 	public AbstractStringAssert<?> hasLocationThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Bundle::getLocation, STRING)
+		return isNotNull().extracting(Bundle::getLocation, STRING)
 			.as(actual + ".location");
 	}
 
@@ -172,7 +157,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasBundleId(long expected) {
 		isNotNull();
 		if (actual.getBundleId() != expected) {
-			failWithMessage("%nExpecting%n  <%s>%nto have bundle ID:%n  <%d>%n but was:%n  <%d>", actual, expected,
+			failWithActualExpectedAndMessage(actual.getBundleId(), expected,
+				"%nExpecting%n  <%s>%nto have bundle ID:%n  <%d>%n but was:%n  <%d>", actual, expected,
 				actual.getBundleId());
 		}
 		return myself;
@@ -193,8 +179,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	}
 
 	public VersionAssert hasVersionThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Bundle::getVersion, VERSION)
+		return isNotNull().extracting(Bundle::getVersion, VERSION)
 			.as(actual + ".version");
 	}
 
@@ -202,7 +187,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		isNotNull();
 		Version expectedVersion = getVersion(expected);
 		if (!Objects.equals(actual.getVersion(), expectedVersion)) {
-			failWithMessage("%nExpecting%n  <%s>%nto have version:%n  <%s>%n but was:%n  <%s>", actual, expected,
+			failWithActualExpectedAndMessage(actual.getVersion(), expected,
+				"%nExpecting%n  <%s>%nto have version:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getVersion());
 		}
 		return myself;
@@ -219,8 +205,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	}
 
 	public AbstractLongAssert<?> hasLastModifiedLongThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Bundle::getLastModified, LONG)
+		return isNotNull().extracting(Bundle::getLastModified, LONG)
 			.as(actual + ".lastModified");
 	}
 
@@ -228,8 +213,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		date -> new DateAssert(new Date(date)));
 
 	public AbstractDateAssert<?> hasLastModifiedDateThat() {
-		return isNotNull().asObjectAssert()
-			.extracting(Bundle::getLastModified, LONG_AS_DATE)
+		return isNotNull().extracting(Bundle::getLastModified, LONG_AS_DATE)
 			.as(actual + ".lastModified");
 	}
 
@@ -297,7 +281,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		return myself;
 	}
 
-	private static final int[] STATES = {
+	private static final int[]	STATES			= {
 		UNINSTALLED, INSTALLED, RESOLVED, STARTING, STOPPING, ACTIVE
 	};
 

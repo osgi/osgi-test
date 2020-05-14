@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package org.osgi.test.assertj.bundle;
+package org.osgi.test.assertj.promise;
 
 import org.assertj.core.api.SoftAssertionsProvider;
-import org.osgi.framework.Bundle;
+import org.osgi.util.promise.Promise;
 
-public interface BundleSoftAssertions extends SoftAssertionsProvider {
+/**
+ * Soft assertions for {@link Promise}s.
+ */
+public interface PromiseSoftAssertionsProvider extends SoftAssertionsProvider {
 	/**
-	 * Create assertion for {@link org.osgi.framework.Bundle}.
+	 * Create a soft assertion for a {@link Promise}.
 	 *
-	 * @param actual the actual value.
-	 * @return the created assertion object.
+	 * @param actual The {@link Promise}.
+	 * @param <T> The type of the value contained in the {@link Promise}.
+	 * @return The created soft assertion.
 	 */
-	default BundleAssert assertThat(Bundle actual) {
-		return proxy(BundleAssert.class, Bundle.class, actual);
+	default <T> PromiseAssert<T> assertThat(Promise<? extends T> actual) {
+		@SuppressWarnings("unchecked")
+		PromiseAssert<T> softly = proxy(PromiseAssert.class, Promise.class, actual);
+		return softly;
 	}
 }
