@@ -18,8 +18,13 @@ package org.osgi.test.junit5.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectInstallBundle;
@@ -33,10 +38,27 @@ public class BundleContextExtensionExampleTest {
 
 	// BundleContext injection
 
+	@InjectBundleContext
+	static BundleContext		classLevelContext;
+
+	@BeforeAll
+	static void beforeAll() throws InterruptedException {
+		assertThat(classLevelContext).isNotNull();
+	}
+
+	BundleContext currentMethodContext;
+
+	@BeforeEach
+	void beforeEach(@InjectBundleContext BundleContext bc) {
+		currentMethodContext = bc;
+		assertThat(bc).isNotSameAs(classLevelContext);
+	}
+
 	@Test
 	public void testBundleContext1(@InjectBundleContext BundleContext bundleContext1) {
 		assertThat(bundleContext1).isNotNull()
-			.isSameAs(bundleContext2);
+			.isSameAs(bundleContext2)
+			.isSameAs(currentMethodContext);
 	}
 
 	// OR
@@ -46,7 +68,38 @@ public class BundleContextExtensionExampleTest {
 
 	@Test
 	public void testBundleContext2() {
-		assertThat(bundleContext2).isNotNull();
+		assertThat(bundleContext2).isNotNull()
+			.isSameAs(
+				currentMethodContext)
+			.isNotSameAs(classLevelContext);
+	}
+
+	@ParameterizedTest
+	@ValueSource(ints = {
+		1, 2, 3
+	})
+	void testBundleContextFromDynamic(int value, @InjectBundleContext BundleContext bc) {
+		assertThat(bc).isSameAs(currentMethodContext)
+			.isNotSameAs(classLevelContext);
+	}
+
+	@Nested
+	class NestedExampleTest {
+
+		@BeforeEach
+		void beforeEach(@InjectBundleContext BundleContext bc) {
+			assertThat(classLevelContext).isNotEqualTo(bc);
+		}
+
+		@InjectBundleContext
+		BundleContext currentMethodBC;
+
+		@Test
+		void testNestedBundleContext1(@InjectBundleContext BundleContext bc) {
+			assertThat(bc).isSameAs(currentMethodBC)
+				.isNotSameAs(classLevelContext);
+		}
+
 	}
 
 	// InstallBundle injection
