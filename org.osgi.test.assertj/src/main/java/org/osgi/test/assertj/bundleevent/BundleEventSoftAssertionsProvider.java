@@ -19,7 +19,7 @@ package org.osgi.test.assertj.bundleevent;
 import org.assertj.core.api.SoftAssertionsProvider;
 import org.osgi.framework.BundleEvent;
 
-public interface BundleEventSoftAssertions extends SoftAssertionsProvider {
+public interface BundleEventSoftAssertionsProvider extends SoftAssertionsProvider {
 	/**
 	 * Create assertion for {@link org.osgi.framework.BundleEvent}.
 	 *

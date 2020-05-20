@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package org.osgi.test.assertj.bundlereference;
+package org.osgi.test.assertj.bundle;
 
 import org.assertj.core.api.SoftAssertionsProvider;
-import org.osgi.framework.BundleReference;
+import org.osgi.framework.Bundle;
 
-public interface BundleReferenceSoftAssertions extends SoftAssertionsProvider {
+public interface BundleSoftAssertionsProvider extends SoftAssertionsProvider {
 	/**
-	 * Create assertion for {@link org.osgi.framework.BundleReference}.
+	 * Create assertion for {@link org.osgi.framework.Bundle}.
 	 *
 	 * @param actual the actual value.
 	 * @return the created assertion object.
 	 */
-	default BundleReferenceAssert assertThat(BundleReference actual) {
-		return proxy(BundleReferenceAssert.class, BundleReference.class, actual);
+	default BundleAssert assertThat(Bundle actual) {
+		return proxy(BundleAssert.class, Bundle.class, actual);
 	}
 }
