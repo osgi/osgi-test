@@ -25,13 +25,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.test.assertj.bundle.AbstractBundleAssert;
 import org.osgi.test.assertj.event.AbstractBitmappedTypeEventAssert;
-import org.osgi.test.common.bitmaps.Bitmaps;
+import org.osgi.test.common.bitmaps.BundleEventType;
 
 public abstract class AbstractBundleEventAssert<SELF extends AbstractBundleEventAssert<SELF, ACTUAL>, ACTUAL extends BundleEvent>
 	extends AbstractBitmappedTypeEventAssert<SELF, ACTUAL> {
 
 	protected AbstractBundleEventAssert(ACTUAL actual, Class<SELF> selfType, ToIntFunction<ACTUAL> getType) {
-		super(actual, selfType, getType, Bitmaps.BUNDLEVENT_TYPE);
+		super(actual, selfType, getType, BundleEventType.BITMAP);
 	}
 
 	public SELF hasBundle(Bundle expected) {

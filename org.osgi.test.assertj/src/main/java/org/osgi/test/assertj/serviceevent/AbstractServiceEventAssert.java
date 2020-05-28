@@ -22,13 +22,13 @@ import java.util.function.ToIntFunction;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.test.assertj.event.AbstractBitmappedTypeEventAssert;
-import org.osgi.test.common.bitmaps.Bitmaps;
+import org.osgi.test.common.bitmaps.ServiceEventType;
 
 public abstract class AbstractServiceEventAssert<SELF extends AbstractServiceEventAssert<SELF, ACTUAL>, ACTUAL extends ServiceEvent>
 	extends AbstractBitmappedTypeEventAssert<SELF, ACTUAL> {
 
 	protected AbstractServiceEventAssert(ACTUAL actual, Class<SELF> selfType, ToIntFunction<ACTUAL> getType) {
-		super(actual, selfType, getType, Bitmaps.SERVICEEVENT_TYPE);
+		super(actual, selfType, getType, ServiceEventType.BITMAP);
 	}
 
 	public SELF hasServiceReference(ServiceReference<?> expected) {

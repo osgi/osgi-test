@@ -22,13 +22,13 @@ import java.util.function.ToIntFunction;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.test.assertj.event.AbstractBitmappedTypeEventAssert;
-import org.osgi.test.common.bitmaps.Bitmaps;
+import org.osgi.test.common.bitmaps.FrameworkEventType;
 
 public abstract class AbstractFrameworkEventAssert<SELF extends AbstractFrameworkEventAssert<SELF, ACTUAL>, ACTUAL extends FrameworkEvent>
 	extends AbstractBitmappedTypeEventAssert<SELF, ACTUAL> {
 
 	protected AbstractFrameworkEventAssert(ACTUAL actual, Class<SELF> selfType, ToIntFunction<ACTUAL> getType) {
-		super(actual, selfType, getType, Bitmaps.FRAMEWORKEVENT_TYPE);
+		super(actual, selfType, getType, FrameworkEventType.BITMAP);
 	}
 
 	public SELF hasBundle(Bundle expected) {
