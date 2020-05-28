@@ -44,17 +44,17 @@ public abstract class AbstractBitmappedTypeEventAssert<SELF extends AbstractBitm
 			throw new IllegalArgumentException(
 				"Multiple bits set in expected (" + expected + ") - do you mean to use isOfTypeMaskedBy()?");
 		}
-		final String expectedString = bitmap.typeToString(expected);
+		final String expectedString = bitmap.toString(expected);
 		if ((actualType() & expected) == 0) {
 			failWithMessage("%nExpecting%n <%s>%nto be of type:%n <%d:%s>%n but was of type:%n <%s>", actual, expected,
-				expectedString, bitmap.typeMaskToString(actualType()));
+				expectedString, bitmap.maskToString(actualType()));
 		}
 		return myself;
 	}
 
 	public SELF isNotOfType(int expected) {
 		isNotNull();
-		final String expectedType = bitmap.typeToString(expected);
+		final String expectedType = bitmap.toString(expected);
 		if ((actualType() & expected) != 0) {
 			failWithMessage("%nExpecting%n <%s>%nnot to be of type:%n <%d:%s>%nbut it was", actual,
 				expected,
@@ -69,10 +69,10 @@ public abstract class AbstractBitmappedTypeEventAssert<SELF extends AbstractBitm
 			throw new IllegalArgumentException("Mask testing for an illegal type: " + mask);
 		}
 		if ((actualType() & mask) == 0) {
-			final String types = bitmap.typeMaskToString(mask);
+			final String types = bitmap.maskToString(mask);
 			failWithMessage("%nExpecting%n <%s>%nto be of one of types:%n [%s]%n but was of type:%n <%s>",
 				actual,
-				types, bitmap.typeMaskToString(actualType()));
+				types, bitmap.maskToString(actualType()));
 		}
 		return myself;
 	}
@@ -83,10 +83,10 @@ public abstract class AbstractBitmappedTypeEventAssert<SELF extends AbstractBitm
 			throw new IllegalArgumentException("Mask testing for an illegal type: " + mask);
 		}
 		if ((actualType() & mask) != 0) {
-			final String types = bitmap.typeMaskToString(mask);
+			final String types = bitmap.maskToString(mask);
 			failWithMessage("%nExpecting%n <%s>%nto not be of one of types:%n [%s]%n but was of type:%n <%s>",
 				actual,
-				types, bitmap.typeMaskToString(actualType()));
+				types, bitmap.maskToString(actualType()));
 		}
 		return myself;
 	}

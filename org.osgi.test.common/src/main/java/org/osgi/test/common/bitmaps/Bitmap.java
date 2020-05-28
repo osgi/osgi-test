@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.osgi.test.common.bitmaps;
 
 import java.util.Map;
@@ -8,8 +24,8 @@ import java.util.stream.Stream;
 
 /**
  * Useful class for producing human-friendly dumps of bit fields. Has support
- * functions for single-bit values ({@link #typeToString(int)} and multi-bit
- * fields {@link #typeMaskToString(int)}.
+ * functions for single-bit values ({@link #toString(int)} and multi-bit fields
+ * {@link #maskToString(int)}.
  */
 public class Bitmap {
 
@@ -72,36 +88,36 @@ public class Bitmap {
 	/**
 	 * Return a string representation of the given type. Expects to be passed a
 	 * field with exactly one bit set - if you want to dump a bit mask, then
-	 * please use {@link #typeMaskToString(int)}
+	 * please use {@link #maskToString(int)}
 	 *
 	 * @param type the field being converted.
 	 * @return Description of the given field.
 	 * @throws IllegalArgumentException if the field has more than one bit set.
-	 * @see #typeMaskToString(int)
+	 * @see #maskToString(int)
 	 */
-	public String typeToString(int type) {
+	public String toString(int type) {
 		if (!hasSingleBit(type)) {
 			throw new IllegalArgumentException(
-				"Multiple bits set in type (" + type + ") - do you mean to use typeMaskToString()?");
+				"Multiple bits set in type (" + type + ") - do you mean to use maskToString()?");
 		}
 		final String retval = mappingFunction.apply(type);
 		return retval == null ? "UNKNOWN" : retval;
 	}
 
 	/**
-	 * Return a string representation of the given type mask.
+	 * Return a string representation of the given type mask. If the mask
+	 * contains multiple bits, their string representations are separated by
+	 * pipes (" | ").
 	 *
 	 * @param mask the field being converted.
 	 * @return Description of the given field.
-	 * @throws IllegalArgumentException if the field has more than one bit set.
-	 * @see #typeToString(int)
+	 * @see #toString(int)
 	 */
-	public String typeMaskToString(int mask) {
-		Stream<String> bits = IntStream
-			.of(
+	public String maskToString(int mask) {
+		Stream<String> bits = IntStream.of(
 			types)
 			.filter(x -> (x & mask) != 0)
-			.mapToObj(this::typeToString);
+			.mapToObj(this::toString);
 
 		if ((mask & UNKNOWN_MASK) != 0) {
 			bits = Stream.concat(bits, Stream.of("UNKNOWN"));
