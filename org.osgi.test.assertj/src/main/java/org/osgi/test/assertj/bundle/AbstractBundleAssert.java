@@ -19,20 +19,13 @@ package org.osgi.test.assertj.bundle;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import static org.osgi.framework.Bundle.ACTIVE;
-import static org.osgi.framework.Bundle.INSTALLED;
-import static org.osgi.framework.Bundle.RESOLVED;
-import static org.osgi.framework.Bundle.STARTING;
-import static org.osgi.framework.Bundle.STOPPING;
-import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.test.assertj.version.VersionAssert.VERSION;
+import static org.osgi.test.common.bitmaps.BundleState.BITMAP;
 
 import java.net.URL;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractDateAssert;
@@ -237,17 +230,17 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 			throw new IllegalArgumentException(
 				"Multiple bits set in expected (" + expected + ") - do you mean to use isInStateMaskedBy()?");
 		}
-		final String expectedString = stateToString(expected);
+		final String expectedString = BITMAP.toString(expected);
 		if ((actual.getState() & expected) == 0) {
 			failWithMessage("%nExpecting%n  <%s>%nto be in state:%n  <%d:%s>%n but was in state:%n  <%s>", actual,
-				expected, expectedString, stateMaskToString(actual.getState()));
+				expected, expectedString, BITMAP.maskToString(actual.getState()));
 		}
 		return myself;
 	}
 
 	public SELF isNotInState(int expected) {
 		isNotNull();
-		final String expectedState = stateToString(expected);
+		final String expectedState = BITMAP.toString(expected);
 		if ((actual.getState() & expected) != 0) {
 			failWithMessage("%nExpecting%n  <%s>%nnot to be in state:%n  <%d:%s>%n but it was", actual, expected,
 				expectedState);
@@ -261,9 +254,9 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 			throw new IllegalArgumentException("Mask testing for an illegal state: " + mask);
 		}
 		if ((actual.getState() & mask) == 0) {
-			final String states = stateMaskToString(mask);
+			final String states = BITMAP.maskToString(mask);
 			failWithMessage("%nExpecting%n  <%s>%nto be in one of states:%n  [%s]%n but was in state:%n  <%s>", actual,
-				states, stateMaskToString(actual.getState()));
+				states, BITMAP.maskToString(actual.getState()));
 		}
 		return myself;
 	}
@@ -274,47 +267,10 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 			throw new IllegalArgumentException("Mask testing for an illegal state: " + mask);
 		}
 		if ((actual.getState() & mask) != 0) {
-			final String states = stateMaskToString(mask);
+			final String states = BITMAP.maskToString(mask);
 			failWithMessage("%nExpecting%n  <%s>%nto not be in one of states:%n  [%s]%n but was in state:%n  <%s>",
-				actual, states, stateMaskToString(actual.getState()));
+				actual, states, BITMAP.maskToString(actual.getState()));
 		}
 		return myself;
-	}
-
-	private static final int[]	STATES			= {
-		UNINSTALLED, INSTALLED, RESOLVED, STARTING, STOPPING, ACTIVE
-	};
-
-	private final static int	KNOWN_MASK		= UNINSTALLED | INSTALLED | RESOLVED | STARTING | ACTIVE | STOPPING;
-	private final static int	UNKNOWN_MASK	= ~KNOWN_MASK;
-
-	private static String stateMaskToString(int state) {
-		Stream<String> bits = IntStream.of(STATES)
-			.filter(x -> (x & state) != 0)
-			.mapToObj(AbstractBundleAssert::stateToString);
-
-		if ((state & UNKNOWN_MASK) != 0) {
-			bits = Stream.concat(bits, Stream.of("UNKNOWN"));
-		}
-		return state + ":" + bits.collect(Collectors.joining(" | "));
-	}
-
-	private static String stateToString(int state) {
-		switch (state) {
-			case UNINSTALLED :
-				return "UNINSTALLED";
-			case INSTALLED :
-				return "INSTALLED";
-			case RESOLVED :
-				return "RESOLVED";
-			case STARTING :
-				return "STARTING";
-			case STOPPING :
-				return "STOPPING";
-			case ACTIVE :
-				return "ACTIVE";
-			default :
-				return "UNKNOWN";
-		}
 	}
 }

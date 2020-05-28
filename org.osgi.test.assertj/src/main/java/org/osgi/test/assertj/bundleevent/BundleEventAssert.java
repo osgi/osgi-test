@@ -25,7 +25,7 @@ public class BundleEventAssert extends AbstractBundleEventAssert<BundleEventAsse
 		BundleEvent.class, BundleEventAssert::new);
 
 	public BundleEventAssert(BundleEvent actual) {
-		super(actual, BundleEventAssert.class);
+		super(actual, BundleEventAssert.class, BundleEvent::getType);
 	}
 
 	public static BundleEventAssert assertThat(BundleEvent actual) {
