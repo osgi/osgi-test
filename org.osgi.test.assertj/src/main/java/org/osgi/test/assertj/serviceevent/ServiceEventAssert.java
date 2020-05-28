@@ -25,7 +25,7 @@ public class ServiceEventAssert extends AbstractServiceEventAssert<ServiceEventA
 		ServiceEvent.class, ServiceEventAssert::new);
 
 	public ServiceEventAssert(ServiceEvent actual) {
-		super(actual, ServiceEventAssert.class);
+		super(actual, ServiceEventAssert.class, ServiceEvent::getType);
 	}
 
 	public static ServiceEventAssert assertThat(ServiceEvent actual) {
