@@ -14,6 +14,8 @@
 
 -tester: biz.aQute.tester.junit-platform
 
+-runvm: ${def;argLine}
+
 -runfw: org.eclipse.osgi
 -resolve.effective: active
 -runproperties: \
