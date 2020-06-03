@@ -26,6 +26,7 @@ import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -221,8 +222,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 	private static class ClosableServiceObjects<S> implements AutoCloseable, InvocationHandler {
 		private final ServiceObjects<S>	so;
-		private final Set<S>			instances	= Collections
-			.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
+		private final Map<S, Integer>	instances	= Collections.synchronizedMap(new IdentityHashMap<>());
 
 		@SuppressWarnings("unchecked")
 		public static <S> ServiceObjects<S> proxy(Class<?> host, ServiceObjects<S> so) {
@@ -237,7 +237,11 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 		@Override
 		public void close() {
-			instances.forEach(so::ungetService);
+			instances.forEach((service, useCount) -> {
+				for (int i = 0; i < useCount; i++) {
+					so.ungetService(service);
+				}
+			});
 		}
 
 		@Override
@@ -258,19 +262,35 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 					return method.invoke(so, args);
 				}
 			}
+			if (method.getDeclaringClass()
+				.equals(Object.class)) {
+				switch (method.getName()) {
+					case "toString" :
+						return delegatedToString(proxy);
+					case "hashCode" :
+						return so.hashCode();
+					case "equals" :
+						return so.equals(args[0]);
+				}
+			}
 
 			throw new IllegalArgumentException();
+		}
+
+		public String delegatedToString(Object proxy) {
+			return "CloseableServiceObjects[" + System.identityHashCode(proxy) + "]:" + so.toString();
 		}
 
 		@SuppressWarnings("unused")
 		public S getService() {
 			S service = so.getService();
-			instances.add(service);
+			instances.merge(service, 1, (oldValue, dummy) -> oldValue + 1);
 			return service;
 		}
 
 		@SuppressWarnings("unused")
 		public void ungetService(S service) {
+			// FIXME: need to decrement instance count rather than remove completely
 			instances.remove(service);
 			so.ungetService(service);
 		}
