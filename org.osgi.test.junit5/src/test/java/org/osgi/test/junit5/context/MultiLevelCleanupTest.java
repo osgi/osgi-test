@@ -28,6 +28,14 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.exceptions.Exceptions;
 import org.osgi.test.junit5.testutils.OSGiSoftAssertions;
 
+/*
+ * The MultiLevelCleanupTest is a test that is designed to be run inside EngineTestKit. It's basic purpose is
+ * to monitor the setup/tear down of "resources" during test execution as the test scope changes. In Jupiter
+ * there are arbitrary levels of scope, but the ones that Extensions have access to are:
+ *
+ * * Global (not used by us here)
+ * * Class level - scope begins when Jupiter starts processing a particular test class (before any @BeforeAlland ends after it has
+ */
 abstract class MultiLevelCleanupTest {
 
 	enum Scope {

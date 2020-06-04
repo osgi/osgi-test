@@ -4,11 +4,13 @@ This artifact provides support classes for OSGi testing with [JUnit 5](https://j
 
 ## Testing with `BundleContext`
 
-There are a number of operations that can be performed with or on the OSGi `BundleContext`. However, this is low level API risk exposing tests to side effects resulting from these operations. Managing these side effects can results in large amounts of boiler plate code.
+There are a number of operations that can be performed with or on the OSGi `BundleContext`. However, this is a 
+low level API that risks exposing other tests to side effects resulting from these operations. Managing these side effects can results in large amounts of boiler plate code.
 
 ### `BundleContextExtension`
 
-The `BundleContextExtension` is designed to help in these scenarios by giving access to an instance of the BundleContext that is context aware and results in the necessary cleanup when a test ends. The following cleanup is performed at the end of each test:
+The `BundleContextExtension` is designed to help in these scenarios by giving access to an instance of the BundleContext that is context aware and results in the necessary cleanup when a test scope 
+ends. The following cleanup is performed at the end of each test scope:
 
 - bundles installed with `installBundle` are uninstalled
 - services obtained from `getService` are returned
@@ -17,6 +19,14 @@ The `BundleContextExtension` is designed to help in these scenarios by giving ac
 - `BundleListener`s registered with `addBundleListener` are removed
 - `FrameworkListener`s registered with `addFrameworkListener` are removed
 - `ServiceListener`s registered with `addServiceListener` are removed (this includes closing `ServiceTracker`s created using the `BundleContext`)
+
+Scope is inherited - for example, any services that are registered at the class-level 
+scope (eg, in a `@BeforeAll` callback) will be visible to all tests in the class as 
+well as to all tests in all nested test classes, and then cleaned up after all the class'
+tests have run. On the other hand, changes made during the execution of an individual
+test will only be visible for the duration of that individual test. Similarly, `@Nested`-annotated 
+inner test classes will be able to see changes made in their enclosing class' `@BeforeAll` 
+and `@BeforeEach` methods.
 
 #### Declarative Registration of `BundleContextExtension`
 
@@ -44,20 +54,33 @@ public BundleContextExtension bundleContextExtension = new BundleContextExtensio
 
 #### Obtaining `BundleContext` Instances
 
-Now that the extension is in place, a `BundleContext` instance can be injected into a non-private, non-static field annotated with `@InjectBundleContext` 
+Now that the extension is in place, a `BundleContext` instance can be injected into a non-private, non-static,
+non-final field annotated with `@InjectBundleContext`: 
 
 ```java
 @InjectBundleContext
 BundleContext bundleContext;
 ```
 
-or from a likewise annotated test method parameter
+or from a likewise-annotated test method or lifecycle method parameter:
 
 ```java
+@BeforeAll
+public static void beforeAll(
+    @InjectBundleContext BundleContext classScopeBundleContext) {
+    // changes made here will persist until the afterAll phase completes
+}
+
+@BeforeEach
+public void beforeEach(
+    @InjectBundleContext BundleContext testScopeBundleContext) {
+    // changes made here will persist until the afterEach phase completes
+}
+
 @Test
 public void testWithBundleContext(
-    @InjectBundleContext BundleContext bundleContext) {
-    // ...
+    @InjectBundleContext BundleContext testScopeBundleContext) {
+    // changes made here will persist until the afterEach phase completes
 }
 ```
 
@@ -65,15 +88,16 @@ public void testWithBundleContext(
 
 In OSGi testing there are many scenarios that require installing pre-built bundles. The [Bnd](https://bnd.bndtools.org/) tool has support for easily building and embedding bundles within bundles. As a matter of convenience the `InstallBundle` utility was designed to simplify the task of finding and installing such embedded bundles. 
 
-The `InstallBundle` utility provides three convenience methods 
+The `InstallBundle` utility provides three convenience methods:
 
 - `Bundle installBundle(String pathToEmbeddedJar)` 
 - `Bundle installBundle(String pathToEmbeddedJar, boolean startBundle)` 
 - `BundleContext getBundleContext()`
 
-to simplify these use cases. The `installBundle` methods use the `findEntries` method from the Bundle API to locate embedded bundles.
+...to simplify these use cases. The `installBundle` methods use the `findEntries` method from the Bundle API to locate embedded bundles.
 
-An instance of this utility can be injected much like the `BundleContext` using the `@InjectInstallBundle`.
+An instance of this utility can be injected into a field, test or lifecycle method (much like the `BundleContext`) 
+using the `@InjectInstallBundle`.
 
 ```java
 @InjectInstallBundle

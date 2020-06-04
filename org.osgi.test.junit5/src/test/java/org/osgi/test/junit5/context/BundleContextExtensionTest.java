@@ -21,16 +21,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.testkit.engine.EventType.FINISHED;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-import static org.osgi.framework.Bundle.INSTALLED;
-import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.test.assertj.bundle.BundleAssert.assertThat;
 import static org.osgi.test.common.dictionary.Dictionaries.dictionaryOf;
 import static org.osgi.test.junit5.TestUtil.getBundle;
@@ -52,25 +48,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicNode;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.engine.JupiterTestEngine;
 import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.testkit.engine.EngineTestKit;
 import org.junit.platform.testkit.engine.Event;
 import org.mockito.ArgumentCaptor;
-import org.mockito.stubbing.Answer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
@@ -91,23 +81,8 @@ import org.osgi.test.common.exceptions.Exceptions;
 import org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope;
 import org.osgi.test.junit5.testutils.OSGiSoftAssertions;
 import org.osgi.test.junit5.types.Foo;
-import org.osgi.test.junit5.types.MockStore;
 
 public class BundleContextExtensionTest {
-
-	ExtensionContext	extensionContext;
-	Store				store;
-
-	@BeforeEach
-	public void beforeEach() {
-		extensionContext = mock(ExtensionContext.class);
-		store = new MockStore();
-
-		when(extensionContext.getUniqueId()).thenReturn("test-id");
-		when(extensionContext.getTestClass()).then((Answer<Optional<Class<?>>>) a -> Optional.ofNullable(getClass()));
-		when(extensionContext.getRequiredTestClass()).then((Answer<Class<?>>) a -> getClass());
-		when(extensionContext.getStore(any())).then((Answer<Store>) a -> store);
-	}
 
 	private static <R> Stream<DynamicNode> runMultilevelTestClass(String type,
 		Class<? extends MultiLevelCleanupTest> testClass) {
@@ -228,6 +203,7 @@ public class BundleContextExtensionTest {
 
 	@TestFactory
 	public Stream<DynamicNode> cleansUpInstallBundlesMultiLevel() {
+		// Uses the BundleChecker AbstractResourceChecker to facilitate stuff.
 		return runMultilevelTestClass("Install Bundle", InstallBundleMultiLevelCleanupTest.class);
 	}
 
