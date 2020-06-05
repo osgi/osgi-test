@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -41,14 +40,11 @@ public class BundleContextExtension_InstallBundleInjectionTest {
 	static void beforeAll(@InjectInstallBundle InstallBundle ib) {
 		assertThat(staticIB).isNotNull();
 		staticSoftly = new OSGiSoftAssertions();
-		staticSoftly.assertThat(
-			staticIB)
+		staticSoftly.assertThat(staticIB)
 			.as("staticIB:beforeAll")
 			.isNotNull()
-			.isSameAs(
-				ib);
-		staticSoftly.assertThat(staticIB
-			.getBundleContext())
+			.isSameAs(ib);
+		staticSoftly.assertThat(staticIB.getBundleContext())
 			.isSameAs(staticBC);
 		staticSoftly.assertAll();
 	}
@@ -83,7 +79,10 @@ public class BundleContextExtension_InstallBundleInjectionTest {
 	@ValueSource(ints = {
 		1, 2, 3
 	})
-	void parameterizedTest(int parameter, @InjectInstallBundle InstallBundle ib) {
+	// This test is meant to check that the extension is doing the
+	// right thing before and after parameterized tests, hence
+	// the parameter is not actually used.
+	void parameterizedTest(int unused, @InjectInstallBundle InstallBundle ib) {
 		assertThat(installBundle).isNotNull();
 		softly = new OSGiSoftAssertions();
 		softly.assertThat(installBundle)
@@ -108,8 +107,7 @@ public class BundleContextExtension_InstallBundleInjectionTest {
 		void beforeEach(@InjectInstallBundle InstallBundle ib) {
 			assertThat(installBundle).isNotNull();
 			softly = new OSGiSoftAssertions();
-			softly.assertThat(
-				nestedIB)
+			softly.assertThat(nestedIB)
 				.as("installBundle:nested.beforeEach")
 				.isNotNull()
 				.isSameAs(ib)
@@ -121,8 +119,7 @@ public class BundleContextExtension_InstallBundleInjectionTest {
 		@Test
 		void test(@InjectInstallBundle InstallBundle ib) {
 			softly = new OSGiSoftAssertions();
-			softly.assertThat(
-				nestedIB)
+			softly.assertThat(nestedIB)
 				.as("installBundle:nested.test")
 				.isNotNull()
 				.isSameAs(ib)
@@ -134,8 +131,7 @@ public class BundleContextExtension_InstallBundleInjectionTest {
 		@AfterEach
 		void afterEach(@InjectInstallBundle InstallBundle ib) {
 			softly = new OSGiSoftAssertions();
-			softly.assertThat(
-				nestedIB)
+			softly.assertThat(nestedIB)
 				.as("installBundle:nested.afterEach")
 				.isNotNull()
 				.isSameAs(ib)
@@ -158,10 +154,9 @@ public class BundleContextExtension_InstallBundleInjectionTest {
 	}
 
 	@AfterAll
-	static void afterAll(TestInfo info, @InjectInstallBundle InstallBundle ib) {
+	static void afterAll(@InjectInstallBundle InstallBundle ib) {
 		staticSoftly = new OSGiSoftAssertions();
-		staticSoftly.assertThat(
-			staticIB)
+		staticSoftly.assertThat(staticIB)
 			.as("staticIB:beforeAll")
 			.isNotNull()
 			.isSameAs(ib)

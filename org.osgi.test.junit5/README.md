@@ -54,7 +54,7 @@ public BundleContextExtension bundleContextExtension = new BundleContextExtensio
 
 #### Obtaining `BundleContext` Instances
 
-Now that the extension is in place, a `BundleContext` instance can be injected into a non-private, non-static,
+Now that the extension is in place, a `BundleContext` instance can be injected into a non-private,
 non-final field annotated with `@InjectBundleContext`: 
 
 ```java

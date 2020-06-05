@@ -12,35 +12,33 @@ import org.osgi.test.common.annotation.InjectBundleContext;
 @ExtendWith(PreDestroyCallback.class)
 @ExtendWith(BundleContextExtension.class)
 class BundleContextMultiLevelCleanupTest<RESOURCE> extends MultiLevelCleanupTest {
-	static final Bundle											bundle	= FrameworkUtil
-		.getBundle(BundleContextMultiLevelCleanupTest.class);
+	static final Bundle		bundle	= FrameworkUtil.getBundle(BundleContextMultiLevelCleanupTest.class);
 
 	@InjectBundleContext
-	static BundleContext										staticBC;
+	static BundleContext	staticBC;
 
 	@InjectBundleContext
-	BundleContext												bundleContext;
+	BundleContext			bundleContext;
 
 	@SuppressWarnings("unchecked")
 	static <STATIC> void setFactory(
-		BiFunction<BundleContext, Map<Scope, STATIC>, AbstractResourceChecker<STATIC>> factory) {
-		BundleContextMultiLevelCleanupTest.factory = (bc, map) -> factory.apply(bc, (Map<Scope, STATIC>) map);
+		BiFunction<BundleContext, Map<CallbackPoint, STATIC>, AbstractResourceChecker<STATIC>> factory) {
+		BundleContextMultiLevelCleanupTest.factory = (bc, map) -> factory.apply(bc, (Map<CallbackPoint, STATIC>) map);
 	}
 
-	static
-	BiFunction<BundleContext, Map<Scope, ?>, AbstractResourceChecker<?>> factory;
+	static BiFunction<BundleContext, Map<CallbackPoint, ?>, AbstractResourceChecker<?>> factory;
 
 	static AbstractResourceChecker<?> getGlobalResourceChecker() {
-		return factory.apply(bundle.getBundleContext(), scopedResourcesMap);
+		return factory.apply(bundle.getBundleContext(), resourcesMap);
 	}
 
 	static AbstractResourceChecker<?> getStaticResourceChecker() {
-		return factory.apply(staticBC, scopedResourcesMap);
+		return factory.apply(staticBC, resourcesMap);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	AbstractResourceChecker<?> getResourceChecker() {
-		return factory.apply(bundleContext, scopedResourcesMap);
+		return factory.apply(bundleContext, resourcesMap);
 	}
 }

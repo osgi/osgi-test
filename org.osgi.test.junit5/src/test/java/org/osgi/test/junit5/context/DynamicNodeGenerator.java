@@ -12,6 +12,10 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.testkit.engine.Event;
 
+/**
+ * Transforms the output of an EngineTestKit set of events into a dynamic node
+ * hierarchy.
+ */
 class DynamicNodeGenerator {
 	final Map<TestDescriptor, Event> eventMap;
 
@@ -33,8 +37,7 @@ class DynamicNodeGenerator {
 		}
 
 		return dynamicContainer(description.replace("MultiLevelCleanupTest", "Class methods"),
-			Stream.concat(Stream.of(dynamicTest("container", ex)), descriptor
-				.getChildren()
+			Stream.concat(Stream.of(dynamicTest("container", ex)), descriptor.getChildren()
 				.stream()
 				.map(this::toNode)));
 	}

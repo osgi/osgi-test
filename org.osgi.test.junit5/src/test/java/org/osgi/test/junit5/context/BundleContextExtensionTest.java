@@ -30,20 +30,12 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.osgi.test.assertj.bundle.BundleAssert.assertThat;
 import static org.osgi.test.common.dictionary.Dictionaries.dictionaryOf;
 import static org.osgi.test.junit5.TestUtil.getBundle;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.AFTER_ALL;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.AFTER_CLASS;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.AFTER_EACH;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.BEFORE_ALL;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.BEFORE_CLASS;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.BEFORE_EACH;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.INNER_TEST;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.NESTED_AFTER_EACH;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.NESTED_BEFORE_EACH;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.NESTED_TEST;
-import static org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope.PARAMETERIZED_TEST;
+import static org.osgi.test.junit5.context.MultiLevelCleanupTest.CallbackPoint.AFTER_CLASS;
+import static org.osgi.test.junit5.context.MultiLevelCleanupTest.CallbackPoint.BEFORE_CLASS;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -78,123 +70,149 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.test.common.exceptions.Exceptions;
-import org.osgi.test.junit5.context.MultiLevelCleanupTest.Scope;
+import org.osgi.test.junit5.context.MultiLevelCleanupTest.CallbackPoint;
 import org.osgi.test.junit5.testutils.OSGiSoftAssertions;
 import org.osgi.test.junit5.types.Foo;
 
 public class BundleContextExtensionTest {
 
+	/**
+	 * This function runs the given concrete subclass of MultiLevelCleanupTest
+	 * using {@link EngineTestKit}. It then takes the result and transforms it
+	 * into DynamicNode test hierarchy to recreate the original test so that it
+	 * shows in the test output - this makes it easier to diagnose test
+	 * failures.
+	 *
+	 * @see DynamicNodeGenerator
+	 */
 	private static <R> Stream<DynamicNode> runMultilevelTestClass(String type,
 		Class<? extends MultiLevelCleanupTest> testClass) {
 		BundleContext bc = FrameworkUtil.getBundle(MultiLevelCleanupTest.class)
 			.getBundleContext();
 		final OSGiSoftAssertions beforeSoftly = new OSGiSoftAssertions();
 
-		MultiLevelCleanupTest.scopedResourcesMap = new HashMap<>();
-		MultiLevelCleanupTest.getGlobalResourceChecker(testClass)
-			.assertNotSetup(beforeSoftly, BEFORE_CLASS, BEFORE_ALL, BEFORE_EACH, INNER_TEST, PARAMETERIZED_TEST,
-				NESTED_BEFORE_EACH, NESTED_TEST, NESTED_AFTER_EACH, AFTER_EACH, AFTER_ALL, AFTER_CLASS);
+		MultiLevelCleanupTest.resourcesMap = new HashMap<>();
+		@SuppressWarnings("unchecked")
+		AbstractResourceChecker<R> checker = (AbstractResourceChecker<R>) MultiLevelCleanupTest
+			.getGlobalResourceChecker(testClass);
+		checker.assertSetup(beforeSoftly, BEFORE_CLASS, EnumSet.noneOf(CallbackPoint.class));
+		checker.setupResource(BEFORE_CLASS);
+		EnumSet<CallbackPoint> expectedSetup = EnumSet.of(BEFORE_CLASS);
+		checker.assertSetup(beforeSoftly, BEFORE_CLASS, expectedSetup);
 
-		DynamicNode beforeTest = dynamicTest("beforeClass", () -> {
-			beforeSoftly.assertAll();
-		});
-
-		Map<TestDescriptor, Event> eventMap = new HashMap<>();
-
-		AtomicReference<TestDescriptor> root = new AtomicReference<>();
-
-		EngineTestKit.engine(new JupiterTestEngine())
-			.selectors(selectClass(
-				testClass))
-			.execute()
-			.allEvents()
-			// .debug(
-			// System.err)
-			.stream()
-			.filter(event -> event.getType()
-				.equals(FINISHED))
-			.forEach(event -> {
-				TestDescriptor current = event.getTestDescriptor();
-				eventMap.put(current, event);
-				if (!current.getParent()
-					.isPresent()) {
-					root.set(current);
-				}
+		try {
+			DynamicNode beforeTest = dynamicTest("beforeClass", () -> {
+				beforeSoftly.assertAll();
 			});
 
-		OSGiSoftAssertions afterSoftly = new OSGiSoftAssertions();
-		MultiLevelCleanupTest.getGlobalResourceChecker(testClass)
-			.assertNotSetup(beforeSoftly, AFTER_CLASS, BEFORE_ALL, BEFORE_EACH, INNER_TEST, PARAMETERIZED_TEST,
-				NESTED_BEFORE_EACH, NESTED_TEST, NESTED_AFTER_EACH, AFTER_EACH, AFTER_ALL);
-		DynamicNode afterTest = dynamicTest("afterClass", () -> {
-			afterSoftly.assertAll();
-		});
+			Map<TestDescriptor, Event> eventMap = new HashMap<>();
 
-		DynamicNode classContainer = new DynamicNodeGenerator(eventMap).toNode(root.get()
-			.getChildren()
-			.stream()
-			.findFirst()
-			.get());
-		return Stream.of(beforeTest, classContainer, afterTest);
+			AtomicReference<TestDescriptor> root = new AtomicReference<>();
+
+			EngineTestKit.engine(new JupiterTestEngine())
+				.selectors(selectClass(testClass))
+				.execute()
+				.allEvents()
+				// .debug(
+				// System.err)
+				.stream()
+				.filter(event -> event.getType()
+					.equals(FINISHED))
+				.forEach(event -> {
+					TestDescriptor current = event.getTestDescriptor();
+					eventMap.put(current, event);
+					if (!current.getParent()
+						.isPresent()) {
+						root.set(current);
+					}
+				});
+
+			OSGiSoftAssertions afterSoftly = new OSGiSoftAssertions();
+			checker.assertSetup(afterSoftly, AFTER_CLASS, expectedSetup);
+
+			DynamicNode afterTest = dynamicTest("afterClass", () -> {
+				afterSoftly.assertAll();
+			});
+
+			DynamicNode classContainer = new DynamicNodeGenerator(eventMap).toNode(root.get()
+				.getChildren()
+				.stream()
+				.findFirst()
+				.get());
+			return Stream.of(beforeTest, classContainer, afterTest);
+		} finally {
+			checker.tearDownResource(BEFORE_CLASS);
+		}
 	}
 
-	static InputStream getBundleForScope(Scope scope) {
-		return getBundle(scope.toString()
+	static InputStream getBundleForCallbackPoint(CallbackPoint callbackPoint) {
+		return getBundle(callbackPoint.toString()
 			.replace(".", "/") + ".jar");
 	}
 
+	/**
+	 * Resource checker for installing bundles. For each callback point our test
+	 * bundle has a corresponding embedded bundle that is installed by the
+	 * "doSetupResource" callback; look in the bnd subdirectory of this project
+	 * to see them. Mapping between the callback point and embedded bundle path
+	 * is done by {@link #getBundleForCallbackPoint(CallbackPoint)}
+	 */
 	static class BundleChecker extends BundleContextResourceChecker<Bundle> {
 
-		public BundleChecker(BundleContext bc, Map<Scope, Bundle> scopedResourcesMap) {
-			super(bc, scopedResourcesMap);
+		public BundleChecker(BundleContext bc, Map<CallbackPoint, Bundle> resourcesMap) {
+			super(bc, resourcesMap);
 		}
 
 		@Override
-		public Bundle doSetupResource(Scope inScope) throws BundleException {
-			return bc.installBundle(inScope.toString(), getBundleForScope(inScope));
+		public Bundle doSetupResource(CallbackPoint currentPoint) throws BundleException {
+			return bc.installBundle(currentPoint.toString(), getBundleForCallbackPoint(currentPoint));
 		}
 
 		@Override
-		public void doAssertSetup(Scope inScope, Scope fromScope, Bundle installedBundle) {
+		public void doAssertSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldBeSetup,
+			Bundle installedBundle) {
 			OSGiSoftAssertions softly = new OSGiSoftAssertions();
 			softly.assertThat(installedBundle)
-				.as(inScope + " from scope "
-					+ fromScope)
+				.as(currentPoint + " from point " + pointThatShouldBeSetup)
 				.isNotInState(Bundle.UNINSTALLED);
 			softly.assertThat(bc)
-				.as(inScope + " from scope "
-					+ fromScope)
+				.as(currentPoint + " from point " + pointThatShouldBeSetup)
 				.hasBundleWithIdThat(installedBundle.getBundleId())
 				.isSameAs(installedBundle);
 			softly.assertThat(bc)
 				.hasBundlesThat()
-				.as(inScope + " from scope "
-					+ fromScope)
+				.as(currentPoint + " from point " + pointThatShouldBeSetup)
 				.contains(installedBundle);
 			softly.assertAll();
 		}
 
 		@Override
-		public void doAssertNotSetup(Scope inScope, Scope fromScope, Bundle installedBundle) {
+		public void doAssertNotSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldNotBeSetup,
+			Bundle installedBundle) {
 			OSGiSoftAssertions softly = new OSGiSoftAssertions();
 			softly.assertThat(installedBundle)
-				.as(inScope + " from scope "
-					+ fromScope)
+				.as(currentPoint + " from point " + pointThatShouldNotBeSetup)
 				.isInState(Bundle.UNINSTALLED);
 			softly.assertThat(bc)
-				.as(inScope + " from scope "
-					+ fromScope)
+				.as(currentPoint + " from point " + pointThatShouldNotBeSetup)
 				.doesNotHaveBundleWithId(installedBundle.getBundleId());
 			softly.assertThat(bc)
-				.as(inScope + " from scope "
-					+ fromScope)
+				.as(currentPoint + " from point " + pointThatShouldNotBeSetup)
 				.hasBundlesThat()
 				.doesNotContain(installedBundle);
 			softly.assertAll();
 		}
 
+		@Override
+		public void doTearDownResource(CallbackPoint callbackPoint, Bundle bundle) throws BundleException {
+			bundle.uninstall();
+		}
 	}
 
+	/**
+	 * Uses the {@link BundleChecker} resource checker (above) to install a
+	 * unique bundle at each callback point.
+	 */
 	@TestFactory
 	public Stream<DynamicNode> cleansUpBundlesMultiLevel() {
 		BundleContextMultiLevelCleanupTest.setFactory(BundleChecker::new);
@@ -203,7 +221,6 @@ public class BundleContextExtensionTest {
 
 	@TestFactory
 	public Stream<DynamicNode> cleansUpInstallBundlesMultiLevel() {
-		// Uses the BundleChecker AbstractResourceChecker to facilitate stuff.
 		return runMultilevelTestClass("Install Bundle", InstallBundleMultiLevelCleanupTest.class);
 	}
 
@@ -211,20 +228,22 @@ public class BundleContextExtensionTest {
 
 		final Bundle bundle;
 
-		BundleListenerResourceChecker(BundleContext bc, Map<Scope, BundleListener> scopedResourcesMap, Bundle bundle) {
-			super(bc, scopedResourcesMap);
+		BundleListenerResourceChecker(BundleContext bc, Map<CallbackPoint, BundleListener> resourcesMap,
+			Bundle bundle) {
+			super(bc, resourcesMap);
 			this.bundle = bundle;
 		}
 
 		@Override
-		public BundleListener doSetupResource(Scope inScope) {
+		public BundleListener doSetupResource(CallbackPoint currentPoint) {
 			BundleListener listener = mock(SynchronousBundleListener.class);
 			bc.addBundleListener(listener);
 			return listener;
 		}
 
 		@Override
-		public void doAssertSetup(Scope inScope, Scope fromScope, BundleListener listener) throws BundleException {
+		public void doAssertSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldBeSetup,
+			BundleListener listener) throws BundleException {
 			reset(listener);
 			assertThat(bundle).isInStateMaskedBy(Bundle.RESOLVED | Bundle.INSTALLED);
 			bundle.start();
@@ -234,8 +253,7 @@ public class BundleContextExtensionTest {
 
 				final ArgumentCaptor<BundleEvent> startEventCapture = ArgumentCaptor.forClass(BundleEvent.class);
 				softly.check(() -> verify(listener, atLeast(2)).bundleChanged(startEventCapture.capture()));
-				List<BundleEvent> ourBundleEvents = startEventCapture
-					.getAllValues()
+				List<BundleEvent> ourBundleEvents = startEventCapture.getAllValues()
 					.stream()
 					.filter(ev -> ev.getBundle() == bundle)
 					.collect(Collectors.toList());
@@ -260,8 +278,7 @@ public class BundleContextExtensionTest {
 				bundle.stop();
 				final ArgumentCaptor<BundleEvent> stopEventCapture = ArgumentCaptor.forClass(BundleEvent.class);
 				softly.check(() -> verify(listener, times(2)).bundleChanged(stopEventCapture.capture()));
-				ourBundleEvents = stopEventCapture
-					.getAllValues()
+				ourBundleEvents = stopEventCapture.getAllValues()
 					.stream()
 					.filter(ev -> ev.getBundle() == bundle)
 					.collect(Collectors.toList());
@@ -281,11 +298,17 @@ public class BundleContextExtensionTest {
 		}
 
 		@Override
-		public void doAssertNotSetup(Scope inScope, Scope fromScope, BundleListener listener) throws BundleException {
+		public void doAssertNotSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldNotBeSetup,
+			BundleListener listener) throws BundleException {
 			reset(listener);
 			bundle.start();
 			bundle.stop();
 			verifyNoInteractions(listener);
+		}
+
+		@Override
+		void doTearDownResource(CallbackPoint currentPoint, BundleListener r) {
+			bc.removeBundleListener(r);
 		}
 	}
 
@@ -299,7 +322,7 @@ public class BundleContextExtensionTest {
 		try {
 			installedBundle.stop();
 			BundleContextMultiLevelCleanupTest.setFactory((BundleContext bc,
-				Map<Scope, BundleListener> map) -> new BundleListenerResourceChecker(bc, map, installedBundle));
+				Map<CallbackPoint, BundleListener> map) -> new BundleListenerResourceChecker(bc, map, installedBundle));
 			return runMultilevelTestClass("BundleListener", BundleContextMultiLevelCleanupTest.class);
 		} finally {
 			installedBundle.uninstall();
@@ -308,38 +331,46 @@ public class BundleContextExtensionTest {
 
 	static class ServiceResourceChecker extends BundleContextResourceChecker<ServiceRegistration<String>> {
 
-		public ServiceResourceChecker(BundleContext bc, Map<Scope, ServiceRegistration<String>> scopedResources) {
-			super(bc, scopedResources);
+		public ServiceResourceChecker(BundleContext bc, Map<CallbackPoint, ServiceRegistration<String>> resources) {
+			super(bc, resources);
 		}
 
 		@Override
-		public ServiceRegistration<String> doSetupResource(Scope inScope) {
-			return bc.registerService(String.class, "Service for scope" + inScope,
-				dictionaryOf("multileveltest.scope", inScope));
+		public ServiceRegistration<String> doSetupResource(CallbackPoint currentPoint) {
+			return bc.registerService(String.class, "Service for callback point " + currentPoint,
+				dictionaryOf("multileveltest.scope", currentPoint.toString()));
 		}
 
 		@Override
-		public void doAssertSetup(Scope inScope, Scope fromScope, ServiceRegistration<String> registration) {
+		public void doAssertSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldBeSetup,
+			ServiceRegistration<String> registration) {
 			assertThat(registration).isNotNull();
 			try {
 				ServiceReference<String> reference = registration.getReference();
-				assertThat(bundle.getRegisteredServices()).as(inScope + ": checking resource from " + fromScope + "\n")
+				assertThat(bundle.getRegisteredServices())
+					.as(currentPoint + ": checking resource from " + pointThatShouldBeSetup + "\n")
 					.contains(registration.getReference());
 			} catch (IllegalStateException e) {
-				fail(String.format("[%s: checking resource from %s]:\nservice not registered: %s", inScope, fromScope,
-					registration), e);
+				fail(String.format("[%s: checking resource from %s]:\nservice not registered: %s", currentPoint,
+					pointThatShouldBeSetup, registration), e);
 			}
 		}
 
 		@Override
-		public void doAssertNotSetup(Scope inScope, Scope fromScope, ServiceRegistration<String> registration) {
+		public void doAssertNotSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldNotBeSetup,
+			ServiceRegistration<String> registration) {
 			assertThat(registration).isNotNull();
 			ServiceReference<?>[] registeredServices = bundle.getRegisteredServices();
 			try {
 				registration.getReference();
-				fail(String.format("[%s: checking resource from %s]:\nservice was not unregistered: %s ", inScope,
-					fromScope, registration));
+				fail(String.format("[%s: checking resource from %s]:\nservice was not unregistered: %s ", currentPoint,
+					pointThatShouldNotBeSetup, registration));
 			} catch (IllegalStateException e) {}
+		}
+
+		@Override
+		void doTearDownResource(CallbackPoint currentPoint, ServiceRegistration<String> r) throws Exception {
+			r.unregister();
 		}
 
 	}
@@ -353,26 +384,27 @@ public class BundleContextExtensionTest {
 	static public class ServiceListenerResourceChecker extends BundleContextResourceChecker<ServiceListener> {
 		final Bundle bundle;
 
-		ServiceListenerResourceChecker(BundleContext bc, Map<Scope, ServiceListener> scopedResources, Bundle bundle) {
-			super(bc, scopedResources);
+		ServiceListenerResourceChecker(BundleContext bc, Map<CallbackPoint, ServiceListener> resources, Bundle bundle) {
+			super(bc, resources);
 			this.bundle = bundle;
 		}
 
 		@Override
-		public ServiceListener doSetupResource(Scope inScope) throws InvalidSyntaxException {
+		public ServiceListener doSetupResource(CallbackPoint currentPoint) throws InvalidSyntaxException {
 			ServiceListener listener = mock(ServiceListener.class);
 			// Use a filter so that we're not getting interfered with by other
 			// tests
-			bc.addServiceListener(listener, "(servicelistener.test.scope=" + inScope + ")");
+			bc.addServiceListener(listener, "(servicelistener.test.scope=" + currentPoint + ")");
 			return listener;
 		}
 
 		@Override
-		public void doAssertSetup(Scope inScope, Scope fromScope, ServiceListener listener) throws BundleException {
+		public void doAssertSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldBeSetup,
+			ServiceListener listener) throws BundleException {
 			reset(listener);
 			ServiceRegistration<String> reg = bundle.getBundleContext()
 				.registerService(String.class, "test",
-					dictionaryOf("servicelistener.test.scope", fromScope.toString()));
+					dictionaryOf("servicelistener.test.scope", pointThatShouldBeSetup.toString()));
 			ServiceReference<String> ref = reg.getReference();
 			OSGiSoftAssertions softly = new OSGiSoftAssertions();
 			try {
@@ -398,13 +430,19 @@ public class BundleContextExtensionTest {
 		}
 
 		@Override
-		public void doAssertNotSetup(Scope inScope, Scope fromScope, ServiceListener listener) {
+		public void doAssertNotSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldNotBeSetup,
+			ServiceListener listener) {
 			reset(listener);
 			ServiceRegistration<String> reg = bundle.getBundleContext()
 				.registerService(String.class, "test",
-					dictionaryOf("servicelistener.test.scope", fromScope.toString()));
+					dictionaryOf("servicelistener.test.scope", pointThatShouldNotBeSetup.toString()));
 			reg.unregister();
 			verifyNoInteractions(listener);
+		}
+
+		@Override
+		void doTearDownResource(CallbackPoint currentPoint, ServiceListener r) throws Exception {
+			bc.removeServiceListener(r);
 		}
 	}
 
@@ -415,8 +453,9 @@ public class BundleContextExtensionTest {
 			.installBundle("it", getBundle("tb1.jar"));
 		try {
 			installedBundle.start();
-			BundleContextMultiLevelCleanupTest.setFactory((BundleContext bc,
-				Map<Scope, ServiceListener> map) -> new ServiceListenerResourceChecker(bc, map, installedBundle));
+			BundleContextMultiLevelCleanupTest.setFactory(
+				(BundleContext bc, Map<CallbackPoint, ServiceListener> map) -> new ServiceListenerResourceChecker(bc,
+					map, installedBundle));
 			return runMultilevelTestClass("ServiceListener", BundleContextMultiLevelCleanupTest.class);
 		} finally {
 			installedBundle.uninstall();
@@ -429,8 +468,8 @@ public class BundleContextExtensionTest {
 		final Bundle				systemBundle;
 		final FrameworkStartLevel	startLevel;
 
-		FrameworkListenerResourceChecker(BundleContext bc, Map<Scope, FrameworkListener> scopedResources) {
-			super(bc, scopedResources);
+		FrameworkListenerResourceChecker(BundleContext bc, Map<CallbackPoint, FrameworkListener> resources) {
+			super(bc, resources);
 			originalContext = FrameworkUtil.getBundle(FrameworkListenerResourceChecker.class)
 				.getBundleContext();
 			systemBundle = originalContext.getBundle(0);
@@ -439,7 +478,7 @@ public class BundleContextExtensionTest {
 		}
 
 		@Override
-		public FrameworkListener doSetupResource(Scope inScope) throws InvalidSyntaxException {
+		public FrameworkListener doSetupResource(CallbackPoint currentPoint) throws InvalidSyntaxException {
 			FrameworkListener listener = mock(FrameworkListener.class);
 			bc.addFrameworkListener(listener);
 			return listener;
@@ -478,7 +517,8 @@ public class BundleContextExtensionTest {
 		}
 
 		@Override
-		public void doAssertSetup(Scope inScope, Scope fromScope, FrameworkListener listener) {
+		public void doAssertSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldBeSetup,
+			FrameworkListener listener) {
 			reset(listener);
 			tryToStart();
 
@@ -489,8 +529,7 @@ public class BundleContextExtensionTest {
 				softly.check(() -> verify(listener).frameworkEvent(startEventCapture.capture()));
 				softly.assertThat(startEventCapture.getValue())
 					.as("registered")
-					.isOfType(
-						FrameworkEvent.STARTLEVEL_CHANGED)
+					.isOfType(FrameworkEvent.STARTLEVEL_CHANGED)
 					.hasBundle(systemBundle);
 			} finally {
 				softly.assertAll();
@@ -498,10 +537,16 @@ public class BundleContextExtensionTest {
 		}
 
 		@Override
-		public void doAssertNotSetup(Scope inScope, Scope fromScope, FrameworkListener listener) {
+		public void doAssertNotSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldNotBeSetup,
+			FrameworkListener listener) {
 			reset(listener);
 			tryToStart();
 			verifyNoInteractions(listener);
+		}
+
+		@Override
+		void doTearDownResource(CallbackPoint currentPoint, FrameworkListener listener) throws Exception {
+			bc.removeFrameworkListener(listener);
 		}
 
 	}
@@ -513,14 +558,13 @@ public class BundleContextExtensionTest {
 	}
 
 	static class GottenServicesResourceChecker extends BundleContextResourceChecker<ServiceReference<Foo>> {
-		GottenServicesResourceChecker(BundleContext bc, Map<Scope, ServiceReference<Foo>> scopedResources) {
-			super(bc, scopedResources);
+		GottenServicesResourceChecker(BundleContext bc, Map<CallbackPoint, ServiceReference<Foo>> resources) {
+			super(bc, resources);
 		}
 
 		@Override
-		public ServiceReference<Foo> doSetupResource(Scope inScope) throws InvalidSyntaxException {
-			ServiceReference<Foo> reference = bc.getServiceReferences(Foo.class, "(test.scope=" + inScope
-				+ ")")
+		public ServiceReference<Foo> doSetupResource(CallbackPoint currentPoint) throws InvalidSyntaxException {
+			ServiceReference<Foo> reference = bc.getServiceReferences(Foo.class, "(test.scope=" + currentPoint + ")")
 				.iterator()
 				.next();
 			bc.getService(reference);
@@ -529,33 +573,43 @@ public class BundleContextExtensionTest {
 		}
 
 		@Override
-		public void doAssertSetup(Scope inScope, Scope fromScope, ServiceReference<Foo> reference) {
-			assertThat(reference).as(String.format("%s checking resource from %s setup: reference", inScope,
-				fromScope))
+		public void doAssertSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldBeSetup,
+			ServiceReference<Foo> reference) {
+			assertThat(reference)
+				.as(String.format("%s checking resource from %s setup: reference", currentPoint,
+					pointThatShouldBeSetup))
 				.isNotNull();
-			assertThat(bundle.getServicesInUse()).as(String.format("%s checking resource from %s setup: inUse", inScope,
-				fromScope))
+			assertThat(bundle.getServicesInUse())
+				.as(String.format("%s checking resource from %s setup: inUse", currentPoint, pointThatShouldBeSetup))
 				.isNotNull()
 				.contains(reference);
 		}
 
 		@Override
-		public void doAssertNotSetup(Scope inScope, Scope fromScope, ServiceReference<Foo> reference) {
-			assertThat(reference).as(String.format("%s checking resource from %s not setup: reference", inScope,
-				fromScope))
+		public void doAssertNotSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldNotBeSetup,
+			ServiceReference<Foo> reference) {
+			assertThat(reference)
+				.as(String.format("%s checking resource from %s not setup: reference", currentPoint,
+					pointThatShouldNotBeSetup))
 				.isNotNull();
 			ServiceReference<?>[] inUse = bundle.getServicesInUse();
 			if (inUse != null) {
 				Stream.of(inUse)
 					.forEach(ref -> {
 						String testScope = (String) ref.getProperty("test.scope");
-						if (fromScope.equals(testScope)) {
+						if (pointThatShouldNotBeSetup.equals(testScope)) {
 							fail(
 								String.format("[%s: checking resource from %s]:\nstill had a reference to service: %s ",
-									inScope, fromScope, ref));
+									currentPoint, pointThatShouldNotBeSetup, ref));
 						}
-						});
+					});
 			}
+		}
+
+		@Override
+		void doTearDownResource(CallbackPoint currentPoint, ServiceReference<Foo> reference) throws Exception {
+			bc.ungetService(reference);
+			bc.ungetService(reference);
 		}
 	}
 
@@ -569,12 +623,11 @@ public class BundleContextExtensionTest {
 			BundleContext installedBundleContext = installedBundle.getBundleContext();
 
 			List<ServiceRegistration<Foo>> registrations = new ArrayList<>();
-			Stream.of(Scope.values())
-				.map(
-					Object::toString)
-				.forEach(scope -> {
+			Stream.of(CallbackPoint.values())
+				.map(Object::toString)
+				.forEach(callbackPoint -> {
 					registrations.add(installedBundleContext.registerService(Foo.class, new Foo() {},
-						dictionaryOf("test.scope", scope)));
+						dictionaryOf("test.scope", callbackPoint)));
 				});
 
 			try {
@@ -592,43 +645,62 @@ public class BundleContextExtensionTest {
 		}
 	}
 
-	static class GottenServiceObjectsResourceChecker extends BundleContextResourceChecker<ServiceObjects<Foo>> {
-		GottenServiceObjectsResourceChecker(BundleContext bc, Map<Scope, ServiceObjects<Foo>> scopedResources) {
-			super(bc, scopedResources);
+	static class GottenServiceObjects {
+		Foo					service1;
+		Foo					service2;
+		ServiceObjects<Foo>	services;
+	}
+
+	static class GottenServiceObjectsResourceChecker extends BundleContextResourceChecker<GottenServiceObjects> {
+		GottenServiceObjectsResourceChecker(BundleContext bc, Map<CallbackPoint, GottenServiceObjects> resources) {
+			super(bc, resources);
 		}
 
 		@Override
-		public ServiceObjects<Foo> doSetupResource(Scope inScope) throws InvalidSyntaxException {
-			ServiceReference<Foo> reference = bc.getServiceReferences(Foo.class, "(test.scope=" + inScope + ")")
+		public GottenServiceObjects doSetupResource(CallbackPoint currentPoint) throws InvalidSyntaxException {
+			ServiceReference<Foo> reference = bc.getServiceReferences(Foo.class, "(test.scope=" + currentPoint + ")")
 				.iterator()
 				.next();
+			GottenServiceObjects serviceObjects = new GottenServiceObjects();
 			ServiceObjects<Foo> services = bc.getServiceObjects(reference);
-			services.getService();
-			services.getService();
-			return services;
+			serviceObjects.services = services;
+			serviceObjects.service1 = services.getService();
+			serviceObjects.service2 = services.getService();
+			return serviceObjects;
 		}
 
 		@Override
-		public void doAssertSetup(Scope inScope, Scope fromScope, ServiceObjects<Foo> services) {
-			assertThat(services).as(String.format("%s checking resource from %s setup: services", inScope,
-				fromScope))
+		public void doAssertSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldBeSetup,
+			GottenServiceObjects services) {
+			assertThat(services.services)
+				.as(String.format("%s checking resource from %s setup: services", currentPoint, pointThatShouldBeSetup))
 				.isNotNull();
 			assertThat(bundle.getServicesInUse())
-				.as(String.format("%s checking resource from %s setup: inUse", inScope, fromScope))
+				.as(String.format("%s checking resource from %s setup: inUse", currentPoint, pointThatShouldBeSetup))
 				.isNotNull()
-				.contains(services.getServiceReference());
+				.contains(services.services.getServiceReference());
 		}
 
 		@Override
-		public void doAssertNotSetup(Scope inScope, Scope fromScope, ServiceObjects<Foo> services) {
-			assertThat(services).as(String.format("%s checking resource from %s not setup: services", inScope,
-				fromScope))
+		public void doAssertNotSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldNotBeSetup,
+			GottenServiceObjects services) {
+			assertThat(services.services)
+				.as(String.format("%s checking resource from %s not setup: services", currentPoint,
+					pointThatShouldNotBeSetup))
 				.isNotNull();
 			ServiceReference<?>[] inUse = bundle.getServicesInUse();
 			if (inUse != null) {
-				assertThat(inUse).as(String.format("%s checking resource from %s not setup: inUse", inScope, fromScope))
-					.doesNotContain(services.getServiceReference());
+				assertThat(inUse)
+					.as(String.format("%s checking resource from %s not setup: inUse", currentPoint,
+						pointThatShouldNotBeSetup))
+					.doesNotContain(services.services.getServiceReference());
 			}
+		}
+
+		@Override
+		void doTearDownResource(CallbackPoint currentPoint, GottenServiceObjects r) throws Exception {
+			r.services.ungetService(r.service1);
+			r.services.ungetService(r.service2);
 		}
 	}
 
@@ -642,12 +714,11 @@ public class BundleContextExtensionTest {
 			BundleContext installedBundleContext = installedBundle.getBundleContext();
 
 			List<ServiceRegistration<Foo>> registrations = new ArrayList<>();
-			Stream.of(Scope.values())
-				.map(
-					Object::toString)
-				.forEach(scope -> {
+			Stream.of(CallbackPoint.values())
+				.map(Object::toString)
+				.forEach(callbackPoint -> {
 					registrations.add(installedBundleContext.registerService(Foo.class, new Foo() {},
-						dictionaryOf("test.scope", scope)));
+						dictionaryOf("test.scope", callbackPoint.toString())));
 				});
 
 			try {

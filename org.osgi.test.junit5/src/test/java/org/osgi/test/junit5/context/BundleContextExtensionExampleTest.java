@@ -39,7 +39,7 @@ public class BundleContextExtensionExampleTest {
 	// BundleContext injection
 
 	@InjectBundleContext
-	static BundleContext		classLevelContext;
+	static BundleContext classLevelContext;
 
 	@BeforeAll
 	static void beforeAll() throws InterruptedException {
@@ -69,8 +69,7 @@ public class BundleContextExtensionExampleTest {
 	@Test
 	public void testBundleContext2() {
 		assertThat(bundleContext2).isNotNull()
-			.isSameAs(
-				currentMethodContext)
+			.isSameAs(currentMethodContext)
 			.isNotSameAs(classLevelContext);
 	}
 
@@ -78,6 +77,8 @@ public class BundleContextExtensionExampleTest {
 	@ValueSource(ints = {
 		1, 2, 3
 	})
+	// Parameter is not used; just a dummy placeholder so that
+	// we can demonstrate the extension's usage with parameterized tests.
 	void testBundleContextFromDynamic(int value, @InjectBundleContext BundleContext bc) {
 		assertThat(bc).isSameAs(currentMethodContext)
 			.isNotSameAs(classLevelContext);

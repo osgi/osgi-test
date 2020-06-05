@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -19,7 +18,8 @@ import org.osgi.test.junit5.testutils.OSGiSoftAssertions;
 @ExtendWith(BundleContextExtension.class)
 public class BundleContextExtension_BundleContextInjectionTest {
 
-	static final Bundle			bundle	= FrameworkUtil.getBundle(BundleContextExtension_BundleContextInjectionTest.class);
+	static final Bundle			bundle	= FrameworkUtil
+		.getBundle(BundleContextExtension_BundleContextInjectionTest.class);
 
 	@InjectBundleContext
 	static BundleContext		staticBC;
@@ -29,7 +29,7 @@ public class BundleContextExtension_BundleContextInjectionTest {
 
 	static OSGiSoftAssertions	staticSoftly;
 
-	OSGiSoftAssertions softly;
+	OSGiSoftAssertions			softly;
 
 	@BeforeAll
 	static void beforeAll(@InjectBundleContext BundleContext bc) {
@@ -68,7 +68,10 @@ public class BundleContextExtension_BundleContextInjectionTest {
 	@ValueSource(ints = {
 		1, 2, 3
 	})
-	void parameterizedTest(int parameter, @InjectBundleContext BundleContext bc) {
+	// This test is meant to check that the extension is doing the
+	// right thing before and after parameterized tests, hence
+	// the parameter is not actually used.
+	void parameterizedTest(int unused, @InjectBundleContext BundleContext bc) {
 		softly = new OSGiSoftAssertions();
 		softly.assertThat(bundleContext)
 			.as("bundleContext:parameterizedTest")
@@ -130,7 +133,7 @@ public class BundleContextExtension_BundleContextInjectionTest {
 	}
 
 	@AfterAll
-	static void afterAll(TestInfo info, @InjectBundleContext BundleContext bc) {
+	static void afterAll(@InjectBundleContext BundleContext bc) {
 		staticSoftly = new OSGiSoftAssertions();
 		staticSoftly.assertThat(staticBC)
 			.as("staticBC:beforeAll")
