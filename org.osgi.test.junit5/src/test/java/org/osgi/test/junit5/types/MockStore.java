@@ -26,6 +26,13 @@ public class MockStore implements Store {
 
 	private final Map<Object, Object> store = new ConcurrentHashMap<>();
 
+	final StackTraceElement[]			whoMadeMe;
+
+	public MockStore() {
+		whoMadeMe = Thread.currentThread()
+			.getStackTrace();
+	}
+
 	@Override
 	public Object get(Object key) {
 		return store.get(key);

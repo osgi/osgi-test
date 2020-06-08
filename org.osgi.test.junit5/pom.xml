@@ -70,6 +70,10 @@
 			<artifactId>junit-platform-launcher</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.junit.platform</groupId>
+			<artifactId>junit-platform-testkit</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
 		</dependency>
@@ -136,9 +140,21 @@
 								-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
 								-includeresource:\
 									tb1.jar,\
-									foo/tbfoo.jar=tb1.jar
+									beforeClass.jar,\
+									beforeAll.jar,\
+									beforeEach.jar,\
+									innerTest.jar,\
+									parameterizedTest.jar,\
+									nested/beforeEach.jar=nested.beforeEach.jar,\
+									nested/test.jar=nested.test.jar,\
+									nested/afterEach.jar=nested.afterEach.jar,\
+									afterEach.jar,\
+									afterAll.jar,\
+									afterClass.jar
+								Test-Cases: ${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE;PUBLIC}
 							]]></bnd>
 							<includeClassesDir>false</includeClassesDir>
+							<testCases>useTestCasesHeader</testCases>
 						</configuration>
 					</execution>
 				</executions>

@@ -77,7 +77,9 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 				.plusMillis(getTimeout());
 			if (!countDownLatch.await(getTimeout(), TimeUnit.MILLISECONDS)) {
 				throw new AssertionError(
-					getCardinality() + " services " + getFilter() + " didn't arrive within " + getTimeout() + "ms");
+					getCardinality() - tracker.size() + "/" + getCardinality() + " services " + getFilter()
+						+ " didn't arrive within "
+						+ getTimeout() + "ms");
 			}
 
 			// CountDownLatch is fired when the last addingService() is called,
@@ -89,7 +91,9 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 					.isAfter(endTime)) {
 
 					throw new AssertionError(
-						getCardinality() + " services " + getFilter() + " didn't arrive within " + getTimeout() + "ms");
+						getCardinality() - tracker.size() + "/" + getCardinality() + " services " + getFilter()
+							+ " didn't arrive within "
+							+ getTimeout() + "ms");
 				}
 				Thread.sleep(10);
 			}

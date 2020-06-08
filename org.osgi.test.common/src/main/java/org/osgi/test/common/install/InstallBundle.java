@@ -70,17 +70,14 @@ public class InstallBundle {
 	 */
 	public Bundle installBundle(String pathToEmbeddedJar, boolean startBundle) {
 		int lastIndexOf = pathToEmbeddedJar.lastIndexOf('/');
-		String[] parts = new String[] {
+		String[] parts = (lastIndexOf == -1) ? new String[] {
 			"/", pathToEmbeddedJar
+		} : new String[] {
+			pathToEmbeddedJar.substring(0, lastIndexOf), pathToEmbeddedJar.substring(lastIndexOf + 1)
 		};
-		if (lastIndexOf != -1) {
-			parts = new String[] {
-				pathToEmbeddedJar.substring(0, lastIndexOf), pathToEmbeddedJar.substring(lastIndexOf + 1)
-			};
-		}
 		Enumeration<URL> entries = bundleContext.getBundle()
 			.findEntries(parts[0], parts[1], false);
-		if (!entries.hasMoreElements())
+		if (entries == null || !entries.hasMoreElements())
 			throw new AssertionError("No bundle entry " + pathToEmbeddedJar + " found in " + bundleContext.getBundle());
 		try (InputStream is = entries.nextElement()
 			.openStream()) {
@@ -94,4 +91,10 @@ public class InstallBundle {
 		}
 	}
 
+	/**
+	 * @return The bundle context that this instance is attached to.
+	 */
+	public BundleContext getBundleContext() {
+		return bundleContext;
+	}
 }

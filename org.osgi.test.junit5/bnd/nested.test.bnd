@@ -1,0 +1,5 @@
+# This bundle is used as part of the tests run under BundleContextExtensionTest.cleansUpBundlesMultiLevel() and
+# cleansUpInstallBundlesMultiLevel(). Having many bundles allows us to install many at the same time and
+# check that the correct ones are installed/uninstalled at the correct time as the test scope changes. As such,
+# the actual contents of this bundle aren't important.
+Export-Package: ${p}.tb1.*;-split-package:=first

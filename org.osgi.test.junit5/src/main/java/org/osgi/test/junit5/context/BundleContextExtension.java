@@ -16,6 +16,7 @@
 
 package org.osgi.test.junit5.context;
 
+import static org.osgi.test.common.inject.FieldInjector.findAnnotatedFields;
 import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFields;
 import static org.osgi.test.common.inject.FieldInjector.setField;
 
@@ -25,11 +26,14 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
+import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -64,28 +68,54 @@ import org.osgi.test.common.install.InstallBundle;
  * }
  * </pre>
  */
-public class BundleContextExtension implements AfterEachCallback, BeforeEachCallback, ParameterResolver {
+public class BundleContextExtension
+	implements BeforeAllCallback, AfterAllCallback, AfterEachCallback, BeforeEachCallback, ParameterResolver {
 
 	public static final String		BUNDLE_CONTEXT_KEY	= "bundle.context";
 	public static final String		INSTALL_BUNDLE_KEY	= "install.bundle";
 	public static final Namespace	NAMESPACE			= Namespace.create(BundleContextExtension.class);
 
 	@Override
+	public void beforeAll(ExtensionContext extensionContext) throws Exception {
+		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectBundleContext.class,
+			m -> Modifier.isStatic(m.getModifiers()));
+
+		fields.forEach(field -> {
+			// assertFieldIsBundleContext(field);
+			setField(field, null, getBundleContext(extensionContext));
+		});
+
+		fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectInstallBundle.class,
+			m -> Modifier.isStatic(m.getModifiers()));
+
+		fields.forEach(field -> {
+			// assertFieldIsInstallBundle(field);
+			setField(field, null, getInstallbundle(
+				extensionContext));
+		});
+	}
+
+	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		List<Field> fields = findAnnotatedNonStaticFields(extensionContext.getRequiredTestClass(),
-			InjectBundleContext.class);
+		List<Field> fields;
+		for (Object instance : extensionContext.getRequiredTestInstances()
+			.getAllInstances()) {
+			final Class<?> testClass = instance.getClass();
+			fields = findAnnotatedNonStaticFields(testClass, InjectBundleContext.class);
 
-		fields.forEach(field -> {
-			assertFieldIsBundleContext(field);
-			setField(field, extensionContext.getRequiredTestInstance(), getBundleContext(extensionContext));
-		});
+			fields.forEach(field -> {
+				assertFieldIsBundleContext(field);
+				setField(field, instance, getBundleContext(extensionContext));
+			});
 
-		fields = findAnnotatedNonStaticFields(extensionContext.getRequiredTestClass(), InjectInstallBundle.class);
+			fields = findAnnotatedNonStaticFields(testClass, InjectInstallBundle.class);
 
-		fields.forEach(field -> {
-			assertFieldIsInstallBundle(field);
-			setField(field, extensionContext.getRequiredTestInstance(), getInstallbundle(extensionContext));
-		});
+			fields.forEach(field -> {
+				assertFieldIsInstallBundle(field);
+				setField(field, instance, getInstallbundle(extensionContext));
+			});
+		}
+
 	}
 
 	@Override
@@ -94,9 +124,10 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 	}
 
 	public static void cleanup(ExtensionContext extensionContext) throws Exception {
-		extensionContext.getStore(NAMESPACE)
+		getStore(
+			extensionContext)
 			.remove(INSTALL_BUNDLE_KEY, InstallBundle.class);
-		CloseableResourceBundleContext closeableResourceBundleContext = extensionContext.getStore(NAMESPACE)
+		CloseableResourceBundleContext closeableResourceBundleContext = getStore(extensionContext)
 			.remove(BUNDLE_CONTEXT_KEY, CloseableResourceBundleContext.class);
 		if (closeableResourceBundleContext != null) {
 			closeableResourceBundleContext.close();
@@ -176,11 +207,18 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 	}
 
 	public static BundleContext getBundleContext(ExtensionContext extensionContext) {
-		BundleContext bundleContext = extensionContext.getStore(NAMESPACE)
+		BundleContext parentContext = extensionContext.getParent()
+			.filter(context -> context.getTestClass()
+				.isPresent())
+			.map(BundleContextExtension::getBundleContext)
+			.orElse(FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
+				.getBundleContext());
+
+		Class<?> requiredTestClass = extensionContext.getRequiredTestClass();
+		BundleContext bundleContext = getStore(
+			extensionContext)
 			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
-				key -> new CloseableResourceBundleContext(extensionContext.getRequiredTestClass(),
-					FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
-						.getBundleContext()),
+				key -> new CloseableResourceBundleContext(requiredTestClass, parentContext),
 				CloseableResourceBundleContext.class)
 			.get();
 
@@ -188,9 +226,8 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 	}
 
 	public static InstallBundle getInstallbundle(ExtensionContext extensionContext) {
-		return extensionContext.getStore(NAMESPACE)
-			.getOrComputeIfAbsent(INSTALL_BUNDLE_KEY,
-				key -> new InstallBundle(getBundleContext(extensionContext)), InstallBundle.class);
+		return getStore(extensionContext).getOrComputeIfAbsent(INSTALL_BUNDLE_KEY,
+			key -> new InstallBundle(getBundleContext(extensionContext)), InstallBundle.class);
 	}
 
 	public static class CloseableResourceBundleContext implements CloseableResource {
@@ -212,4 +249,13 @@ public class BundleContextExtension implements AfterEachCallback, BeforeEachCall
 
 	}
 
+	@Override
+	public void afterAll(ExtensionContext extensionContext) throws Exception {
+		cleanup(extensionContext);
+	}
+
+	static Store getStore(ExtensionContext extensionContext) {
+		return extensionContext
+			.getStore(Namespace.create(BundleContextExtension.class, extensionContext.getUniqueId()));
+	}
 }

@@ -33,6 +33,7 @@ import org.assertj.core.api.AbstractLongAssert;
 import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.DateAssert;
 import org.assertj.core.api.InstanceOfAssertFactory;
+import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
@@ -40,6 +41,12 @@ import org.osgi.test.assertj.version.VersionAssert;
 
 public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SELF, ACTUAL>, ACTUAL extends Bundle>
 	extends AbstractAssert<SELF, ACTUAL> {
+
+	static {
+		// SoftAssertions will require this at runtime; this
+		// forces bnd to generate an import for it.
+		Class<?> importRecursive = RecursiveComparisonConfiguration.class;
+	}
 
 	protected AbstractBundleAssert(ACTUAL actual, Class<SELF> selfType) {
 		super(actual, selfType);

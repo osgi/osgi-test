@@ -21,11 +21,13 @@ import static org.osgi.test.common.exceptions.ConsumerWithException.asConsumerIg
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -35,12 +37,14 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkListener;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.test.common.exceptions.Exceptions;
 
 public class CloseableBundleContext implements AutoCloseable, InvocationHandler {
 	private static final Consumer<ServiceRegistration<?>>	unregisterService	= asConsumerIgnoreException(
@@ -66,6 +70,13 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
 	private final Set<ServiceObjects<?>>					serviceobjects		= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
+
+	public static BundleContext proxy(Class<?> host) {
+		return (BundleContext) Proxy.newProxyInstance(host.getClassLoader(), new Class<?>[] {
+			BundleContext.class, AutoCloseable.class
+		}, new CloseableBundleContext(host, FrameworkUtil.getBundle(host)
+			.getBundleContext()));
+	}
 
 	public static BundleContext proxy(Class<?> host, BundleContext bundleContext) {
 		return (BundleContext) Proxy.newProxyInstance(host.getClassLoader(), new Class<?>[] {
@@ -109,6 +120,11 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		}
 
 		throw new IllegalArgumentException();
+	}
+
+	public static void close(BundleContext bundleContext) {
+		CloseableBundleContext cbc = (CloseableBundleContext) Proxy.getInvocationHandler(bundleContext);
+		cbc.close();
 	}
 
 	@Override
@@ -221,8 +237,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 	private static class ClosableServiceObjects<S> implements AutoCloseable, InvocationHandler {
 		private final ServiceObjects<S>	so;
-		private final Set<S>			instances	= Collections
-			.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
+		private final Map<S, Integer>	instances	= Collections.synchronizedMap(new IdentityHashMap<>());
 
 		@SuppressWarnings("unchecked")
 		public static <S> ServiceObjects<S> proxy(Class<?> host, ServiceObjects<S> so) {
@@ -237,7 +252,11 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 		@Override
 		public void close() {
-			instances.forEach(so::ungetService);
+			instances.forEach((service, useCount) -> {
+				for (int i = useCount; i > 0; i--) {
+					so.ungetService(service);
+				}
+			});
 		}
 
 		@Override
@@ -251,30 +270,53 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 				.equals(ServiceObjects.class)) {
 
 				try {
-					Method ourMethod = getClass().getMethod(method.getName(), method.getParameterTypes());
+					try {
+						Method ourMethod = getClass().getMethod(method.getName(), method.getParameterTypes());
 
-					return ourMethod.invoke(this, args);
-				} catch (NoSuchMethodException t) {
-					return method.invoke(so, args);
+						return ourMethod.invoke(this, args);
+					} catch (NoSuchMethodException t) {
+						return method.invoke(so, args);
+					}
+				} catch (InvocationTargetException e) {
+					throw Exceptions.duck(e.getCause());
+				}
+			}
+			if (method.getDeclaringClass()
+				.equals(Object.class)) {
+				switch (method.getName()) {
+					case "toString" :
+						return delegatedToString(proxy);
+					case "hashCode" :
+						return so.hashCode();
+					case "equals" :
+						return so.equals(args[0]);
 				}
 			}
 
 			throw new IllegalArgumentException();
 		}
 
+		public String delegatedToString(Object proxy) {
+			return "CloseableServiceObjects[" + System.identityHashCode(proxy) + "]:" + so.toString();
+		}
+
 		@SuppressWarnings("unused")
 		public S getService() {
 			S service = so.getService();
-			instances.add(service);
+			instances.merge(service, 1, (oldValue, dummy) -> oldValue + 1);
 			return service;
 		}
 
 		@SuppressWarnings("unused")
 		public void ungetService(S service) {
-			instances.remove(service);
+			instances.compute(service, (key, oldValue) -> {
+				if (oldValue == null) {
+					throw new AssertionError("Attempt to ungetService " + service
+						+ " but there are no outstanding references to this object");
+				}
+				return oldValue == 1 ? null : oldValue - 1;
+			});
 			so.ungetService(service);
 		}
-
 	}
-
 }
