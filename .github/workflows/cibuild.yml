@@ -5,6 +5,10 @@ on: [push, pull_request]
 env:
   LC_ALL: en_US.UTF-8
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   OpenJDK8_Linux:
     name: OpenJDK8 Linux
@@ -17,7 +21,6 @@ jobs:
       with:
         java-version: 1.8
     - name: Build
-      shell: bash
       run: |
         ./.github/scripts/build.sh
     - name: Upload "assertj" coverage to Codecov
@@ -42,7 +45,6 @@ jobs:
         name: junit5
     - name: Publish
       if: success() && (github.repository == 'osgi/osgi-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request')
-      shell: bash
       run: |
         ./.github/scripts/publish.sh -Possrh
       env:
@@ -59,7 +61,6 @@ jobs:
       with:
         java-version: 11
     - name: Build
-      shell: bash
       run: |
         ./.github/scripts/build.sh
   OpenJDK8_Bnd_SNAPSHOT:
@@ -74,7 +75,6 @@ jobs:
         java-version: 1.8
     - name: Build
       continue-on-error: true
-      shell: bash
       run: |
         ./.github/scripts/build.sh -Pbnd-next
   OpenJDK8_Windows:
@@ -88,7 +88,6 @@ jobs:
       with:
         java-version: 1.8
     - name: Build
-      shell: bash
       run: |
         ./.github/scripts/build.sh
   OpenJDK8_macOS:
@@ -102,6 +101,5 @@ jobs:
       with:
         java-version: 1.8
     - name: Build
-      shell: bash
       run: |
         ./.github/scripts/build.sh
