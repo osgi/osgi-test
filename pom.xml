@@ -124,6 +124,7 @@
 					<configuration>
 						<failOnMissing>false</failOnMissing>
 						<fullReport>true</fullReport>
+						<includeDistributionManagement>false</includeDistributionManagement>
 					</configuration>
 					<executions>
 						<execution>
