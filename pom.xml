@@ -124,6 +124,10 @@
 					<configuration>
 						<failOnMissing>false</failOnMissing>
 						<fullReport>true</fullReport>
+						<includeDistributionManagement>false</includeDistributionManagement>
+						<diffignores>
+							<diffignore>Bundle-Version</diffignore>
+						</diffignores>
 					</configuration>
 					<executions>
 						<execution>
