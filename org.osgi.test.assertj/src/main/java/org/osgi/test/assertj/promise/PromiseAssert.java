@@ -58,6 +58,7 @@ public class PromiseAssert<RESULT>
 	/**
 	 * {@link InstanceOfAssertFactory} for a {@link PromiseAssert}.
 	 *
+	 * @param <ACTUAL> The type of the {@code Promise}.
 	 * @param <RESULT> The {@code Promise} result type.
 	 * @param resultType The result type class.
 	 * @return The factory instance.

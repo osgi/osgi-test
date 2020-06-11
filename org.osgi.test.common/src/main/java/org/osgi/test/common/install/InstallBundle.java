@@ -44,7 +44,7 @@ public class InstallBundle {
 	 * in this fashion are uninstalled automatically at the end of the test
 	 * method.
 	 *
-	 * @param pathToEmbeddedJar
+	 * @param pathToEmbeddedJar The entry path to the jar resource.
 	 * @return installed and started bundle
 	 * @throws AssertionError if no bundle is found
 	 */
@@ -63,7 +63,7 @@ public class InstallBundle {
 	 * in this fashion are uninstalled automatically at the end of the test
 	 * method.
 	 *
-	 * @param pathToEmbeddedJar
+	 * @param pathToEmbeddedJar The entry path to the jar resource.
 	 * @param startBundle if true, start the bundle
 	 * @return installed bundle
 	 * @throws AssertionError if no bundle is found
