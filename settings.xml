@@ -3,12 +3,7 @@
   <interactiveMode>false</interactiveMode>
   <servers>
     <server>
-      <id>OSGi Releases</id>
-      <username>${env.OSSRH_USERNAME}</username>
-      <password>${env.OSSRH_PASSWORD}</password>
-    </server>
-    <server>
-      <id>OSGi Snapshots</id>
+      <id>ossrh</id>
       <username>${env.OSSRH_USERNAME}</username>
       <password>${env.OSSRH_PASSWORD}</password>
     </server>

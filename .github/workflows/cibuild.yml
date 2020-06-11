@@ -5,103 +5,84 @@ on: [push, pull_request]
 env:
   LC_ALL: en_US.UTF-8
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  OpenJDK8_Linux:
-    name: OpenJDK8 Linux
-    runs-on: ubuntu-latest
+  JDK_Matrix:
+    strategy:
+      matrix:
+        java: [ 8, 11, 14, 15-ea ]
+        os: [ ubuntu-latest ]
+        exclude:
+        - os: ubuntu-latest
+          java: 8
+        include:
+        - os: windows-latest
+          java: 8
+        - os: ubuntu-latest
+          java: 8
+          canonical: ${{ (github.repository == 'osgi/osgi-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request') }}
+        - os: ubuntu-latest
+          java: 8
+          experimental: true
+          mavenopts: -Pbnd-next
+    name: JDK${{ matrix.java }} ${{ matrix.os }} ${{ matrix.mavenopts }}
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Git Checkout
       uses: actions/checkout@v2
     - name: Set up Java
       uses: actions/setup-java@v1
       with:
-        java-version: 1.8
+        java-version: ${{ matrix.java }}
     - name: Build
-      shell: bash
+      continue-on-error: ${{ matrix.experimental }}
       run: |
-        ./.github/scripts/build.sh
+        ./.github/scripts/build.sh ${{ matrix.mavenopts }}
     - name: Upload "assertj" coverage to Codecov
+      if: (matrix.canonical)
       uses: codecov/codecov-action@v1
       with:
         file: ./org.osgi.test.assertj/target/site/jacoco/jacoco.xml
         name: assertj
     - name: Upload "common" coverage to Codecov
+      if: (matrix.canonical)
       uses: codecov/codecov-action@v1
       with:
         file: ./org.osgi.test.common/target/site/jacoco/jacoco.xml
         name: common
     - name: Upload "junit4" coverage to Codecov
+      if: (matrix.canonical)
       uses: codecov/codecov-action@v1
       with:
         file: ./org.osgi.test.junit4/target/site/jacoco-it/jacoco.xml
         name: junit4
     - name: Upload "junit5" coverage to Codecov
+      if: (matrix.canonical)
       uses: codecov/codecov-action@v1
       with:
         file: ./org.osgi.test.junit5/target/site/jacoco-it/jacoco.xml
         name: junit5
+    - name: Import GPG key
+      id: import_gpg
+      if: (matrix.canonical)
+      uses: crazy-max/ghaction-import-gpg@v2
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    - name: GPG key information
+      if: (steps.import_gpg.outcome == 'success')
+      run: |
+        echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+        echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+        echo "name:        ${{ steps.import_gpg.outputs.name }}"
+        echo "email:       ${{ steps.import_gpg.outputs.email }}"
     - name: Publish
-      if: success() && (github.repository == 'osgi/osgi-test') && (github.ref == 'refs/heads/master') && (github.event_name != 'pull_request')
-      shell: bash
+      if: (matrix.canonical)
       run: |
         ./.github/scripts/publish.sh -Possrh
       env:
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-  OpenJDK11_Linux:
-    name: OpenJDK11 Linux
-    runs-on: ubuntu-latest
-    steps:
-    - name: Git Checkout
-      uses: actions/checkout@v2
-    - name: Set up Java
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11
-    - name: Build
-      shell: bash
-      run: |
-        ./.github/scripts/build.sh
-  OpenJDK8_Bnd_SNAPSHOT:
-    name: OpenJDK8 Bnd SNAPSHOT
-    runs-on: ubuntu-latest
-    steps:
-    - name: Git Checkout
-      uses: actions/checkout@v2
-    - name: Set up Java
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Build
-      continue-on-error: true
-      shell: bash
-      run: |
-        ./.github/scripts/build.sh -Pbnd-next
-  OpenJDK8_Windows:
-    name: OpenJDK8 Windows
-    runs-on: windows-latest
-    steps:
-    - name: Git Checkout
-      uses: actions/checkout@v2
-    - name: Set up Java
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Build
-      shell: bash
-      run: |
-        ./.github/scripts/build.sh
-  OpenJDK8_macOS:
-    name: OpenJDK8 macOS
-    runs-on: macos-latest
-    steps:
-    - name: Git Checkout
-      uses: actions/checkout@v2
-    - name: Set up Java
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.8
-    - name: Build
-      shell: bash
-      run: |
-        ./.github/scripts/build.sh
