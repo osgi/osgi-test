@@ -61,22 +61,30 @@ public @interface InjectService {
 	/**
 	 * Filter string used to target more specific services using the
 	 * {@code String.format} pattern. Must use valid OSGi filter syntax.
+	 *
+	 * @return The filter string.
 	 */
 	String filter() default "";
 
 	/**
 	 * Optional arguments to the format string provided by {@link #filter()}.
+	 *
+	 * @return The filter arguments.
 	 */
 	String[] filterArguments() default {};
 
 	/**
 	 * Indicate the number of services that are required to arrive within the
 	 * specified by {@link #timeout()} before starting the test.
+	 *
+	 * @return The cardinality.
 	 */
 	int cardinality() default 1;
 
 	/**
 	 * Indicate require services must arrive within the specified timeout.
+	 *
+	 * @return The timeout.
 	 */
 	long timeout() default DEFAULT_TIMEOUT;
 

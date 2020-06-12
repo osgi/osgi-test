@@ -156,6 +156,7 @@ public class CloseableBundleContextTest extends SoftAssertions {
 
 		@Test
 		void unmodifiedMethods_passedThrough() {
+			@SuppressWarnings("unchecked")
 			ServiceReference<Object> ref = mock(ServiceReference.class);
 			when(upstreamSO.getServiceReference()).thenReturn(ref);
 			assertThat(sutSO.getServiceReference()).isSameAs(ref);
