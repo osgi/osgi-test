@@ -11,6 +11,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.junit.jupiter.api.AfterEach;
@@ -110,9 +112,8 @@ abstract class AbstractServiceExtensionTest {
 	protected AbstractThrowableAssert<?, ? extends Throwable> futureAssertThatTest(Class<?> testClass, int delay) {
 		checkClass(testClass);
 		try {
-			return executor.schedule(() -> assertThatTest(testClass), delay,
-				TimeUnit.MILLISECONDS)
-				.get(delay + 2000, TimeUnit.MILLISECONDS);
+			return executor.schedule(() -> assertThatTest(testClass), delay, TimeUnit.MILLISECONDS)
+				.get(delay + 200000, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			throw Exceptions.duck(e);
 		}
@@ -120,24 +121,34 @@ abstract class AbstractServiceExtensionTest {
 
 	protected static AbstractThrowableAssert<?, ? extends Throwable> assertThatTest(Class<?> testClass) {
 		checkClass(testClass);
-		Event testEvent = EngineTestKit.engine(new JupiterTestEngine())
-			.selectors(selectClass(
-				testClass))
-			.execute()
-			.testEvents()
-			// .debug(
-			// System.err)
-			.filter(event -> event.getType()
-				.equals(
-					FINISHED))
-			.findAny()
-			.orElseThrow(() -> new IllegalStateException("Test failed to run at all"));
 
-		TestExecutionResult result = testEvent.getPayload(TestExecutionResult.class)
-			.orElseThrow(() -> new IllegalStateException("Test result payload missing"));
+		Logger logger = Logger.getLogger("org.junit.jupiter");
+		Level oldLevel = logger.getLevel();
+		try {
+			// Suppress log output while the testkit is running (see issue
+			// #133).
+			logger.setLevel(Level.OFF);
+			Event testEvent = EngineTestKit.engine(new JupiterTestEngine())
+				.selectors(selectClass(testClass))
+				.execute()
+				.testEvents()
+				// .debug(
+				// System.err)
+				.filter(event -> event.getType()
+					.equals(FINISHED))
+				.findAny()
+				.orElseThrow(() -> new IllegalStateException("Test failed to run at all"));
 
-		return assertThat(result.getThrowable()
-			.orElse(null));
+			TestExecutionResult result = testEvent.getPayload(TestExecutionResult.class)
+				.orElseThrow(() -> new IllegalStateException("Test result payload missing"));
+
+			return assertThat(result.getThrowable()
+				.orElse(null));
+		} finally {
+			// Restore the filter to what it was so that we do not interfere
+			// with the parent test
+			logger.setLevel(oldLevel);
+		}
 	}
 
 	protected ScheduledFuture<ServiceRegistration<Foo>> schedule(Foo afoo, String key, String value) {
