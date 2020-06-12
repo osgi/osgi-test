@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -109,23 +111,34 @@ public class BundleContextExtensionTest {
 
 			AtomicReference<TestDescriptor> root = new AtomicReference<>();
 
-			EngineTestKit.engine(new JupiterTestEngine())
-				.selectors(selectClass(testClass))
-				.execute()
-				.allEvents()
-				// .debug(
-				// System.err)
-				.stream()
-				.filter(event -> event.getType()
-					.equals(FINISHED))
-				.forEach(event -> {
-					TestDescriptor current = event.getTestDescriptor();
-					eventMap.put(current, event);
-					if (!current.getParent()
-						.isPresent()) {
-						root.set(current);
-					}
-				});
+			Logger logger = Logger.getLogger("org.junit.jupiter");
+			Level oldLevel = logger.getLevel();
+			try {
+				// Suppress log output while the testkit is running (see issue
+				// #133).
+				logger.setLevel(Level.OFF);
+				EngineTestKit.engine(new JupiterTestEngine())
+					.selectors(selectClass(testClass))
+					.execute()
+					.allEvents()
+					// .debug(
+					// System.err)
+					.stream()
+					.filter(event -> event.getType()
+						.equals(FINISHED))
+					.forEach(event -> {
+						TestDescriptor current = event.getTestDescriptor();
+						eventMap.put(current, event);
+						if (!current.getParent()
+							.isPresent()) {
+							root.set(current);
+						}
+					});
+			} finally {
+				// Restore the filter to what it was so that we do not interfere
+				// with the parent test
+				logger.setLevel(oldLevel);
+			}
 
 			OSGiSoftAssertions afterSoftly = new OSGiSoftAssertions();
 			checker.assertSetup(afterSoftly, AFTER_CLASS, expectedSetup);
