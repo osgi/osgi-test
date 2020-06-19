@@ -23,7 +23,7 @@ We use [GitHub Actions](https://github.com/osgi/osgi-test/actions?query=workflow
 
 ## Workflow
 
-We use [git triangular workflow](https://www.sociomantic.com/blog/2014/05/git-triangular-workflow/).
+We use [git triangular workflow](https://github.blog/2015-07-29-git-2-5-including-multiple-worktrees-and-triangular-workflows/).
 This means that no one, not even the maintainers, push contributions directly into the [main repo](https://github.com/osgi/osgi-test). All contribution come in through pull requests.
 So each contributor will need to [fork the main repo](https://github.com/osgi/osgi-test/fork)
 on GitHub. All contributions are made as commits to your fork. Then you submit a
@@ -132,12 +132,12 @@ Sometimes for big changes/feature additions, you may wish to submit a pull
 request before it is fully ready to merge, in order to solicit feedback from the
 core developers and ensure you're on the right track before proceeding too far.
 In this case, you can submit a pull request and mark it as a
-work-in-progress by prefixing the title of the PR with **WIP**.
+draft.
 
-Once your pull request is ready for consideration to merge, remove the WIP prefix
-from the title to signal this fact to the core team. While the pull request is
-flagged as WIP the maintainers are unlikely to know that it is ready, the
-review process won't start and your branch won't get merged.
+Once your pull request is ready for consideration to merge, remove the 
+draft marker to signal this fact to the core team. While the pull request is
+marked as draft, the maintainers are unlikely to know that it is ready, the
+review process won't start and your PR won't get merged.
 
 ### Sign your work
 
