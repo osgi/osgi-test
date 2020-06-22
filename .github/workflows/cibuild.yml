@@ -44,25 +44,25 @@ jobs:
         ./.github/scripts/build.sh ${{ matrix.mavenopts }}
     - name: Upload "assertj" coverage to Codecov
       if: (matrix.canonical)
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.0.7
       with:
         file: ./org.osgi.test.assertj/target/site/jacoco/jacoco.xml
         name: assertj
     - name: Upload "common" coverage to Codecov
       if: (matrix.canonical)
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.0.7
       with:
         file: ./org.osgi.test.common/target/site/jacoco/jacoco.xml
         name: common
     - name: Upload "junit4" coverage to Codecov
       if: (matrix.canonical)
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.0.7
       with:
         file: ./org.osgi.test.junit4/target/site/jacoco-it/jacoco.xml
         name: junit4
     - name: Upload "junit5" coverage to Codecov
       if: (matrix.canonical)
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v1.0.7
       with:
         file: ./org.osgi.test.junit5/target/site/jacoco-it/jacoco.xml
         name: junit5
