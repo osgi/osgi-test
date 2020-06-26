@@ -19,6 +19,7 @@ package org.osgi.test.assertj.serviceevent;
 import java.util.Objects;
 import java.util.function.ToIntFunction;
 
+import org.assertj.core.error.ErrorMessageFactory;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.test.assertj.event.AbstractBitmappedTypeEventAssert;
@@ -26,6 +27,11 @@ import org.osgi.test.common.bitmaps.ServiceEventType;
 
 public abstract class AbstractServiceEventAssert<SELF extends AbstractServiceEventAssert<SELF, ACTUAL>, ACTUAL extends ServiceEvent>
 	extends AbstractBitmappedTypeEventAssert<SELF, ACTUAL> {
+	static {
+		// SoftAssertions will require this at runtime; this
+		// forces bnd to generate an import for it.
+		Class<?> importError = ErrorMessageFactory.class;
+	}
 
 	protected AbstractServiceEventAssert(ACTUAL actual, Class<SELF> selfType, ToIntFunction<ACTUAL> getType) {
 		super(actual, selfType, getType, ServiceEventType.BITMAP);

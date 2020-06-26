@@ -95,9 +95,13 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.service.log</artifactId>
 		</dependency>
-		<dependency>
+		<dependency> 
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.test.assertj</artifactId>
+			<artifactId>org.osgi.test.assertj.framework</artifactId>
+		</dependency>
+		<dependency> 
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.test.assertj.promise</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>biz.aQute.bnd</groupId>

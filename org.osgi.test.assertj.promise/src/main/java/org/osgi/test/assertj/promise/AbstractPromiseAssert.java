@@ -31,6 +31,8 @@ import org.assertj.core.api.Assert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
+import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
+import org.assertj.core.error.ErrorMessageFactory;
 import org.osgi.test.common.exceptions.Exceptions;
 import org.osgi.util.promise.Promise;
 
@@ -41,6 +43,13 @@ import org.osgi.util.promise.Promise;
  */
 public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<SELF, ACTUAL, RESULT>, ACTUAL extends Promise<? extends RESULT>, RESULT>
 	extends AbstractAssert<SELF, ACTUAL> {
+
+	static {
+		// SoftAssertions will require this at runtime; this
+		// forces bnd to generate an import for it.
+		Class<?> importRecursive = RecursiveComparisonConfiguration.class;
+		Class<?> importError = ErrorMessageFactory.class;
+	}
 
 	protected AbstractPromiseAssert(ACTUAL actual, Class<?> selfType) {
 		super(actual, selfType);
