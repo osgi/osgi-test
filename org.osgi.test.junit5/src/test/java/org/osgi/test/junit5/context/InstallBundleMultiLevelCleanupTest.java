@@ -9,7 +9,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectInstallBundle;
 import org.osgi.test.common.install.InstallBundle;
-import org.osgi.test.junit5.context.BundleContextExtensionTest.BundleChecker;
+import org.osgi.test.junit5.context.BundleContextExtension_CleanupTest.BundleChecker;
 
 @ExtendWith(PreDestroyCallback.class)
 @ExtendWith(BundleContextExtension.class)

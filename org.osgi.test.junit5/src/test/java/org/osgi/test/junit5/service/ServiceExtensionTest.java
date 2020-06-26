@@ -18,6 +18,7 @@ package org.osgi.test.junit5.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.osgi.test.common.annotation.InjectService.DEFAULT_TIMEOUT;
+import static org.osgi.test.junit5.testutils.TestKitUtils.assertThatTest;
 
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;

@@ -81,7 +81,7 @@ public class BundleContextExtension
 			m -> Modifier.isStatic(m.getModifiers()));
 
 		fields.forEach(field -> {
-			// assertFieldIsBundleContext(field);
+			assertFieldIsBundleContext(field);
 			setField(field, null, getBundleContext(extensionContext));
 		});
 
@@ -89,9 +89,8 @@ public class BundleContextExtension
 			m -> Modifier.isStatic(m.getModifiers()));
 
 		fields.forEach(field -> {
-			// assertFieldIsInstallBundle(field);
-			setField(field, null, getInstallbundle(
-				extensionContext));
+			assertFieldIsInstallBundle(field);
+			setField(field, null, getInstallbundle(extensionContext));
 		});
 	}
 
@@ -124,9 +123,7 @@ public class BundleContextExtension
 	}
 
 	public static void cleanup(ExtensionContext extensionContext) throws Exception {
-		getStore(
-			extensionContext)
-			.remove(INSTALL_BUNDLE_KEY, InstallBundle.class);
+		getStore(extensionContext).remove(INSTALL_BUNDLE_KEY, InstallBundle.class);
 		CloseableResourceBundleContext closeableResourceBundleContext = getStore(extensionContext)
 			.remove(BUNDLE_CONTEXT_KEY, CloseableResourceBundleContext.class);
 		if (closeableResourceBundleContext != null) {
@@ -189,20 +186,32 @@ public class BundleContextExtension
 	}
 
 	private void assertFieldIsBundleContext(Field field) {
-		assertIsBundleContext("field", field.getType());
-		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
-			|| Modifier.isStatic(field.getModifiers())) {
+		if (field.getType() != BundleContext.class) {
 			throw new ExtensionConfigurationException(
-				InjectBundleContext.class.getName() + " field [" + field + "] must not be final, private or static.");
+				"[" + field.getName() + "] Can only resolve @" + InjectBundleContext.class.getSimpleName()
+					+ " field of type " + BundleContext.class.getName() + " but was: " + field.getType()
+						.getName());
+		}
+		if (Modifier.isFinal(field.getModifiers())) {
+			// Modifier.isPrivate(field.getModifiers())
+			throw new ExtensionConfigurationException(
+				'@' + InjectBundleContext.class.getSimpleName() + " field [" + field.getName() + "] must not be final");
+			// not be final, private or static.");
 		}
 	}
 
 	private void assertFieldIsInstallBundle(Field field) {
-		assertIsInstallBundle("field", field.getType());
-		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
-			|| Modifier.isStatic(field.getModifiers())) {
+		if (field.getType() != InstallBundle.class) {
 			throw new ExtensionConfigurationException(
-				InjectInstallBundle.class.getName() + " field [" + field + "] must not be final, private or static.");
+				"[" + field.getName() + "] Can only resolve @" + InjectInstallBundle.class.getSimpleName()
+					+ " field of type " + InstallBundle.class.getName() + " but was: " + field.getType()
+						.getName());
+		}
+		if (Modifier.isFinal(field.getModifiers())) {
+			// Modifier.isPrivate(field.getModifiers())
+			throw new ExtensionConfigurationException(
+				'@' + InjectInstallBundle.class.getSimpleName() + " field [" + field.getName() + "] must not be final");
+			// not be final, private or static.");
 		}
 	}
 
@@ -215,8 +224,7 @@ public class BundleContextExtension
 				.getBundleContext());
 
 		Class<?> requiredTestClass = extensionContext.getRequiredTestClass();
-		BundleContext bundleContext = getStore(
-			extensionContext)
+		BundleContext bundleContext = getStore(extensionContext)
 			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
 				key -> new CloseableResourceBundleContext(requiredTestClass, parentContext),
 				CloseableResourceBundleContext.class)
@@ -246,7 +254,6 @@ public class BundleContextExtension
 		public BundleContext get() {
 			return bundleContext;
 		}
-
 	}
 
 	@Override
