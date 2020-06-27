@@ -26,8 +26,8 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.osgi.test.assertj</artifactId>
-	<description>OSGi Testing AssertJ Support</description>
+	<artifactId>org.osgi.test.assertj.promise</artifactId>
+	<description>OSGi Testing AssertJ Support for Promises</description>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<url>https://www.osgi.org</url>
 	<scm>
