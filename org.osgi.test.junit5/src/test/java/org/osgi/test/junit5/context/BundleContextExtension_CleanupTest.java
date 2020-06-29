@@ -76,7 +76,7 @@ import org.osgi.test.junit5.context.MultiLevelCleanupTest.CallbackPoint;
 import org.osgi.test.junit5.testutils.OSGiSoftAssertions;
 import org.osgi.test.junit5.types.Foo;
 
-public class BundleContextExtensionTest {
+public class BundleContextExtension_CleanupTest {
 
 	/**
 	 * This function runs the given concrete subclass of MultiLevelCleanupTest
