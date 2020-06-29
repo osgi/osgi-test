@@ -166,7 +166,7 @@ public class BundleContextExtension
 		if ((annotatedBundleContextParameter || annotatedInstallBundleParameter)
 			&& (parameterContext.getDeclaringExecutable() instanceof Constructor)) {
 			throw new ParameterResolutionException(
-				"BundleContextExtension only supports field and parameter injection.");
+				"BundleContextExtension does not support parameter injection on constructors");
 		}
 		return annotatedBundleContextParameter || annotatedInstallBundleParameter;
 	}

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.platform.engine.discovery.DiscoverySelectors.selectClass;
 import static org.junit.platform.testkit.engine.EventType.FINISHED;
 
+import java.lang.reflect.Modifier;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,11 +20,9 @@ public class TestKitUtils {
 
 	public static void checkClass(Class<?> testClass) {
 		// This is to protect against developer slip-ups that can be costly...
-		try {
-			testClass.getDeclaredConstructor();
-		} catch (NoSuchMethodException e) {
+		if (!Modifier.isStatic(testClass.getModifiers())) {
 			throw new IllegalStateException(
-				"Test class does not have a default constructor (did you accidentally use a non-static inner class?): "
+				"Test class is not static: "
 					+ testClass);
 		}
 	}

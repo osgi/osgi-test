@@ -126,4 +126,20 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 		assertThatTest(StaticPrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
 			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*private.*");
 	}
+
+	static class AnnotatedConstructor extends TestBase {
+		AnnotatedConstructor(@InjectBundleContext BundleContext context) {
+
+		}
+
+		@Override
+		@Test
+		void myTest() {}
+	}
+
+	@Test
+	void annotatedConstructor_throwsException() {
+		assertThatTest(AnnotatedConstructor.class).isInstanceOf(ParameterResolutionException.class)
+			.hasMessageMatching("BundleContextExtension does not support parameter injection on constructors");
+	}
 }
