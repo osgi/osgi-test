@@ -192,11 +192,10 @@ public class BundleContextExtension
 					+ " field of type " + BundleContext.class.getName() + " but was: " + field.getType()
 						.getName());
 		}
-		if (Modifier.isFinal(field.getModifiers())) {
-			// Modifier.isPrivate(field.getModifiers())
+		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())) {
 			throw new ExtensionConfigurationException(
-				'@' + InjectBundleContext.class.getSimpleName() + " field [" + field.getName() + "] must not be final");
-			// not be final, private or static.");
+				'@' + InjectBundleContext.class.getSimpleName() + " field [" + field.getName()
+					+ "] must not be private or final");
 		}
 	}
 

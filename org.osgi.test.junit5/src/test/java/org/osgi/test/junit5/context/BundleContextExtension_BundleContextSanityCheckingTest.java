@@ -79,8 +79,7 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsFinal_throwsException() {
 		assertThatTest(FinalStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessage(
-				"@InjectBundleContext field [bc] must not be final");
+			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*final.*");
 	}
 
 	static class FinalField extends TestBase {
@@ -95,7 +94,36 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 	@Test
 	void annotatedField_thatIsFinal_throwsException() {
 		assertThatTest(FinalField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessage(
-				"@InjectBundleContext field [bc] must not be final");
+			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*final.*");
+	}
+
+	static class PrivateField extends TestBase {
+		@InjectBundleContext
+		private BundleContext bc = null;
+
+		@Override
+		@Test
+		void myTest() {}
+	}
+
+	@Test
+	void annotatedField_thatIsPrivate_throwsException() {
+		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
+			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*private.*");
+	}
+
+	static class StaticPrivateField extends TestBase {
+		@InjectBundleContext
+		static private BundleContext bc = null;
+
+		@Override
+		@Test
+		void myTest() {}
+	}
+
+	@Test
+	void annotatedStaticField_thatIsPrivate_throwsException() {
+		assertThatTest(StaticPrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
+			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*private.*");
 	}
 }
