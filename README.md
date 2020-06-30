@@ -10,9 +10,9 @@ This project provides a set of bundles which contain useful and helpful classes 
 
 This artifact includes common utility classes which are useful in all testing scenarios.
 
-### [org.osgi.test.assertj.*][2][3]
+### org.osgi.test.assertj.*
 
-These artifacts provides support classes for OSGi testing with [AssertJ](https://github.com/joel-costigliola/assertj-core) including custom assertions. Currently there are artifacts for `org.osgi.framework` and `org.osgi.util.promise`.
+These artifacts provides support classes for OSGi testing with [AssertJ](https://github.com/joel-costigliola/assertj-core) including custom assertions. Currently there are artifacts for [org.osgi.framework][2] and [org.osgi.util.promise][3].
 
 ### [org.osgi.test.junit4][4]
 
