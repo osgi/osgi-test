@@ -10,15 +10,15 @@ This project provides a set of bundles which contain useful and helpful classes 
 
 This artifact includes common utility classes which are useful in all testing scenarios.
 
-### [org.osgi.test.assertj][2]
+### [org.osgi.test.assertj.*][2][3]
 
-This artifact provides support classes for OSGi testing with [AssertJ](https://github.com/joel-costigliola/assertj-core) including custom assertions.
+These artifacts provides support classes for OSGi testing with [AssertJ](https://github.com/joel-costigliola/assertj-core) including custom assertions. Currently there are artifacts for `org.osgi.framework` and `org.osgi.util.promise`.
 
-### [org.osgi.test.junit4][3]
+### [org.osgi.test.junit4][4]
 
 This artifact provides support classes for OSGi testing with [JUnit 4](https://junit.org/junit4/) including JUnit 4 Rules.
 
-### [org.osgi.test.junit5][4]
+### [org.osgi.test.junit5][5]
 
 This artifact provides support classes for OSGi testing with [JUnit 5](https://junit.org/junit5/) including JUnit 5 Extensions.
 
@@ -67,6 +67,7 @@ wrong or incomplete.
 This project uses the [Bnd Maven Plugins](https://github.com/bndtools/bnd) to build.
 
 [1]: org.osgi.test.common/README.md
-[2]: org.osgi.test.assertj/README.md
-[3]: org.osgi.test.junit4/README.md
-[4]: org.osgi.test.junit5/README.md
+[2]: org.osgi.test.assertj.framework/README.md
+[3]: org.osgi.test.assertj.promise/README.md
+[4]: org.osgi.test.junit4/README.md
+[5]: org.osgi.test.junit5/README.md
