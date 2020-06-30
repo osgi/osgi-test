@@ -40,6 +40,27 @@ jobs:
       continue-on-error: ${{ matrix.experimental }}
       run: |
         ./.github/scripts/build.sh ${{ matrix.mavenopts }}
+    - name: Import GPG key
+      id: import_gpg
+      if: (matrix.canonical && (steps.build.outcome == 'success'))
+      uses: crazy-max/ghaction-import-gpg@v2
+      env:
+        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    - name: GPG key information
+      if: (steps.import_gpg.outcome == 'success')
+      run: |
+        echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+        echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+        echo "name:        ${{ steps.import_gpg.outputs.name }}"
+        echo "email:       ${{ steps.import_gpg.outputs.email }}"
+    - name: Publish
+      if: (steps.import_gpg.outcome == 'success')
+      run: |
+        ./.github/scripts/publish.sh -Possrh
+      env:
+        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
     - name: Upload "assertj.framework" coverage to Codecov
       if: (matrix.codecov)
       uses: codecov/codecov-action@v1.0.7
@@ -70,24 +91,3 @@ jobs:
       with:
         file: ./org.osgi.test.junit5/target/site/jacoco-it/jacoco.xml
         name: junit5
-    - name: Import GPG key
-      id: import_gpg
-      if: (matrix.canonical)
-      uses: crazy-max/ghaction-import-gpg@v2
-      env:
-        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-    - name: GPG key information
-      if: (steps.import_gpg.outcome == 'success')
-      run: |
-        echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
-        echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
-        echo "name:        ${{ steps.import_gpg.outputs.name }}"
-        echo "email:       ${{ steps.import_gpg.outputs.email }}"
-    - name: Publish
-      if: (matrix.canonical && (steps.build.outcome == 'success'))
-      run: |
-        ./.github/scripts/publish.sh -Possrh
-      env:
-        OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-        OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
