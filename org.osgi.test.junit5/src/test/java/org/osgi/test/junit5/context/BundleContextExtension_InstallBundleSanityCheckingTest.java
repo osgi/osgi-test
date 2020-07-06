@@ -2,9 +2,7 @@ package org.osgi.test.junit5.context;
 
 import static org.osgi.test.junit5.testutils.TestKitUtils.assertThatTest;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
@@ -17,15 +15,6 @@ public class BundleContextExtension_InstallBundleSanityCheckingTest {
 	static class TestBase {
 		@Test
 		void myTest() {}
-	}
-
-	protected String					testMethodName;
-
-	@BeforeEach
-	public void beforeEach(TestInfo testInfo) {
-		testMethodName = testInfo.getTestMethod()
-			.get()
-			.getName();
 	}
 
 	@ExtendWith(BundleContextExtension.class)
@@ -88,8 +77,7 @@ public class BundleContextExtension_InstallBundleSanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsFinal_throwsException() {
 		assertThatTest(FinalStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessage(
-				"@InjectInstallBundle field [bc] must not be final");
+			.hasMessageMatching("@InjectInstallBundle field \\[bc\\] must not be .*final.*");
 	}
 
 	static class FinalField extends TestBase {
@@ -104,7 +92,36 @@ public class BundleContextExtension_InstallBundleSanityCheckingTest {
 	@Test
 	void annotatedField_thatIsFinal_throwsException() {
 		assertThatTest(FinalField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessage(
-				"@InjectInstallBundle field [bc] must not be final");
+			.hasMessageMatching("@InjectInstallBundle field \\[bc\\] must not be .*final.*");
+	}
+
+	static class PrivateStaticField extends TestBase {
+		@InjectInstallBundle
+		static final InstallBundle bc = null;
+
+		@Override
+		@Test
+		void myTest() {}
+	}
+
+	@Test
+	void annotatedStaticField_thatIsPrivate_throwsException() {
+		assertThatTest(PrivateStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
+			.hasMessageMatching("@InjectInstallBundle field \\[bc\\] must not be .*private.*");
+	}
+
+	static class PrivateField extends TestBase {
+		@InjectInstallBundle
+		final InstallBundle bc = null;
+
+		@Override
+		@Test
+		void myTest() {}
+	}
+
+	@Test
+	void annotatedField_thatIsPrivate_throwsException() {
+		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
+			.hasMessageMatching("@InjectInstallBundle field \\[bc\\] must not be .*private.*");
 	}
 }

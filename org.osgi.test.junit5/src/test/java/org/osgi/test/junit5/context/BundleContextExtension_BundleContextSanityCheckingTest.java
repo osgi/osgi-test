@@ -17,8 +17,6 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 		void myTest() {}
 	}
 
-	protected String					testMethodName;
-
 	@ExtendWith(BundleContextExtension.class)
 	static class IncorrectParameterType {
 		@SuppressWarnings("unused")

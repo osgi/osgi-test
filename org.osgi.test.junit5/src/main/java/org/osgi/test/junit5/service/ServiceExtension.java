@@ -16,7 +16,7 @@
 
 package org.osgi.test.junit5.service;
 
-import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFields;
+import static org.osgi.test.common.inject.FieldInjector.findAnnotatedFields;
 import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.reflect.Field;
@@ -62,11 +62,11 @@ import org.osgi.test.common.service.ServiceConfigurationKey;
  */
 public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 
-	final static Namespace					NAMESPACE	= Namespace.create(ServiceExtension.class);
+	final static Namespace NAMESPACE = Namespace.create(ServiceExtension.class);
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		List<Field> fields = findAnnotatedNonStaticFields(extensionContext.getRequiredTestClass(), InjectService.class);
+		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectService.class);
 
 		BundleContext bundleContext = FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
 			.getBundleContext();
@@ -78,9 +78,8 @@ public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 			Class<?> memberType = field.getType();
 			Type genericMemberType = field.getGenericType();
 
-			setField(field, extensionContext.getRequiredTestInstance(),
-				resolveReturnValue(memberType, genericMemberType, serviceUseParameter, bundleContext,
-					extensionContext));
+			setField(field, extensionContext.getRequiredTestInstance(), resolveReturnValue(memberType,
+				genericMemberType, serviceUseParameter, bundleContext, extensionContext));
 		});
 	}
 
@@ -114,31 +113,27 @@ public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 
 		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
 			serviceType = ((ParameterizedType) genericMemberType).getActualTypeArguments()[0];
-		}
-		else if (ServiceAware.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
+		} else if (ServiceAware.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
 			serviceType = ((ParameterizedType) genericMemberType).getActualTypeArguments()[0];
 		}
 		// The service type must be a raw type
 		if (serviceType instanceof Class) {
 			return true;
 		}
-
-		return false;
+		throw new ParameterResolutionException("Can only resolve @" + InjectService.class.getSimpleName()
+			+ " parameter for services with non-generic types, service type was: " + serviceType.getTypeName());
 	}
 
 	static void assertValidFieldCandidate(Field field) {
 		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
 			|| Modifier.isStatic(field.getModifiers())) {
-			throw new ExtensionConfigurationException(
-				InjectService.class.getName() + " field [" + field + "] must not be final, private or static.");
+			throw new ExtensionConfigurationException("@" + InjectService.class.getSimpleName() + " field ["
+				+ field.getName() + "] must not be final, private or static.");
 		}
 	}
 
-	static <X> ServiceConfiguration<X> getServiceUseConfiguration(
-		InjectService injectService,
-		Class<X> serviceType,
-		BundleContext bundleContext,
-		ExtensionContext extensionContext) {
+	static <X> ServiceConfiguration<X> getServiceConfiguration(InjectService injectService, Class<X> serviceType,
+		BundleContext bundleContext, ExtensionContext extensionContext) {
 		@SuppressWarnings("unchecked")
 		ServiceConfiguration<X> serviceConfiguration = extensionContext.getStore(NAMESPACE)
 			.getOrComputeIfAbsent(new ServiceConfigurationKey(serviceType, injectService),
@@ -155,24 +150,20 @@ public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 
 		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
 			serviceType = ((ParameterizedType) serviceType).getActualTypeArguments()[0];
-		} else if (ServiceAware.class.equals(
-			memberType)
-			&& (genericMemberType instanceof ParameterizedType)) {
+		} else if (ServiceAware.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
 			serviceType = ((ParameterizedType) serviceType).getActualTypeArguments()[0];
 		}
 
-		if (!(serviceType instanceof Class)) {
-			throw new ParameterResolutionException(
-				"The only generic types allowed are List<S> and ServiceAware<S>: " + serviceType);
-		}
+		// supportsParameter() If Jupiter does the right thing then this method
+		// should not be called without serviceType being a class
+		assert serviceType instanceof Class;
 
-		ServiceConfiguration<?> configuration = getServiceUseConfiguration(injectService,
-			(Class<?>) serviceType, bundleContext, extensionContext);
+		ServiceConfiguration<?> configuration = getServiceConfiguration(injectService, (Class<?>) serviceType,
+			bundleContext, extensionContext);
 
 		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
 			return configuration.getServices();
-		} else if (ServiceAware.class.equals(memberType)
-			&& (genericMemberType instanceof ParameterizedType)) {
+		} else if (ServiceAware.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
 			return configuration;
 		}
 
