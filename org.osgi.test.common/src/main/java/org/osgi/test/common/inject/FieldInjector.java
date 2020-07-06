@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class FieldInjector {
@@ -57,6 +58,10 @@ public class FieldInjector {
 
 	public static List<Field> findAnnotatedNonStaticFields(Class<?> clazz, Class<? extends Annotation> annotationType) {
 		return findAnnotatedFields(clazz, annotationType, m -> !Modifier.isStatic(m.getModifiers()));
+	}
+
+	public static List<Field> findAnnotatedFields(Class<?> clazz, Class<? extends Annotation> annotationType) {
+		return findAnnotatedFields(clazz, annotationType, x -> true);
 	}
 
 	public static List<Field> findAnnotatedFields(Class<?> clazz, Class<? extends Annotation> annotationType,
@@ -206,6 +211,28 @@ public class FieldInjector {
 			.sorted(
 				fieldComparator)
 			.collect(toCollection(ArrayList::new));
+	}
+
+	public static void assertParameterIsOfType(Class<?> actual, Class<?> expected,
+		Class<? extends Annotation> annotationType, Function<String, ? extends RuntimeException> exception) {
+		if (actual != expected) {
+			throw exception.apply("Can only resolve @" + annotationType.getSimpleName()
+				+ " parameter of type " + expected.getName() + " but was: " + actual.getName());
+		}
+	}
+
+	public static void assertFieldIsOfType(Field field, Class<?> expected, Class<? extends Annotation> annotationType,
+		Function<String, ? extends RuntimeException> exception) {
+		if (field.getType() != expected) {
+			throw exception.apply(
+				"[" + field.getName() + "] Can only resolve @" + annotationType.getSimpleName() + " field of type "
+					+ expected.getName() + " but was: " + field.getType()
+						.getName());
+		}
+		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())) {
+			throw exception.apply(
+				"@" + annotationType.getSimpleName() + " field [" + field.getName() + "] must not be private or final");
+		}
 	}
 
 }

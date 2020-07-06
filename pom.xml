@@ -118,6 +118,7 @@
 						</execution>
 					</executions>
 				</plugin>
+				<!-- Disable baseline validation until we are at version > 1.0.0 
 				<plugin>
 					<groupId>biz.aQute.bnd</groupId>
 					<artifactId>bnd-baseline-maven-plugin</artifactId>
@@ -139,6 +140,7 @@
 						</execution>
 					</executions>
 				</plugin>
+				-->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>

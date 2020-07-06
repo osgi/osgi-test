@@ -16,6 +16,8 @@
 
 package org.osgi.test.junit5.context;
 
+import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
+import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
 import static org.osgi.test.common.inject.FieldInjector.findAnnotatedFields;
 import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFields;
 import static org.osgi.test.common.inject.FieldInjector.setField;
@@ -73,7 +75,6 @@ public class BundleContextExtension
 
 	public static final String		BUNDLE_CONTEXT_KEY	= "bundle.context";
 	public static final String		INSTALL_BUNDLE_KEY	= "install.bundle";
-	public static final Namespace	NAMESPACE			= Namespace.create(BundleContextExtension.class);
 
 	@Override
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
@@ -81,7 +82,8 @@ public class BundleContextExtension
 			m -> Modifier.isStatic(m.getModifiers()));
 
 		fields.forEach(field -> {
-			assertFieldIsBundleContext(field);
+			assertFieldIsOfType(field, BundleContext.class, InjectBundleContext.class,
+				ExtensionConfigurationException::new);
 			setField(field, null, getBundleContext(extensionContext));
 		});
 
@@ -89,7 +91,8 @@ public class BundleContextExtension
 			m -> Modifier.isStatic(m.getModifiers()));
 
 		fields.forEach(field -> {
-			assertFieldIsInstallBundle(field);
+			assertFieldIsOfType(field, InstallBundle.class, InjectInstallBundle.class,
+				ExtensionConfigurationException::new);
 			setField(field, null, getInstallbundle(extensionContext));
 		});
 	}
@@ -103,14 +106,16 @@ public class BundleContextExtension
 			fields = findAnnotatedNonStaticFields(testClass, InjectBundleContext.class);
 
 			fields.forEach(field -> {
-				assertFieldIsBundleContext(field);
+				assertFieldIsOfType(field, BundleContext.class, InjectBundleContext.class,
+					ExtensionConfigurationException::new);
 				setField(field, instance, getBundleContext(extensionContext));
 			});
 
 			fields = findAnnotatedNonStaticFields(testClass, InjectInstallBundle.class);
 
 			fields.forEach(field -> {
-				assertFieldIsInstallBundle(field);
+				assertFieldIsOfType(field, InstallBundle.class, InjectInstallBundle.class,
+					ExtensionConfigurationException::new);
 				setField(field, instance, getInstallbundle(extensionContext));
 			});
 		}
@@ -143,10 +148,12 @@ public class BundleContextExtension
 			.getType();
 
 		if (parameterContext.isAnnotated(InjectBundleContext.class)) {
-			assertIsBundleContext("parameter", parameterType);
+			assertParameterIsOfType(parameterType, BundleContext.class, InjectBundleContext.class,
+				ParameterResolutionException::new);
 			return getBundleContext(extensionContext);
 		} else if (parameterContext.isAnnotated(InjectInstallBundle.class)) {
-			assertIsInstallBundle("parameter", parameterType);
+			assertParameterIsOfType(parameterType, InstallBundle.class, InjectInstallBundle.class,
+				ParameterResolutionException::new);
 			return getInstallbundle(extensionContext);
 		}
 
@@ -169,49 +176,6 @@ public class BundleContextExtension
 				"BundleContextExtension does not support parameter injection on constructors");
 		}
 		return annotatedBundleContextParameter || annotatedInstallBundleParameter;
-	}
-
-	private void assertIsBundleContext(String target, Class<?> type) {
-		if (type != BundleContext.class) {
-			throw new ExtensionConfigurationException("Can only resolve @" + InjectBundleContext.class.getSimpleName()
-				+ " " + target + " of type " + BundleContext.class.getName() + " but was: " + type.getName());
-		}
-	}
-
-	private void assertIsInstallBundle(String target, Class<?> type) {
-		if (type != InstallBundle.class) {
-			throw new ExtensionConfigurationException("Can only resolve @" + InjectInstallBundle.class.getSimpleName()
-				+ " " + target + " of type " + InstallBundle.class.getName() + " but was: " + type.getName());
-		}
-	}
-
-	private void assertFieldIsBundleContext(Field field) {
-		if (field.getType() != BundleContext.class) {
-			throw new ExtensionConfigurationException(
-				"[" + field.getName() + "] Can only resolve @" + InjectBundleContext.class.getSimpleName()
-					+ " field of type " + BundleContext.class.getName() + " but was: " + field.getType()
-						.getName());
-		}
-		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())) {
-			throw new ExtensionConfigurationException(
-				'@' + InjectBundleContext.class.getSimpleName() + " field [" + field.getName()
-					+ "] must not be private or final");
-		}
-	}
-
-	private void assertFieldIsInstallBundle(Field field) {
-		if (field.getType() != InstallBundle.class) {
-			throw new ExtensionConfigurationException(
-				"[" + field.getName() + "] Can only resolve @" + InjectInstallBundle.class.getSimpleName()
-					+ " field of type " + InstallBundle.class.getName() + " but was: " + field.getType()
-						.getName());
-		}
-		if (Modifier.isFinal(field.getModifiers())) {
-			// Modifier.isPrivate(field.getModifiers())
-			throw new ExtensionConfigurationException(
-				'@' + InjectInstallBundle.class.getSimpleName() + " field [" + field.getName() + "] must not be final");
-			// not be final, private or static.");
-		}
 	}
 
 	public static BundleContext getBundleContext(ExtensionContext extensionContext) {

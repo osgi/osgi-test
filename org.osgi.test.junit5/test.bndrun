@@ -24,6 +24,7 @@
 	org.osgi.service.http.port=*,\
 	org.osgi.framework.bootdelegation=sun.reflect,\
 	osgi.console=
+	
 -runsystempackages: \
 	org.slf4j;version=1.7.25,\
 	org.slf4j.helpers;version=1.7.25,\
