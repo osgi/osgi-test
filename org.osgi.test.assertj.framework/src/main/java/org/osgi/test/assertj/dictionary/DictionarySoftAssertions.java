@@ -18,18 +18,9 @@ package org.osgi.test.assertj.dictionary;
 
 import java.util.Dictionary;
 
-import org.assertj.core.api.SoftAssertionsProvider;
+import org.assertj.core.api.SoftAssertions;
 
-public interface DictionarySoftAssertionsProvider extends SoftAssertionsProvider {
-	/**
-	 * Create soft assertion for {@link java.util.Dictionary}.
-	 *
-	 * @param actual the actual value.
-	 * @return the created assertion object.
-	 */
-	default <K, V> ProxyableDictionaryAssert<K, V> assertThat(Dictionary<K, V> actual) {
-		@SuppressWarnings("unchecked")
-		ProxyableDictionaryAssert<K, V> softly = proxy(ProxyableDictionaryAssert.class, Dictionary.class, actual);
-		return softly;
-	}
-}
+/**
+ * Soft assertions for {@link Dictionary}s.
+ */
+public class DictionarySoftAssertions extends SoftAssertions implements DictionarySoftAssertionsProvider {}
