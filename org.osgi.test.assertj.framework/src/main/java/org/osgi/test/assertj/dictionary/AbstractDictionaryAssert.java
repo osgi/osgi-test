@@ -30,7 +30,7 @@ public abstract class AbstractDictionaryAssert<SELF extends AbstractDictionaryAs
 	}
 
 	public SELF containsAllEntriesOf(Dictionary<? extends K, ? extends V> dictionary) {
-		return super.containsAllEntriesOf(Dictionaries.asMap(dictionary));
+		return containsAllEntriesOf(Dictionaries.asMap(dictionary));
 	}
 
 	public SELF containsExactlyEntriesOf(Dictionary<? extends K, ? extends V> dictionary) {

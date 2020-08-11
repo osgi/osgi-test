@@ -610,7 +610,8 @@ public class BundleContextExtension_CleanupTest {
 				Stream.of(inUse)
 					.forEach(ref -> {
 						String testScope = (String) ref.getProperty("test.scope");
-						if (pointThatShouldNotBeSetup.equals(testScope)) {
+						if (pointThatShouldNotBeSetup.name()
+							.equals(testScope)) {
 							fail(
 								String.format("[%s: checking resource from %s]:\nstill had a reference to service: %s ",
 									currentPoint, pointThatShouldNotBeSetup, ref));
