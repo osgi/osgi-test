@@ -17,6 +17,7 @@
 package org.osgi.test.junit5.service;
 
 import static org.osgi.test.common.inject.FieldInjector.findAnnotatedFields;
+import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFields;
 import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.reflect.Field;
@@ -27,19 +28,21 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
+import org.junit.jupiter.api.extension.ExtensionContext.Store;
+import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.common.service.ServiceConfiguration;
 import org.osgi.test.common.service.ServiceConfigurationKey;
+import org.osgi.test.junit5.context.BundleContextExtension;
 
 /**
  * A JUnit 5 Extension to depend on OSGi services.
@@ -60,16 +63,12 @@ import org.osgi.test.common.service.ServiceConfigurationKey;
  * }
  * </pre>
  */
-public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
-
-	final static Namespace NAMESPACE = Namespace.create(ServiceExtension.class);
+public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
 
 	@Override
-	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectService.class);
-
-		BundleContext bundleContext = FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
-			.getBundleContext();
+	public void beforeAll(ExtensionContext extensionContext) throws Exception {
+		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectService.class,
+			m -> Modifier.isStatic(m.getModifiers()));
 
 		fields.forEach(field -> {
 			assertValidFieldCandidate(field);
@@ -78,24 +77,40 @@ public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 			Class<?> memberType = field.getType();
 			Type genericMemberType = field.getGenericType();
 
-			setField(field, extensionContext.getRequiredTestInstance(), resolveReturnValue(memberType,
-				genericMemberType, serviceUseParameter, bundleContext, extensionContext));
+			setField(field, null,
+				resolveReturnValue(memberType, genericMemberType, serviceUseParameter, extensionContext));
 		});
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext extensionContext) throws Exception {
+		for (Object instance : extensionContext.getRequiredTestInstances()
+			.getAllInstances()) {
+			List<Field> fields = findAnnotatedNonStaticFields(instance.getClass(), InjectService.class);
+
+			fields.forEach(field -> {
+				assertValidFieldCandidate(field);
+
+				InjectService serviceUseParameter = field.getAnnotation(InjectService.class);
+				Class<?> memberType = field.getType();
+				Type genericMemberType = field.getGenericType();
+
+				setField(field, instance,
+					resolveReturnValue(memberType, genericMemberType, serviceUseParameter, extensionContext));
+			});
+		}
 	}
 
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
 
-		BundleContext bundleContext = FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
-			.getBundleContext();
-
 		Optional<InjectService> injectService = parameterContext.findAnnotation(InjectService.class);
 		Parameter parameter = parameterContext.getParameter();
 		Class<?> memberType = parameter.getType();
 		Type genericMemberType = parameter.getParameterizedType();
 
-		return resolveReturnValue(memberType, genericMemberType, injectService.get(), bundleContext, extensionContext);
+		return resolveReturnValue(memberType, genericMemberType, injectService.get(), extensionContext);
 	}
 
 	@Override
@@ -125,26 +140,26 @@ public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 	}
 
 	static void assertValidFieldCandidate(Field field) {
-		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
-			|| Modifier.isStatic(field.getModifiers())) {
+		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())) {
 			throw new ExtensionConfigurationException("@" + InjectService.class.getSimpleName() + " field ["
-				+ field.getName() + "] must not be final, private or static.");
+				+ field.getName() + "] must not be final or private.");
 		}
 	}
 
-	static <X> ServiceConfiguration<X> getServiceConfiguration(InjectService injectService, Class<X> serviceType,
-		BundleContext bundleContext, ExtensionContext extensionContext) {
+	public static <S> ServiceConfiguration<S> getServiceConfiguration(Class<S> serviceType, String format,
+		String[] args, int cardinality, long timeout, ExtensionContext extensionContext) {
 		@SuppressWarnings("unchecked")
-		ServiceConfiguration<X> serviceConfiguration = extensionContext.getStore(NAMESPACE)
-			.getOrComputeIfAbsent(new ServiceConfigurationKey(serviceType, injectService),
-				k -> new ServiceConfiguration<>(serviceType, injectService.filter(), injectService.filterArguments(),
-					injectService.cardinality(), injectService.timeout()).init(bundleContext),
-				ServiceConfiguration.class);
+		ServiceConfiguration<S> serviceConfiguration = getStore(extensionContext)
+			.getOrComputeIfAbsent(new ServiceConfigurationKey<>(serviceType, format, args, cardinality, timeout),
+				key -> new CloseableServiceConfiguration<>(new ServiceConfiguration<>(key)
+						.init(BundleContextExtension.getBundleContext(extensionContext))),
+				CloseableServiceConfiguration.class)
+			.get();
 		return serviceConfiguration;
 	}
 
 	static Object resolveReturnValue(Class<?> memberType, Type genericMemberType, InjectService injectService,
-		BundleContext bundleContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+		ExtensionContext extensionContext) throws ParameterResolutionException {
 
 		Type serviceType = genericMemberType;
 
@@ -158,8 +173,9 @@ public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 		// should not be called without serviceType being a class
 		assert serviceType instanceof Class;
 
-		ServiceConfiguration<?> configuration = getServiceConfiguration(injectService, (Class<?>) serviceType,
-			bundleContext, extensionContext);
+		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType,
+			injectService.filter(), injectService.filterArguments(), injectService.cardinality(),
+			injectService.timeout(), extensionContext);
 
 		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
 			return configuration.getServices();
@@ -170,4 +186,30 @@ public class ServiceExtension implements BeforeEachCallback, ParameterResolver {
 		return configuration.getService();
 	}
 
+	static Store getStore(ExtensionContext extensionContext) {
+		return extensionContext.getStore(Namespace.create(ServiceExtension.class, extensionContext.getUniqueId()));
+	}
+
+	public static class CloseableServiceConfiguration<S> implements CloseableResource {
+
+		private final ServiceConfiguration<S> serviceConfiguration;
+
+		CloseableServiceConfiguration(ServiceConfiguration<S> serviceConfiguration) {
+			this.serviceConfiguration = serviceConfiguration;
+		}
+
+		@Override
+		public void close() throws Exception {
+			get().close();
+		}
+
+		public ServiceConfiguration<S> get() {
+			return serviceConfiguration;
+		}
+
+		@Override
+		public String toString() {
+			return get().toString();
+		}
+	}
 }

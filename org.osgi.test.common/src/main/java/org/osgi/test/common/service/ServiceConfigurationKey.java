@@ -1,24 +1,25 @@
 package org.osgi.test.common.service;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.Arrays;
 import java.util.Objects;
 
-import org.osgi.test.common.annotation.InjectService;
+public class ServiceConfigurationKey<S> {
 
-public class ServiceConfigurationKey {
+	final Class<S>	serviceType;
+	final String	filter;
+	final String[]	filterArguments;
+	final int		cardinality;
+	final long		timeout;
 
-	private final int		cardinality;
-	private final String	filter;
-	private final String[]	filterArguments;
-	private final String	serviceName;
-	private final long		timeout;
-
-	public ServiceConfigurationKey(Class<?> serviceType, InjectService injectService) {
-		this.serviceName = serviceType.getName();
-		this.cardinality = injectService.cardinality();
-		this.filter = injectService.filter();
-		this.filterArguments = injectService.filterArguments();
-		this.timeout = injectService.timeout();
+	public ServiceConfigurationKey(Class<S> serviceType, String filter, String[] filterArguments, int cardinality,
+		long timeout) {
+		this.serviceType = requireNonNull(serviceType);
+		this.filter = filter;
+		this.filterArguments = filterArguments;
+		this.cardinality = cardinality;
+		this.timeout = timeout;
 	}
 
 	@Override
@@ -26,7 +27,7 @@ public class ServiceConfigurationKey {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + Arrays.hashCode(filterArguments);
-		result = prime * result + Objects.hash(cardinality, filter, serviceName, timeout);
+		result = prime * result + Objects.hash(cardinality, filter, serviceType.getName(), timeout);
 		return result;
 	}
 
@@ -38,10 +39,10 @@ public class ServiceConfigurationKey {
 		if (!(obj instanceof ServiceConfigurationKey)) {
 			return false;
 		}
-		ServiceConfigurationKey other = (ServiceConfigurationKey) obj;
+		ServiceConfigurationKey<?> other = (ServiceConfigurationKey<?>) obj;
 		return cardinality == other.cardinality && Objects.equals(filter, other.filter)
-			&& Arrays.equals(filterArguments, other.filterArguments) && Objects.equals(serviceName, other.serviceName)
+			&& Arrays.equals(filterArguments, other.filterArguments)
+			&& Objects.equals(serviceType.getName(), other.serviceType.getName())
 			&& timeout == other.timeout;
 	}
-
 }

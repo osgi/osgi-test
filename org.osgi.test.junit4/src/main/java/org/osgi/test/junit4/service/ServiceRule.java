@@ -59,7 +59,7 @@ import org.osgi.test.common.service.ServiceConfigurationKey;
  */
 public class ServiceRule implements AutoCloseable, MethodRule {
 
-	private final Map<ServiceConfigurationKey, ServiceConfiguration<?>> configurations = new ConcurrentHashMap<>();
+	private final Map<ServiceConfigurationKey<?>, ServiceConfiguration<?>> configurations = new ConcurrentHashMap<>();
 
 	public ServiceRule init(Object testInstance) {
 		BundleContext bundleContext = FrameworkUtil.getBundle(testInstance
@@ -83,10 +83,10 @@ public class ServiceRule implements AutoCloseable, MethodRule {
 
 	@Override
 	public void close() throws Exception {
-		for (Iterator<Entry<ServiceConfigurationKey, ServiceConfiguration<?>>> itr = configurations
+		for (Iterator<Entry<ServiceConfigurationKey<?>, ServiceConfiguration<?>>> itr = configurations
 			.entrySet()
 			.iterator(); itr.hasNext();) {
-			Entry<ServiceConfigurationKey, ServiceConfiguration<?>> entry = itr.next();
+			Entry<ServiceConfigurationKey<?>, ServiceConfiguration<?>> entry = itr.next();
 			entry.getValue()
 				.close();
 			itr.remove();
@@ -120,17 +120,17 @@ public class ServiceRule implements AutoCloseable, MethodRule {
 		InjectService injectService,
 		Class<X> serviceType,
 		BundleContext bundleContext,
-		Map<ServiceConfigurationKey, ServiceConfiguration<?>> configurations) {
+		Map<ServiceConfigurationKey<?>, ServiceConfiguration<?>> configurations) {
 		@SuppressWarnings("unchecked")
 		ServiceConfiguration<X> closeableTrackServices = (ServiceConfiguration<X>) configurations.computeIfAbsent(
-			new ServiceConfigurationKey(serviceType, injectService),
-			k -> new ServiceConfiguration<>(serviceType, injectService.filter(), injectService.filterArguments(),
-				injectService.cardinality(), injectService.timeout()).init(bundleContext));
+			new ServiceConfigurationKey<>(serviceType, injectService.filter(), injectService.filterArguments(),
+				injectService.cardinality(), injectService.timeout()),
+			key -> new ServiceConfiguration<>(key).init(bundleContext));
 		return closeableTrackServices;
 	}
 
 	static Object resolveReturnValue(Class<?> memberType, Type genericMemberType, InjectService serviceUseParameter,
-		BundleContext bundleContext, Map<ServiceConfigurationKey, ServiceConfiguration<?>> configurations) {
+		BundleContext bundleContext, Map<ServiceConfigurationKey<?>, ServiceConfiguration<?>> configurations) {
 
 		Type serviceType = genericMemberType;
 
