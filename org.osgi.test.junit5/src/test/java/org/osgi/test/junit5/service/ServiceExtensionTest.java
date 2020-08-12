@@ -42,6 +42,10 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		Foo getService() {
 			return foo;
 		}
+
+		@Override
+		@Test
+		void test() throws Exception {}
 	}
 
 	@Test
@@ -61,6 +65,10 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		Foo getService() {
 			return foo;
 		}
+
+		@Override
+		@Test
+		void test() throws Exception {}
 	}
 
 	@Test
@@ -91,6 +99,10 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		Foo getService() {
 			return foo;
 		}
+
+		@Override
+		@Test
+		void test() throws Exception {}
 	}
 
 	@Test
@@ -113,6 +125,10 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		Foo getService() {
 			return foo;
 		}
+
+		@Override
+		@Test
+		void test() throws Exception {}
 	}
 
 	@Test
@@ -133,6 +149,10 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		List<Foo> getServices() {
 			return foos;
 		}
+
+		@Override
+		@Test
+		void test() throws Exception {}
 	}
 
 	@Test
@@ -191,6 +211,10 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		Foo getService() {
 			return foo;
 		}
+
+		@Override
+		@Test
+		void test() throws Exception {}
 	}
 
 	@Test
@@ -209,6 +233,10 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		Foo getService() {
 			return foo;
 		}
+
+		@Override
+		@Test
+		void test() throws Exception {}
 	}
 
 	@Test
@@ -226,6 +254,10 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		Foo getService() {
 			return foo;
 		}
+
+		@Override
+		@Test
+		void test() throws Exception {}
 	}
 
 	@Test

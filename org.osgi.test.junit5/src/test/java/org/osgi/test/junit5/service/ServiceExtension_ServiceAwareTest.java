@@ -18,6 +18,8 @@ package org.osgi.test.junit5.service;
 
 import static org.osgi.test.common.annotation.InjectService.DEFAULT_TIMEOUT;
 
+import java.util.List;
+
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.osgi.test.common.annotation.InjectService;
@@ -28,40 +30,61 @@ public class ServiceExtension_ServiceAwareTest extends AbstractServiceExtensionT
 
 	static class ServiceWithZeroCardinality extends TestBase {
 		@InjectService(cardinality = 0)
-		ServiceAware<Foo> foo;
+		ServiceAware<Foo> serviceAware;
 
 		@Override
-		ServiceAware<Foo> getServiceAware() {
-			return foo;
-		}
-	}
-
-	static class ServiceWithDefaults extends TestBase {
-		@InjectService
-		ServiceAware<Foo> foo;
-
-		@Override
-		ServiceAware<Foo> getServiceAware() {
-			return foo;
+		@Test
+		void test() throws Exception {
+			softly.assertThat(serviceAware.isEmpty())
+				.as("isEmpty %s", serviceAware)
+				.isTrue();
+			softly.assertThat(serviceAware.getTimeout())
+				.as("getTimeout %s", serviceAware)
+				.isEqualTo(DEFAULT_TIMEOUT);
+			softly.assertThat(serviceAware.getCardinality())
+				.as("getCardinality %s", serviceAware)
+				.isEqualTo(0);
 		}
 	}
 
 	@Test
 	public void basicAssumptions() throws Exception {
 		futureAssertThatTest(ServiceWithZeroCardinality.class).doesNotThrowAnyException();
-		ServiceAware<Foo> serviceAware = TestBase.lastServiceAware.get();
-		SoftAssertions softly = new SoftAssertions();
-		softly.assertThat(serviceAware.isEmpty())
-			.as("isEmpty %s", serviceAware)
-			.isTrue();
-		softly.assertThat(serviceAware.getTimeout())
-			.as("getTimeout %s", serviceAware)
-			.isEqualTo(DEFAULT_TIMEOUT);
-		softly.assertThat(serviceAware.getCardinality())
-			.as("getCardinality %s", serviceAware)
-			.isEqualTo(0);
+		SoftAssertions softly = TestBase.lastSoftAssertions.get();
 
 		softly.assertAll();
+	}
+
+	static class ServiceWithDefaults extends TestBase {
+		@InjectService
+		ServiceAware<Foo> serviceAware;
+
+		@Override
+		Foo getService() {
+			return serviceAware.getService();
+		}
+
+		@Override
+		List<Foo> getServices() {
+			return serviceAware.getServices();
+		}
+
+		@Override
+		@Test
+		void test() throws Exception {
+			softly.assertThat(serviceAware.isEmpty())
+				.as("isEmpty %s", serviceAware)
+				.isFalse();
+			softly.assertThat(serviceAware.size())
+				.as("size %s", serviceAware)
+				.isEqualTo(1);
+			softly.assertThat(serviceAware.getTimeout())
+				.as("getTimeout %s", serviceAware)
+				.isEqualTo(DEFAULT_TIMEOUT);
+			softly.assertThat(serviceAware.getCardinality())
+				.as("getCardinality %s", serviceAware)
+				.isEqualTo(1);
+		}
 	}
 
 	@Test
@@ -71,23 +94,11 @@ public class ServiceExtension_ServiceAwareTest extends AbstractServiceExtensionT
 		schedule(afoo);
 
 		futureAssertThatTest(ServiceWithDefaults.class).doesNotThrowAnyException();
-		ServiceAware<Foo> serviceAware = TestBase.lastServiceAware.get();
-		SoftAssertions softly = new SoftAssertions();
+		SoftAssertions softly = TestBase.lastSoftAssertions.get();
+		Foo service = TestBase.lastService.get();
 
-		softly.assertThat(serviceAware.isEmpty())
-			.as("isEmpty %s", serviceAware)
-			.isFalse();
-		softly.assertThat(serviceAware.size())
-			.as("size %s", serviceAware)
-			.isEqualTo(1);
-		softly.assertThat(serviceAware.getTimeout())
-			.as("getTimeout %s", serviceAware)
-			.isEqualTo(DEFAULT_TIMEOUT);
-		softly.assertThat(serviceAware.getCardinality())
-			.as("getCardinality %s", serviceAware)
-			.isEqualTo(1);
-		softly.assertThat(serviceAware.getService())
-			.as("getService %s", serviceAware)
+		softly.assertThat(service)
+			.as("getService %s", service)
 			.isSameAs(afoo);
 
 		softly.assertAll();
@@ -95,11 +106,51 @@ public class ServiceExtension_ServiceAwareTest extends AbstractServiceExtensionT
 
 	static class ServiceWithLongerTimeout extends TestBase {
 		@InjectService(timeout = 1000)
-		ServiceAware<Foo> foo;
+		ServiceAware<Foo> serviceAware;
 
 		@Override
-		ServiceAware<Foo> getServiceAware() {
-			return foo;
+		Foo getService() {
+			return serviceAware.getService();
+		}
+
+		@Override
+		List<Foo> getServices() {
+			return serviceAware.getServices();
+		}
+
+		@Override
+		@Test
+		void test() throws Exception {
+			softly.assertThat(serviceAware.getService())
+				.as("getService %s", serviceAware)
+				.isNotNull();
+			softly.assertThat(serviceAware.getServiceReference())
+				.as("getServiceReference %s", serviceAware)
+				.isNotNull();
+			softly.assertThat(serviceAware.getServiceReferences())
+				.as("getServiceReferences %s", serviceAware)
+				.hasSize(1);
+			softly.assertThat(serviceAware.getTimeout())
+				.as("getTimeout %s", serviceAware)
+				.isEqualTo(1000);
+			softly.assertThat(serviceAware.getTracked())
+				.as("getTracked %s", serviceAware)
+				.hasSize(1);
+			softly.assertThat(serviceAware.getTrackingCount())
+				.as("getTrackingCount %s", serviceAware)
+				.isGreaterThanOrEqualTo(1);
+			softly.assertThat(serviceAware.getCardinality())
+				.as("getCardinality %s", serviceAware)
+				.isEqualTo(1);
+			softly.assertThat(serviceAware.size())
+				.as("size %s", serviceAware)
+				.isEqualTo(1);
+			softly.assertThat(serviceAware.isEmpty())
+				.as("isEmpty %s", serviceAware)
+				.isFalse();
+			softly.assertThat(serviceAware.waitForService(20))
+				.as("waitForService %s", serviceAware)
+				.isNotNull();
 		}
 	}
 
@@ -110,53 +161,67 @@ public class ServiceExtension_ServiceAwareTest extends AbstractServiceExtensionT
 		schedule(afoo);
 
 		futureAssertThatTest(ServiceWithLongerTimeout.class).doesNotThrowAnyException();
-		ServiceAware<Foo> serviceAware = TestBase.lastServiceAware.get();
-		SoftAssertions softly = new SoftAssertions();
+		SoftAssertions softly = TestBase.lastSoftAssertions.get();
+		Foo service = TestBase.lastService.get();
+		List<Foo> services = TestBase.lastServices.get();
 
-		softly.assertThat(serviceAware.getService())
-			.as("getService %s", serviceAware)
-			.isEqualTo(afoo);
-		softly.assertThat(serviceAware.getServiceReference())
-			.as("getServiceReference %s", serviceAware)
-			.isNotNull();
-		softly.assertThat(serviceAware.getServiceReferences())
-			.as("getServiceReferences %s", serviceAware)
-			.hasSize(1);
-		softly.assertThat(serviceAware.getServices())
-			.as("getServices %s", serviceAware)
+		softly.assertThat(service)
+			.as("getService %s", service)
+			.isSameAs(afoo);
+		softly.assertThat(services)
+			.as("getServices %s", services)
 			.containsExactly(afoo);
-		softly.assertThat(serviceAware.getTimeout())
-			.as("getTimeout %s", serviceAware)
-			.isEqualTo(1000);
-		softly.assertThat(serviceAware.getTracked())
-			.as("getTracked %s", serviceAware)
-			.hasSize(1);
-		softly.assertThat(serviceAware.getTrackingCount())
-			.as("getTrackingCount %s", serviceAware)
-			.isGreaterThanOrEqualTo(1);
-		softly.assertThat(serviceAware.getCardinality())
-			.as("getCardinality %s", serviceAware)
-			.isEqualTo(1);
-		softly.assertThat(serviceAware.size())
-			.as("size %s", serviceAware)
-			.isEqualTo(1);
-		softly.assertThat(serviceAware.isEmpty())
-			.as("isEmpty %s", serviceAware)
-			.isFalse();
-		softly.assertThat(serviceAware.waitForService(20))
-			.as("waitForService %s", serviceAware)
-			.isEqualTo(afoo);
 
 		softly.assertAll();
 	}
 
 	static class ServiceWithFilter extends TestBase {
 		@InjectService(filter = FILTER)
-		ServiceAware<Foo> foo;
+		ServiceAware<Foo> serviceAware;
 
 		@Override
-		ServiceAware<Foo> getServiceAware() {
-			return foo;
+		Foo getService() {
+			return serviceAware.getService();
+		}
+
+		@Override
+		List<Foo> getServices() {
+			return serviceAware.getServices();
+		}
+
+		@Override
+		@Test
+		void test() throws Exception {
+			softly.assertThat(serviceAware.getService())
+				.as("getService %s", serviceAware)
+				.isNotNull();
+			softly.assertThat(serviceAware.getServiceReference())
+				.as("getServiceReference %s", serviceAware)
+				.isNotNull();
+			softly.assertThat(serviceAware.getServiceReferences())
+				.as("getServiceReferences %s", serviceAware)
+				.isNotNull();
+			softly.assertThat(serviceAware.getTimeout())
+				.as("getTimeout %s", serviceAware)
+				.isEqualTo(DEFAULT_TIMEOUT);
+			softly.assertThat(serviceAware.getTracked())
+				.as("waitForService %s", serviceAware)
+				.isNotEmpty();
+			softly.assertThat(serviceAware.getTrackingCount())
+				.as("getTrackingCount %s", serviceAware)
+				.isGreaterThanOrEqualTo(1);
+			softly.assertThat(serviceAware.getCardinality())
+				.as("getCardinality %s", serviceAware)
+				.isEqualTo(1);
+			softly.assertThat(serviceAware.size())
+				.as("size %s", serviceAware)
+				.isEqualTo(1);
+			softly.assertThat(serviceAware.isEmpty())
+				.as("isEmpty %s", serviceAware)
+				.isFalse();
+			softly.assertThat(serviceAware.waitForService(20))
+				.as("waitForService %s", serviceAware)
+				.isNotNull();
 		}
 	}
 
@@ -166,53 +231,60 @@ public class ServiceExtension_ServiceAwareTest extends AbstractServiceExtensionT
 
 		schedule(afoo, "foo", "bar");
 		futureAssertThatTest(ServiceWithFilter.class).doesNotThrowAnyException();
-		ServiceAware<Foo> serviceAware = TestBase.lastServiceAware.get();
-		SoftAssertions softly = new SoftAssertions();
+		SoftAssertions softly = TestBase.lastSoftAssertions.get();
+		Foo service = TestBase.lastService.get();
 
-		softly.assertThat(serviceAware.getService())
-			.as("getService %s", serviceAware)
-			.isNotNull();
-		softly.assertThat(serviceAware.getServiceReference())
-			.as("getServiceReference %s", serviceAware)
-			.isNotNull();
-		softly.assertThat(serviceAware.getServiceReferences())
-			.as("getServiceReferences %s", serviceAware)
-			.isNotNull();
-		softly.assertThat(serviceAware.getServices())
-			.as("getServices %s", serviceAware)
-			.contains(afoo);
-		softly.assertThat(serviceAware.getTimeout())
-			.as("getTimeout %s", serviceAware)
-			.isEqualTo(DEFAULT_TIMEOUT);
-		softly.assertThat(serviceAware.getTracked())
-			.as("waitForService %s", serviceAware)
-			.isNotEmpty();
-		softly.assertThat(serviceAware.getTrackingCount())
-			.as("getTrackingCount %s", serviceAware)
-			.isGreaterThanOrEqualTo(1);
-		softly.assertThat(serviceAware.getCardinality())
-			.as("getCardinality %s", serviceAware)
-			.isEqualTo(1);
-		softly.assertThat(serviceAware.size())
-			.as("size %s", serviceAware)
-			.isEqualTo(1);
-		softly.assertThat(serviceAware.isEmpty())
-			.as("isEmpty %s", serviceAware)
-			.isFalse();
-		softly.assertThat(serviceAware.waitForService(20))
-			.as("waitForService %s", serviceAware)
-			.isNotNull();
+		softly.assertThat(service)
+			.as("getService %s", service)
+			.isSameAs(afoo);
 
 		softly.assertAll();
 	}
 
 	static class ServiceWithCardinality2 extends TestBase {
 		@InjectService(cardinality = 2)
-		ServiceAware<Foo> foo;
+		ServiceAware<Foo> serviceAware;
 
 		@Override
-		ServiceAware<Foo> getServiceAware() {
-			return foo;
+		Foo getService() {
+			return serviceAware.getService();
+		}
+
+		@Override
+		List<Foo> getServices() {
+			return serviceAware.getServices();
+		}
+
+		@Override
+		@Test
+		void test() throws Exception {
+			softly.assertThat(serviceAware.getServiceReference())
+				.as("getServiceReference %s", serviceAware)
+				.isNotNull();
+			softly.assertThat(serviceAware.getServiceReferences())
+				.as("getServiceReferences %s", serviceAware)
+				.isNotNull();
+			softly.assertThat(serviceAware.getTimeout())
+				.as("getTimeout %s", serviceAware)
+				.isEqualTo(DEFAULT_TIMEOUT);
+			softly.assertThat(serviceAware.getTracked())
+				.as("getTracked %s", serviceAware)
+				.isNotEmpty();
+			softly.assertThat(serviceAware.getTrackingCount())
+				.as("getTrackingCount %s", serviceAware)
+				.isGreaterThanOrEqualTo(2);
+			softly.assertThat(serviceAware.getCardinality())
+				.as("getCardinality %s", serviceAware)
+				.isEqualTo(2);
+			softly.assertThat(serviceAware.size())
+				.as("size %s", serviceAware)
+				.isEqualTo(2);
+			softly.assertThat(serviceAware.isEmpty())
+				.as("isEmpty %s", serviceAware)
+				.isFalse();
+			softly.assertThat(serviceAware.waitForService(20))
+				.as("waitForService %s", serviceAware)
+				.isNotNull();
 		}
 	}
 
@@ -223,42 +295,16 @@ public class ServiceExtension_ServiceAwareTest extends AbstractServiceExtensionT
 		schedule(s2);
 
 		futureAssertThatTest(ServiceWithCardinality2.class).doesNotThrowAnyException();
-		ServiceAware<Foo> serviceAware = TestBase.lastServiceAware.get();
-		SoftAssertions softly = new SoftAssertions();
+		SoftAssertions softly = TestBase.lastSoftAssertions.get();
+		Foo service = TestBase.lastService.get();
+		List<Foo> services = TestBase.lastServices.get();
 
-		softly.assertThat(serviceAware.getService())
-			.as("getService %s", serviceAware)
+		softly.assertThat(service)
+			.as("getService %s", service)
 			.isIn(s1, s2);
-		softly.assertThat(serviceAware.getServiceReference())
-			.as("getServiceReference %s", serviceAware)
-			.isNotNull();
-		softly.assertThat(serviceAware.getServiceReferences())
-			.as("getServiceReferences %s", serviceAware)
-			.isNotNull();
-		softly.assertThat(serviceAware.getServices())
-			.as("getServices %s", serviceAware)
+		softly.assertThat(services)
+			.as("getServices %s", services)
 			.containsExactlyInAnyOrder(s1, s2);
-		softly.assertThat(serviceAware.getTimeout())
-			.as("getTimeout %s", serviceAware)
-			.isEqualTo(DEFAULT_TIMEOUT);
-		softly.assertThat(serviceAware.getTracked())
-			.as("getTracked %s", serviceAware)
-			.isNotEmpty();
-		softly.assertThat(serviceAware.getTrackingCount())
-			.as("getTrackingCount %s", serviceAware)
-			.isGreaterThanOrEqualTo(2);
-		softly.assertThat(serviceAware.getCardinality())
-			.as("getCardinality %s", serviceAware)
-			.isEqualTo(2);
-		softly.assertThat(serviceAware.size())
-			.as("size %s", serviceAware)
-			.isEqualTo(2);
-		softly.assertThat(serviceAware.isEmpty())
-			.as("isEmpty %s", serviceAware)
-			.isFalse();
-		softly.assertThat(serviceAware.waitForService(20))
-			.as("waitForService %s", serviceAware)
-			.isNotNull();
 
 		softly.assertAll();
 	}

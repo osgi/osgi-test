@@ -13,6 +13,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.assertj.core.api.AbstractThrowableAssert;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +26,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.exceptions.Exceptions;
-import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.junit5.ExecutorExtension;
 import org.osgi.test.junit5.ExecutorParameter;
 import org.osgi.test.junit5.types.Foo;
@@ -34,14 +34,11 @@ import org.osgi.test.junit5.types.Foo;
 abstract class AbstractServiceExtensionTest {
 
 	@ExtendWith(ServiceExtension.class)
-	static class TestBase {
+	abstract static class TestBase {
+		static AtomicReference<SoftAssertions>		lastSoftAssertions	= new AtomicReference<>();
 		static AtomicReference<Foo>					lastService			= new AtomicReference<>();
-		static AtomicReference<ServiceAware<Foo>>	lastServiceAware	= new AtomicReference<>();
 		static AtomicReference<List<Foo>>			lastServices		= new AtomicReference<>();
-
-		ServiceAware<Foo> getServiceAware() {
-			return null;
-		}
+		SoftAssertions								softly;
 
 		Foo getService() {
 			return null;
@@ -53,15 +50,24 @@ abstract class AbstractServiceExtensionTest {
 
 		@BeforeAll
 		static void beforeAll() {
+			lastSoftAssertions.set(null);
 			lastService.set(null);
-			lastServiceAware.set(null);
+			lastServices.set(null);
+		}
+
+		@BeforeEach
+		void beforeEach() {
+			lastSoftAssertions.set(softly = new SoftAssertions());
+			lastService.set(null);
 			lastServices.set(null);
 		}
 
 		@Test
-		final void test() {
+		abstract void test() throws Exception;
+
+		@AfterEach
+		void afterEach() {
 			lastService.set(getService());
-			lastServiceAware.set(getServiceAware());
 			lastServices.set(getServices());
 		}
 	}
