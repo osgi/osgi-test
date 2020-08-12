@@ -11,11 +11,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.assertj.core.api.Assert;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(SoftAssertionsExtension.class)
 public class DictionaryAssertTest {
+
+	private static final String ISSUE = "Refer to https://github.com/joel-costigliola/assertj-core/issues/1964";
 
 	@Test
 	public void keysAndValues_areTheRightWayAround(SoftAssertions softly) throws Exception {
@@ -76,6 +79,7 @@ public class DictionaryAssertTest {
 			.isEqualTo(sut);
 	}
 
+	@Disabled(ISSUE)
 	@Test
 	public void instanceof_factory(SoftAssertions softly) throws Exception {
 		Dictionary<String, String> dict1 = new TestDictionary<>();
@@ -99,6 +103,7 @@ public class DictionaryAssertTest {
 			.isInstanceOf(NullPointerException.class);
 	}
 
+	@Disabled(ISSUE)
 	@Test
 	public void containsAllEntriesOf(DictionarySoftAssertions softly) throws Exception {
 		Dictionary<String, String> dict1 = new TestDictionary<>();
@@ -115,6 +120,7 @@ public class DictionaryAssertTest {
 			.isInstanceOf(AssertionError.class);
 	}
 
+	@Disabled(ISSUE)
 	@Test
 	public void containsExactlyEntriesOf(DictionarySoftAssertions softly) throws Exception {
 		Dictionary<String, String> dict1 = new TestDictionary<>();
@@ -149,6 +155,7 @@ public class DictionaryAssertTest {
 			.isInstanceOf(AssertionError.class);
 	}
 
+	@Disabled(ISSUE)
 	@Test
 	public void containsExactlyInAnyOrderEntriesOf(DictionarySoftAssertions softly) throws Exception {
 		Dictionary<String, String> dict1 = new TestDictionary<>();
@@ -181,6 +188,7 @@ public class DictionaryAssertTest {
 			.isInstanceOf(AssertionError.class);
 	}
 
+	@Disabled(ISSUE)
 	@Test
 	public void hasSameSizeAs(DictionarySoftAssertions softly) throws Exception {
 		Dictionary<String, String> dict1 = new TestDictionary<>();

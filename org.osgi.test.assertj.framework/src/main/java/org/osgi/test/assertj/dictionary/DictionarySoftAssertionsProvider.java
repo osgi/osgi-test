@@ -25,6 +25,8 @@ public interface DictionarySoftAssertionsProvider extends SoftAssertionsProvider
 	 * Create soft assertion for {@link java.util.Dictionary}.
 	 *
 	 * @param actual the actual value.
+	 * @param <K> the type of the keys used in the dictionary
+	 * @param <V> the type of the values used in the dictionary
 	 * @return the created assertion object.
 	 */
 	default <K, V> ProxyableDictionaryAssert<K, V> assertThat(Dictionary<K, V> actual) {

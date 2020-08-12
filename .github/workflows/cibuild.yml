@@ -65,19 +65,19 @@ jobs:
       if: (matrix.codecov)
       uses: codecov/codecov-action@v1.0.12
       with:
-        file: ./org.osgi.test.assertj.framework/target/site/jacoco/jacoco.xml
+        file: ./org.osgi.test.assertj.framework/target/site/jacoco-it/jacoco.xml
         name: assertj.framework
     - name: Upload "assertj.promise" coverage to Codecov
       if: (matrix.codecov)
       uses: codecov/codecov-action@v1.0.12
       with:
-        file: ./org.osgi.test.assertj.promise/target/site/jacoco/jacoco.xml
+        file: ./org.osgi.test.assertj.promise/target/site/jacoco-it/jacoco.xml
         name: assertj.promise
     - name: Upload "common" coverage to Codecov
       if: (matrix.codecov)
       uses: codecov/codecov-action@v1.0.12
       with:
-        file: ./org.osgi.test.common/target/site/jacoco/jacoco.xml
+        file: ./org.osgi.test.common/target/site/jacoco-it/jacoco.xml
         name: common
     - name: Upload "junit4" coverage to Codecov
       if: (matrix.codecov)
