@@ -28,8 +28,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
-import org.junit.jupiter.api.extension.AfterAllCallback;
-import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
@@ -70,8 +68,7 @@ import org.osgi.test.common.install.InstallBundle;
  * }
  * </pre>
  */
-public class BundleContextExtension
-	implements BeforeAllCallback, AfterAllCallback, AfterEachCallback, BeforeEachCallback, ParameterResolver {
+public class BundleContextExtension implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
 
 	public static final String		BUNDLE_CONTEXT_KEY	= "bundle.context";
 	public static final String		INSTALL_BUNDLE_KEY	= "install.bundle";
@@ -99,11 +96,10 @@ public class BundleContextExtension
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		List<Field> fields;
 		for (Object instance : extensionContext.getRequiredTestInstances()
 			.getAllInstances()) {
 			final Class<?> testClass = instance.getClass();
-			fields = findAnnotatedNonStaticFields(testClass, InjectBundleContext.class);
+			List<Field> fields = findAnnotatedNonStaticFields(testClass, InjectBundleContext.class);
 
 			fields.forEach(field -> {
 				assertFieldIsOfType(field, BundleContext.class, InjectBundleContext.class,
@@ -118,21 +114,6 @@ public class BundleContextExtension
 					ExtensionConfigurationException::new);
 				setField(field, instance, getInstallbundle(extensionContext));
 			});
-		}
-
-	}
-
-	@Override
-	public void afterEach(ExtensionContext extensionContext) throws Exception {
-		cleanup(extensionContext);
-	}
-
-	public static void cleanup(ExtensionContext extensionContext) throws Exception {
-		getStore(extensionContext).remove(INSTALL_BUNDLE_KEY, InstallBundle.class);
-		CloseableResourceBundleContext closeableResourceBundleContext = getStore(extensionContext)
-			.remove(BUNDLE_CONTEXT_KEY, CloseableResourceBundleContext.class);
-		if (closeableResourceBundleContext != null) {
-			closeableResourceBundleContext.close();
 		}
 	}
 
@@ -213,17 +194,17 @@ public class BundleContextExtension
 
 		@Override
 		public void close() throws Exception {
-			((AutoCloseable) bundleContext).close();
+			((AutoCloseable) get()).close();
 		}
 
 		public BundleContext get() {
 			return bundleContext;
 		}
-	}
 
-	@Override
-	public void afterAll(ExtensionContext extensionContext) throws Exception {
-		cleanup(extensionContext);
+		@Override
+		public String toString() {
+			return get().toString();
+		}
 	}
 
 	static Store getStore(ExtensionContext extensionContext) {
