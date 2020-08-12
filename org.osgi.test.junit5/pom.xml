@@ -102,10 +102,14 @@
 		<dependency> 
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.test.assertj.framework</artifactId>
+			<version>${revision}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency> 
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.test.assertj.promise</artifactId>
+			<version>${revision}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>biz.aQute.bnd</groupId>
