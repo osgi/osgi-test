@@ -179,21 +179,23 @@ public class BundleContextExtension
 	}
 
 	public static BundleContext getBundleContext(ExtensionContext extensionContext) {
+		BundleContext bundleContext = getStore(extensionContext)
+			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
+				key -> new CloseableResourceBundleContext(extensionContext.getRequiredTestClass(),
+					getParentBundleContext(extensionContext)),
+				CloseableResourceBundleContext.class)
+			.get();
+		return bundleContext;
+	}
+
+	private static BundleContext getParentBundleContext(ExtensionContext extensionContext) {
 		BundleContext parentContext = extensionContext.getParent()
 			.filter(context -> context.getTestClass()
 				.isPresent())
 			.map(BundleContextExtension::getBundleContext)
-			.orElse(FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
+			.orElseGet(() -> FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
 				.getBundleContext());
-
-		Class<?> requiredTestClass = extensionContext.getRequiredTestClass();
-		BundleContext bundleContext = getStore(extensionContext)
-			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
-				key -> new CloseableResourceBundleContext(requiredTestClass, parentContext),
-				CloseableResourceBundleContext.class)
-			.get();
-
-		return bundleContext;
+		return parentContext;
 	}
 
 	public static InstallBundle getInstallbundle(ExtensionContext extensionContext) {
