@@ -96,7 +96,7 @@ public class ServiceRuleTest {
 		assertThatExceptionOfType(AssertionError.class) //
 			.isThrownBy(() -> {
 				try (BundleContextRule bcRule = new BundleContextRule();
-					ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1, 50)) {
+					ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1, 50L)) {
 
 					bcRule.init(this);
 
@@ -155,7 +155,7 @@ public class ServiceRuleTest {
 	@Test
 	public void successWhenServiceWithTimeout() throws Exception {
 		try (BundleContextRule bcRule = new BundleContextRule();
-			ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1, 1000)) {
+			ServiceConfiguration<Foo> foos = new ServiceConfiguration<>(Foo.class, "", new String[0], 1, 1000L)) {
 
 			bcRule.init(this);
 
@@ -405,7 +405,7 @@ public class ServiceRuleTest {
 			.isThrownBy(() -> {
 				try (BundleContextRule bcRule = new BundleContextRule();
 						ServiceConfiguration<Foo> fooRule = new ServiceConfiguration<>(Foo.class, "", new String[0], 1,
-							-1)) {
+						-1L)) {
 				}
 			});
 	}

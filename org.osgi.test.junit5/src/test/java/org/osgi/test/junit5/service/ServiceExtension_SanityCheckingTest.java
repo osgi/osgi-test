@@ -72,21 +72,6 @@ public class ServiceExtension_SanityCheckingTest {
 			.hasMessageMatching("@InjectService field \\[bc\\] must not be.*final.*");
 	}
 
-	static class StaticField extends TestBase {
-		@InjectService
-		static Date bc = null;
-
-		@Override
-		@Test
-		void myTest() {}
-	}
-
-	@Test
-	void annotatedField_thatIsStatic_throwsException() {
-		assertThatTest(StaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectService field \\[bc\\] must not be.*static.*");
-	}
-
 	static class PrivateField extends TestBase {
 		@InjectService
 		private Date bc = null;

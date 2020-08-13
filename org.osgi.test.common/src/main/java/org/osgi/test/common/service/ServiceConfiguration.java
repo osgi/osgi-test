@@ -44,6 +44,10 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 	private final long						timeout;
 	private volatile ServiceTracker<S, S>	tracker;
 
+	public ServiceConfiguration(ServiceConfigurationKey<S> key) {
+		this(key.serviceType, key.filter, key.filterArguments, key.cardinality, key.timeout);
+	}
+
 	public ServiceConfiguration(Class<S> serviceType, String format, String[] args, int cardinality, long timeout) {
 		this.serviceType = requireNonNull(serviceType);
 

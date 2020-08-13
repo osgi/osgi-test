@@ -18,6 +18,8 @@ package org.osgi.test.junit5.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.log.LogService;
@@ -28,9 +30,21 @@ import org.osgi.test.common.service.ServiceAware;
 public class SingleServiceTest {
 
 	@InjectService
+	static LogService			staticLogService;
+	@InjectService
 	LogService					logService;
 	@InjectService
 	ServiceAware<LogService>	lsServiceAware;
+
+	@BeforeAll
+	public static void beforeAll() throws Exception {
+		assertThat(staticLogService).isNotNull();
+	}
+
+	@BeforeEach
+	public void beforeEach() throws Exception {
+		assertThat(staticLogService).isNotNull();
+	}
 
 	@Test
 	public void testWithLogServiceUse() throws Exception {
