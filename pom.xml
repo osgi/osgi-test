@@ -44,6 +44,7 @@
 		<module>org.osgi.test.assertj.promise</module>
 		<module>org.osgi.test.junit4</module>
 		<module>org.osgi.test.junit5</module>
+		<module>org.osgi.test.junit5.cm</module>
 	</modules>
 
 	<url>https://www.osgi.org</url>
@@ -426,6 +427,12 @@
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.cm</artifactId>
+				<version>1.6.0</version>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.function</artifactId>
 				<version>1.0.0</version>
 				<scope>compile</scope>
@@ -494,6 +501,11 @@
 				<groupId>org.eclipse.platform</groupId>
 				<artifactId>org.eclipse.osgi</artifactId>
 				<version>3.15.300</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>org.apache.felix.configadmin</artifactId>
+				<version>1.9.16</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

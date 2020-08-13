@@ -91,3 +91,9 @@ jobs:
       with:
         file: ./org.osgi.test.junit5/target/site/jacoco-it/jacoco.xml
         name: junit5
+    - name: Upload "junit5.cm" coverage to Codecov
+      if: (matrix.codecov)
+      uses: codecov/codecov-action@v1.0.13
+      with:
+        file: ./org.osgi.test.junit5.cm/target/site/jacoco-it/jacoco.xml
+        name: junit5.cm

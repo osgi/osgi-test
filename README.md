@@ -22,6 +22,10 @@ This artifact provides support classes for OSGi testing with [JUnit 4](https://j
 
 This artifact provides support classes for OSGi testing with [JUnit 5](https://junit.org/junit5/) including JUnit 5 Extensions.
 
+### [org.osgi.test.junit5.cm][6]
+
+This artifact provides support classes for OSGi testing with ConfigurationAdmin and [JUnit 5](https://junit.org/junit5/) including JUnit 5 Extensions.
+
 ## Building
 
 We use Maven to build and the repo includes `mvnw`.
@@ -71,3 +75,4 @@ This project uses the [Bnd Maven Plugins](https://github.com/bndtools/bnd) to bu
 [3]: org.osgi.test.assertj.promise/README.md
 [4]: org.osgi.test.junit4/README.md
 [5]: org.osgi.test.junit5/README.md
+[6]: org.osgi.test.junit5.cm/README.md
