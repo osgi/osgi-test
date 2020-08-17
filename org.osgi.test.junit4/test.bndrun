@@ -31,6 +31,10 @@
 	org.apache.felix.logback,\
 	slf4j.api
 -runrequires: bnd.identity;id='${project.artifactId}-tests'
+# This will help us keep -runbundles sorted
+-runstartlevel: \
+    order=sortbynameversion,\
+    begin=-1
 -runbundles: \
 	assertj-core;version='[3.16.1,3.16.2)',\
 	org.apache.servicemix.bundles.junit;version='[4.12.0,4.12.1)',\
