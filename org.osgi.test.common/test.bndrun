@@ -52,8 +52,8 @@
 	junit-platform-launcher;version='[1.6.2,1.6.3)',\
 	net.bytebuddy.byte-buddy;version='[1.10.13,1.10.14)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.10.13,1.10.14)',\
-	org.mockito.mockito-core;version='[3.4.6,3.4.7)',\
-	org.objenesis;version='[2.6.0,2.6.1)',\
+	org.mockito.mockito-core;version='[3.5.0,3.5.1)',\
+	org.objenesis;version='[3.1.0,3.1.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.test.common;version='[0.10.0,0.10.1)',\
 	org.osgi.test.common-tests;version='[0.10.0,0.10.1)'
