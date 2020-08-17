@@ -26,6 +26,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -65,9 +67,9 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 	private final Set<BundleListener>						bListeners			= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
 	private final Set<Bundle>								bundles				= Collections
-		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<ServiceReference<?>>					services			= Collections
-		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
+		.synchronizedSet(new HashSet<>());
+	private final Map<ServiceReference<?>, Integer>			services			= Collections
+		.synchronizedMap(new HashMap<>());
 	private final Set<ServiceObjects<?>>					serviceobjects		= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
 
@@ -132,14 +134,31 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		bundles.stream()
 			.filter(installed)
 			.forEach(uninstallBundle);
-		services.forEach(this::ungetService);
+		bundles.clear();
+
+		services.forEach((reference, useCount) -> {
+			for (int i = useCount; i > 0; i--) {
+				bundleContext.ungetService(reference);
+			}
+		});
+		services.clear();
+
 		serviceobjects.stream()
 			.map(AutoCloseable.class::cast)
 			.forEach(autoclose);
+		serviceobjects.clear();
+
 		regs.forEach(unregisterService);
+		regs.clear();
+
 		bListeners.forEach(bundleContext::removeBundleListener);
+		bListeners.clear();
+
 		sListeners.forEach(bundleContext::removeServiceListener);
+		sListeners.clear();
+
 		fwListeners.forEach(bundleContext::removeFrameworkListener);
+		fwListeners.clear();
 	}
 
 	public String delegatedToString(Object proxy) {
@@ -195,7 +214,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 	public <S> S getService(ServiceReference<S> reference) {
 		S service = bundleContext.getService(reference);
-		services.add(reference);
+		Integer count = services.merge(reference, 1, (oldValue, dummy) -> oldValue + 1);
 		return service;
 	}
 
@@ -231,8 +250,18 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		return reg;
 	}
 
-	private void ungetService(ServiceReference<?> reference) {
-		while (bundleContext.ungetService(reference)) {}
+	public boolean ungetService(ServiceReference<?> reference) {
+		Integer count = services.compute(reference, (key, oldValue) -> {
+			if ((oldValue == null) || (oldValue == 0)) {
+				return null;
+			}
+			return oldValue - 1;
+		});
+		if (count != null) {
+			bundleContext.ungetService(reference);
+			return true;
+		}
+		return false;
 	}
 
 	private static class ClosableServiceObjects<S> implements AutoCloseable, InvocationHandler {
@@ -257,6 +286,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 					so.ungetService(service);
 				}
 			});
+			instances.clear();
 		}
 
 		@Override
