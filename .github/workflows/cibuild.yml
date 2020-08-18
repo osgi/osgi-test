@@ -63,31 +63,31 @@ jobs:
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
     - name: Upload "assertj.framework" coverage to Codecov
       if: (matrix.codecov)
-      uses: codecov/codecov-action@v1.0.12
+      uses: codecov/codecov-action@v1.0.13
       with:
         file: ./org.osgi.test.assertj.framework/target/site/jacoco-it/jacoco.xml
         name: assertj.framework
     - name: Upload "assertj.promise" coverage to Codecov
       if: (matrix.codecov)
-      uses: codecov/codecov-action@v1.0.12
+      uses: codecov/codecov-action@v1.0.13
       with:
         file: ./org.osgi.test.assertj.promise/target/site/jacoco-it/jacoco.xml
         name: assertj.promise
     - name: Upload "common" coverage to Codecov
       if: (matrix.codecov)
-      uses: codecov/codecov-action@v1.0.12
+      uses: codecov/codecov-action@v1.0.13
       with:
         file: ./org.osgi.test.common/target/site/jacoco-it/jacoco.xml
         name: common
     - name: Upload "junit4" coverage to Codecov
       if: (matrix.codecov)
-      uses: codecov/codecov-action@v1.0.12
+      uses: codecov/codecov-action@v1.0.13
       with:
         file: ./org.osgi.test.junit4/target/site/jacoco-it/jacoco.xml
         name: junit4
     - name: Upload "junit5" coverage to Codecov
       if: (matrix.codecov)
-      uses: codecov/codecov-action@v1.0.12
+      uses: codecov/codecov-action@v1.0.13
       with:
         file: ./org.osgi.test.junit5/target/site/jacoco-it/jacoco.xml
         name: junit5
