@@ -42,7 +42,6 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
@@ -60,7 +59,6 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 
 	private static final String							STORE_CONFIGURATION_KEY	= "store.configurationAdmin";
 
-	private ServiceRegistration<ConfigurationListener>	registrationTimeoutListener;
 	private static BlockingConfigurationHandler			blockingConfigHandler;
 
 	static BundleContext bc(ExtensionContext extensionContext) {
@@ -265,7 +263,7 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
 
 		BlockingConfigurationHandlerImpl blockingConfigHandlerImpl = new BlockingConfigurationHandlerImpl();
-		registrationTimeoutListener = bc(extensionContext).registerService(ConfigurationListener.class,
+		bc(extensionContext).registerService(ConfigurationListener.class,
 			blockingConfigHandlerImpl, null);
 		blockingConfigHandler = blockingConfigHandlerImpl;
 		storeConfigCopy(extensionContext);
