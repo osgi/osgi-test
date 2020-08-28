@@ -17,10 +17,8 @@ package org.osgi.test.junit5.cm;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.reflect.Array;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -34,10 +32,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.test.common.annotation.config.ConfigEntry;
-import org.osgi.test.common.annotation.config.ConfigEntry.Scalar;
-import org.osgi.test.common.annotation.config.ConfigEntry.Type;
-import org.osgi.test.common.annotation.config.WithConfiguration;
+import org.osgi.test.common.annotation.Property;
 
 public class ConfigUtil {
 
@@ -45,7 +40,7 @@ public class ConfigUtil {
 		if (dictionary.size() == 1) {
 			if (dictionary.keys()
 				.nextElement()
-				.equals(WithConfiguration.NOT_SET)) {
+				.equals(Property.NOT_SET)) {
 				return true;
 			}
 		}
@@ -166,7 +161,7 @@ public class ConfigUtil {
 	}
 
 	public static <K, V> Dictionary<K, V> copy(Dictionary<K, V> dictionary) {
-		Hashtable<K, V> copy = new Hashtable<>();
+		Dictionary<K, V> copy = new Hashtable<>();
 		Enumeration<K> keys = dictionary.keys();
 		while (keys.hasMoreElements()) {
 			K key = keys.nextElement();
@@ -175,159 +170,5 @@ public class ConfigUtil {
 		return copy;
 	}
 
-	public static Dictionary<String, Object> of(ConfigEntry[] entrys) {
-		Hashtable<String, Object> dictionary = new Hashtable<>();
-		for (ConfigEntry entry : entrys) {
-			dictionary.put(entry.key(), toValue(entry));
-		}
-		return dictionary;
-	}
-
-	private static Object toValue(ConfigEntry entry) {
-
-		boolean primitive = entry.type()
-			.equals(Type.PrimitiveArray);
-		Object array = createArray(entry.scalar(), primitive, entry.value().length);
-		int i = 0;
-		for (String v : entry.value()) {
-			Object val = null;
-
-			if (v != null) {
-				switch (entry.scalar()) {
-					case Boolean :
-						Boolean booleanValue = Boolean.valueOf(v);
-						val = primitive ? booleanValue.booleanValue() : booleanValue;
-						break;
-
-					case Byte :
-						Byte byteVal = Byte.valueOf(v);
-						val = primitive ? byteVal.byteValue() : byteVal;
-						break;
-
-					case Character :
-						char charVal = v.charAt(0);
-						val = primitive ? charVal : new Character(charVal);
-						break;
-
-					case Double :
-						Double doubleVal = Double.valueOf(v);
-						val = primitive ? doubleVal.doubleValue() : doubleVal;
-						break;
-
-					case Float :
-						Float floatVal = Float.valueOf(v);
-						val = primitive ? floatVal.floatValue() : floatVal;
-						break;
-
-					case Integer :
-						Integer integerVal = Integer.valueOf(v);
-						val = primitive ? integerVal.intValue() : integerVal;
-						break;
-
-					case Long :
-						Long longVal = Long.valueOf(v);
-						val = primitive ? longVal.longValue() : longVal;
-						break;
-
-					case Short :
-						Short shortVal = Short.valueOf(v);
-						val = primitive ? shortVal.shortValue() : shortVal;
-						break;
-
-					case String :
-						val = v;
-						break;
-				}
-			}
-
-			if (Type.Scalar.equals(entry.type())) {
-				return val;
-			} else {
-				Array.set(array, i++, val);
-			}
-		}
-		if (entry.type()
-			.equals(Type.Array)
-			|| entry.type()
-				.equals(Type.PrimitiveArray)) {
-			return array;
-		} else if (entry.type()
-			.equals(Type.Collection)) {
-
-			return Arrays.asList((Object[]) array);
-		}
-
-		return null;
-	}
-
-	private static Object createArray(Scalar scalar, boolean primitive, int length) {
-
-		switch (scalar) {
-			case Boolean :
-				if (primitive) {
-					return new boolean[length];
-				} else {
-					return new Boolean[length];
-				}
-
-			case Byte :
-				if (primitive) {
-					return new byte[length];
-				} else {
-					return new Byte[length];
-				}
-
-			case Character :
-				if (primitive) {
-					return new char[length];
-				} else {
-					return new Character[length];
-				}
-
-			case Double :
-				if (primitive) {
-					return new double[length];
-				} else {
-					return new Double[length];
-				}
-
-			case Float :
-				if (primitive) {
-					return new int[length];
-				} else {
-					return new Float[length];
-				}
-
-			case Integer :
-				if (primitive) {
-					return new int[length];
-				} else {
-					return new Integer[length];
-				}
-
-			case Long :
-				if (primitive) {
-					return new long[length];
-				} else {
-					return new Long[length];
-				}
-
-			case Short :
-				if (primitive) {
-					return new short[length];
-				} else {
-					return new Short[length];
-				}
-
-			case String :
-				if (primitive) {
-					throw new IllegalArgumentException(
-						"@ConfigEntry Could not be Scalar=String and type=ÜrimitiveArray at the same time");
-				} else {
-					return new String[length];
-				}
-		}
-		return null;
-	}
 
 }

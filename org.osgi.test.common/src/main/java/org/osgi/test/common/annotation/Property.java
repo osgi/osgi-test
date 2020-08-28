@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.osgi.test.common.annotation.config;
+package org.osgi.test.common.annotation;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -30,8 +30,9 @@ import java.lang.annotation.Target;
 })
 @Retention(RUNTIME)
 @Documented
-public @interface ConfigEntry {
+public @interface Property {
 
+	public static final String NOT_SET = "org.osgi.test.common.annotation.notset";
 	public enum Scalar {
 		String,
 		Integer,

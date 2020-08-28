@@ -45,12 +45,15 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.PropertiesConverter;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithConfigurations;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfigurations;
 import org.osgi.test.common.dictionary.Dictionaries;
+import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
@@ -121,7 +124,7 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 
 			Configuration configuration = configurationAdmin.getConfiguration(configAnnotation.pid());
 
-			updateConfigurationRespectNew(configuration, ConfigUtil.of(configAnnotation.properties()),
+			updateConfigurationRespectNew(configuration, PropertiesConverter.of(configAnnotation.properties()),
 				configBefore == null);
 
 			return configuration;
@@ -142,7 +145,7 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 			Configuration configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
 				configAnnotation.name());
 
-			updateConfigurationRespectNew(configuration, ConfigUtil.of(configAnnotation.properties()),
+			updateConfigurationRespectNew(configuration, PropertiesConverter.of(configAnnotation.properties()),
 				configBefore == null);
 
 			return configuration;
@@ -181,14 +184,14 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 				boolean withConfigUsed = false;
 				boolean withFactoryConfigUsed = false;
 				if (!ic.value()
-					.equals(WithConfiguration.NOT_SET)) {
+					.equals(Property.NOT_SET)) {
 
 					configuration = ConfigUtil.getConfigsByServicePid(ca(extensionContext), ic.value(), ic.timeout());
 
 					valueUsed = true;
 				} else if (!ic.withConfig()
 					.pid()
-					.equals(WithConfiguration.NOT_SET)) {
+					.equals(Property.NOT_SET)) {
 
 					if (valueUsed) {
 						throw new IllegalArgumentException(
@@ -199,7 +202,7 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 					withConfigUsed = true;
 				} else if (!ic.withFactoryConfig()
 					.factoryPid()
-					.equals(WithConfiguration.NOT_SET)) {
+					.equals(Property.NOT_SET)) {
 
 					if (valueUsed || withConfigUsed) {
 						throw new IllegalArgumentException(

@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
-import org.osgi.test.common.annotation.config.ConfigEntry;
-import org.osgi.test.common.annotation.config.ConfigEntry.Scalar;
-import org.osgi.test.common.annotation.config.ConfigEntry.Type;
+import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.Property.Scalar;
+import org.osgi.test.common.annotation.Property.Type;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
@@ -35,14 +35,14 @@ public class InjectWith {
 
 	@Test
 	public void test1(@InjectConfiguration(withConfig = @WithConfiguration(pid = "pid", properties = {//
-		@ConfigEntry(key = "Scalar", type = Type.Scalar, scalar = Scalar.Integer, value = "1"), //
-		@ConfigEntry(key = "PrimitiveArray", type = Type.PrimitiveArray, scalar = Scalar.Integer, value = {
+		@Property(key = "Scalar", type = Type.Scalar, scalar = Scalar.Integer, value = "1"), //
+		@Property(key = "PrimitiveArray", type = Type.PrimitiveArray, scalar = Scalar.Integer, value = {
 			"1", "2"
 		}), //
-		@ConfigEntry(key = "Array", type = Type.Array, scalar = Scalar.Integer, value = {
+		@Property(key = "Array", type = Type.Array, scalar = Scalar.Integer, value = {
 			"1", "2"
 		}), //
-		@ConfigEntry(key = "Collection", type = Type.Collection, scalar = Scalar.Integer, value = {
+		@Property(key = "Collection", type = Type.Collection, scalar = Scalar.Integer, value = {
 			"1", "2"
 		})//
 	})) Configuration c) throws Exception {

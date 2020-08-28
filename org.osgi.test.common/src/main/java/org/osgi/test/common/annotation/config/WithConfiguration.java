@@ -26,6 +26,8 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.osgi.test.common.annotation.Property;
+
 /*
  * Configure the Config-Admin using the annotation `@WithConfiguration`
  * Get or Create an new Configuration Object.
@@ -41,8 +43,6 @@ import java.lang.annotation.Target;
 
 public @interface WithConfiguration {
 
-	public static final String NOT_SET = "org.osgi.test.common.annotation.config.notset";
-
 	/**
 	 * The pid of the Configuration.<br>
 	 *
@@ -50,15 +50,14 @@ public @interface WithConfiguration {
 	 */
 	String pid();
 
-
 	/**
 	 * Indicate the properties, that will be updated (if set) after selecting a
 	 * Configuration. If empty no update will be done.
 	 *
 	 * @return The Properties.
 	 */
-	ConfigEntry[] properties() default {
-		@ConfigEntry(key = NOT_SET)
+	Property[] properties() default {
+		@Property(key = Property.NOT_SET)
 	};
 
 }

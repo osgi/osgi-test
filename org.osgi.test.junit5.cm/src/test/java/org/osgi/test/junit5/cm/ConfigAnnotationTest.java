@@ -23,7 +23,7 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
 import org.osgi.test.common.annotation.InjectService;
-import org.osgi.test.common.annotation.config.ConfigEntry;
+import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
@@ -63,7 +63,7 @@ public class ConfigAnnotationTest {
 
 	@Test
 	@WithConfiguration(pid = PARAM_PID, properties = {
-		@ConfigEntry(key = "bar", value = "foo")
+		@Property(key = "bar", value = "foo")
 	})
 	public void testParameterConfiguration(@InjectService ConfigurationAdmin ca,
 		@InjectConfiguration(PARAM_PID) Configuration configuration) throws Exception {
@@ -82,7 +82,7 @@ public class ConfigAnnotationTest {
 
 	@Test
 	@WithConfiguration(pid = PARAM_PID, properties = {
-		@ConfigEntry(key = "foo", value = "bar")
+		@Property(key = "foo", value = "bar")
 	})
 	public void testParameterConfiguration2(@InjectConfiguration(PARAM_PID) Configuration configuration)
 		throws Exception {
@@ -116,7 +116,7 @@ public class ConfigAnnotationTest {
 
 	@Test
 	@WithConfiguration(pid = METHOD_PID, properties = {
-		@ConfigEntry(key = "foo", value = "bar")
+		@Property(key = "foo", value = "bar")
 	})
 	public void testMethodConfiguration() throws Exception {
 
@@ -129,7 +129,7 @@ public class ConfigAnnotationTest {
 
 	@Test
 	@WithConfiguration(pid = FACTORY_CONFIGURATION_PID + "~" + "factory.name", properties = {
-		@ConfigEntry(key = "foo", value = "bar")
+		@Property(key = "foo", value = "bar")
 	})
 	public void testMethodConfigurationFactory() throws Exception {
 
@@ -143,7 +143,7 @@ public class ConfigAnnotationTest {
 
 	@Test
 	@WithFactoryConfiguration(factoryPid = FACTORY_CONFIGURATION_PID, name = "factory.name2", properties = {
-		@ConfigEntry(key = "foo", value = "bar")
+		@Property(key = "foo", value = "bar")
 	})
 	public void testMethodConfigurationFactoryCreate() throws Exception {
 

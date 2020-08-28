@@ -39,6 +39,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.common.service.ServiceConfiguration;
 import org.osgi.test.common.service.ServiceConfigurationKey;
@@ -67,6 +68,7 @@ public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, 
 
 	@Override
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
+
 		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectService.class,
 			m -> Modifier.isStatic(m.getModifiers()));
 
@@ -74,16 +76,15 @@ public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, 
 			assertValidFieldCandidate(field);
 
 			InjectService serviceUseParameter = field.getAnnotation(InjectService.class);
-			Class<?> memberType = field.getType();
-			Type genericMemberType = field.getGenericType();
 
-			setField(field, null,
-				resolveReturnValue(memberType, genericMemberType, serviceUseParameter, extensionContext));
+			TargetType targetType = TargetType.of(field);
+			setField(field, null, resolveReturnValue(targetType, serviceUseParameter, extensionContext));
 		});
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
+
 		for (Object instance : extensionContext.getRequiredTestInstances()
 			.getAllInstances()) {
 			List<Field> fields = findAnnotatedNonStaticFields(instance.getClass(), InjectService.class);
@@ -92,11 +93,9 @@ public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, 
 				assertValidFieldCandidate(field);
 
 				InjectService serviceUseParameter = field.getAnnotation(InjectService.class);
-				Class<?> memberType = field.getType();
-				Type genericMemberType = field.getGenericType();
 
-				setField(field, instance,
-					resolveReturnValue(memberType, genericMemberType, serviceUseParameter, extensionContext));
+				TargetType targetType = TargetType.of(field);
+				setField(field, instance, resolveReturnValue(targetType, serviceUseParameter, extensionContext));
 			});
 		}
 	}
@@ -107,10 +106,10 @@ public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, 
 
 		Optional<InjectService> injectService = parameterContext.findAnnotation(InjectService.class);
 		Parameter parameter = parameterContext.getParameter();
-		Class<?> memberType = parameter.getType();
-		Type genericMemberType = parameter.getParameterizedType();
 
-		return resolveReturnValue(memberType, genericMemberType, injectService.get(), extensionContext);
+		TargetType targetType = TargetType.of(parameter);
+
+		return resolveReturnValue(targetType, injectService.get(), extensionContext);
 	}
 
 	@Override
@@ -151,35 +150,35 @@ public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, 
 		@SuppressWarnings("unchecked")
 		ServiceConfiguration<S> serviceConfiguration = getStore(extensionContext)
 			.getOrComputeIfAbsent(new ServiceConfigurationKey<>(serviceType, format, args, cardinality, timeout),
-				key -> new CloseableServiceConfiguration<>(new ServiceConfiguration<>(key)
-						.init(BundleContextExtension.getBundleContext(extensionContext))),
+				key -> new CloseableServiceConfiguration<>(
+					new ServiceConfiguration<>(key).init(BundleContextExtension.getBundleContext(extensionContext))),
 				CloseableServiceConfiguration.class)
 			.get();
 		return serviceConfiguration;
 	}
 
-	static Object resolveReturnValue(Class<?> memberType, Type genericMemberType, InjectService injectService,
+	static Object resolveReturnValue(TargetType targetType, InjectService injectService,
 		ExtensionContext extensionContext) throws ParameterResolutionException {
 
-		Type serviceType = genericMemberType;
+		Type serviceType = targetType.getType();
 
-		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
-			serviceType = ((ParameterizedType) serviceType).getActualTypeArguments()[0];
-		} else if (ServiceAware.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
-			serviceType = ((ParameterizedType) serviceType).getActualTypeArguments()[0];
+		if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
+			Optional<Type> o = targetType.getFirstGenericTypes();
+			if (o.isPresent()) {
+				serviceType = (o.get());
+			}
 		}
 
 		// supportsParameter() If Jupiter does the right thing then this method
 		// should not be called without serviceType being a class
 		assert serviceType instanceof Class;
 
-		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType,
-			injectService.filter(), injectService.filterArguments(), injectService.cardinality(),
-			injectService.timeout(), extensionContext);
+		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType, injectService.filter(),
+			injectService.filterArguments(), injectService.cardinality(), injectService.timeout(), extensionContext);
 
-		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
+		if (targetType.matches(List.class) && targetType.hasParameterizedTypes()) {
 			return configuration.getServices();
-		} else if (ServiceAware.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
+		} else if (targetType.matches(ServiceAware.class) && targetType.hasParameterizedTypes()) {
 			return configuration;
 		}
 

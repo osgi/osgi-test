@@ -26,6 +26,8 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.osgi.test.common.annotation.Property;
+
 /*
  * Configure the Config-Admin using the annotation `@WithConfiguration`
  * Get or Create an new Configuration Object.
@@ -63,8 +65,8 @@ public @interface WithFactoryConfiguration {
 	 *
 	 * @return The Properties.
 	 */
-	ConfigEntry[] properties() default {
-		@ConfigEntry(key = NOT_SET)
+	Property[] properties() default {
+		@Property(key = Property.NOT_SET)
 	};
 
 }

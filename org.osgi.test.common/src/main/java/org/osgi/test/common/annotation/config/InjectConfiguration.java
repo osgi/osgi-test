@@ -25,6 +25,8 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.osgi.test.common.annotation.Property;
+
 /*
  * Reads existing a Configuration from the Config-Admin and injects it into Field or Parameter
  * Inject the `org.osgi.service.cm.Configuration`, `Map`, `Dictionary` or an `Optional<Configuration>`.
@@ -48,21 +50,21 @@ public @interface InjectConfiguration {
 	 *
 	 * @return The pid
 	 */
-	String value() default WithConfiguration.NOT_SET;
+	String value() default Property.NOT_SET;
 
 	/**
 	 * The Configuration that would be created/updated before injection.
 	 *
 	 * @return The withConfiguration
 	 */
-	WithConfiguration withConfig() default @WithConfiguration(pid = WithConfiguration.NOT_SET);
+	WithConfiguration withConfig() default @WithConfiguration(pid = Property.NOT_SET);
 
 	/**
 	 * The FactoryConfiguration that would be created/updated before injection.
 	 *
 	 * @return The withFactoryConfiguration
 	 */
-	WithFactoryConfiguration withFactoryConfig() default @WithFactoryConfiguration(factoryPid = WithConfiguration.NOT_SET, name = WithConfiguration.NOT_SET);
+	WithFactoryConfiguration withFactoryConfig() default @WithFactoryConfiguration(factoryPid = Property.NOT_SET, name = Property.NOT_SET);
 
 	/**
 	 * Indicate require Configuration must arrive within the specified timeout.
