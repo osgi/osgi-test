@@ -43,10 +43,10 @@ jobs:
     - name: Import GPG key
       id: import_gpg
       if: (matrix.canonical && (steps.build.outcome == 'success'))
-      uses: crazy-max/ghaction-import-gpg@v2
-      env:
-        GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-        PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      uses: crazy-max/ghaction-import-gpg@v3
+      with:
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.GPG_PASSPHRASE }}
     - name: GPG key information
       if: (steps.import_gpg.outcome == 'success')
       run: |
