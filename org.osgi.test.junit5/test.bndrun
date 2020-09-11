@@ -57,9 +57,6 @@
 	org.objenesis;version='[3.1.0,3.1.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.test.assertj.framework;version='[0.10.0,0.10.1)',\
-	org.osgi.test.assertj.promise;version='[0.10.0,0.10.1)',\
 	org.osgi.test.common;version='[0.10.0,0.10.1)',\
 	org.osgi.test.junit5;version='[0.10.0,0.10.1)',\
-	org.osgi.test.junit5-tests;version='[0.10.0,0.10.1)',\
-	org.osgi.util.function;version='[1.0.0,1.0.1)',\
-	org.osgi.util.promise;version='[1.0.0,1.0.1)'
+	org.osgi.test.junit5-tests;version='[0.10.0,0.10.1)'
