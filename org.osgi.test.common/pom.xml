@@ -62,21 +62,12 @@
 			<artifactId>mockito-core</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>biz.aQute.bnd</groupId>
-				<artifactId>biz.aQute.tester.junit-platform</artifactId>
-				<version>${bnd.version}</version>
-				<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.logback</artifactId>
-			<version>1.0.2</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.platform</groupId>
 			<artifactId>org.eclipse.osgi</artifactId>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
