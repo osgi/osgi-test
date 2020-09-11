@@ -1,4 +1,4 @@
-# Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+# Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+-tester: biz.aQute.tester
+
 -runvm: ${def;argLine}
+
 -runfw: org.eclipse.osgi
 -resolve.effective: active
 -runproperties: \
@@ -37,7 +40,7 @@
     begin=-1
 -runbundles: \
 	assertj-core;version='[3.17.2,3.17.3)',\
-	org.apache.servicemix.bundles.junit;version='[4.12.0,4.12.1)',\
+	org.apache.servicemix.bundles.junit;version='[4.13.0,4.13.1)',\
 	org.osgi.test.common;version='[0.10.0,0.10.1)',\
 	org.osgi.test.junit4;version='[0.10.0,0.10.1)',\
 	org.osgi.test.junit4-tests;version='[0.10.0,0.10.1)'
