@@ -107,29 +107,112 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!-- Disable baseline validation until we are at version > 1.0.0 
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<executions>
+						<execution>
+							<id>bnd-process</id>
+							<goals>
+								<goal>bnd-process</goal>
+							</goals>
+						</execution>
+						<!-- Integration Test Configuration -->
+						<execution>
+							<id>bnd-process-tests</id>
+							<phase>process-test-classes</phase>
+							<goals>
+								<goal>bnd-process-tests</goal>
+							</goals>
+							<configuration>
+								<artifactFragment>true</artifactFragment>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-resolver-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<executions>
+						<!-- Integration Test Configuration -->
+						<execution>
+							<id>resolve-test</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+								<goal>resolve</goal>
+							</goals>
+							<configuration>
+								<bndruns>
+									<bndrun>test.bndrun</bndrun>
+								</bndruns>
+								<bundles>
+									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+								</bundles>
+								<failOnChanges>false</failOnChanges>
+								<includeDependencyManagement>true</includeDependencyManagement>
+								<reportOptional>false</reportOptional>
+								<scopes>
+									<scope>compile</scope>
+									<scope>runtime</scope>
+									<scope>test</scope>
+								</scopes>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>biz.aQute.bnd</groupId>
+					<artifactId>bnd-testing-maven-plugin</artifactId>
+					<version>${bnd.version}</version>
+					<executions>
+						<!-- OSGi integration tests execution -->
+						<execution>
+							<id>testing</id>
+							<goals>
+								<goal>testing</goal>
+							</goals>
+							<configuration>
+								<bndruns>
+									<bndrun>test.bndrun</bndrun>
+								</bndruns>
+								<bundles>
+									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
+								</bundles>
+								<failOnChanges>false</failOnChanges>
+								<includeDependencyManagement>true</includeDependencyManagement>
+								<resolve>false</resolve>
+								<scopes>
+									<scope>compile</scope>
+									<scope>runtime</scope>
+									<scope>test</scope>
+								</scopes>
+							</configuration>
+						</execution>
+					</executions>
+				</plugin>
 				<plugin>
 					<groupId>biz.aQute.bnd</groupId>
 					<artifactId>bnd-baseline-maven-plugin</artifactId>
 					<version>${bnd.version}</version>
-					<configuration>
-						<failOnMissing>false</failOnMissing>
-						<fullReport>true</fullReport>
-						<includeDistributionManagement>false</includeDistributionManagement>
-						<diffignores>
-							<diffignore>Bundle-Version</diffignore>
-						</diffignores>
-					</configuration>
 					<executions>
 						<execution>
 							<id>baseline</id>
 							<goals>
 								<goal>baseline</goal>
 							</goals>
+							<configuration>
+								<failOnMissing>false</failOnMissing>
+								<fullReport>true</fullReport>
+								<includeDistributionManagement>false</includeDistributionManagement>
+								<diffignores>
+									<diffignore>Bundle-Version</diffignore>
+								</diffignores>
+							</configuration>
 						</execution>
 					</executions>
 				</plugin>
-				-->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
@@ -343,6 +426,85 @@
 		</pluginManagement>
 		<plugins>
 			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>bnd-process</id>
+						<goals>
+							<goal>bnd-process</goal>
+						</goals>
+						<inherited>false</inherited>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+					<!-- Integration Test Configuration -->
+					<execution>
+						<id>bnd-process-tests</id>
+						<phase>process-test-classes</phase>
+						<goals>
+							<goal>bnd-process-tests</goal>
+						</goals>
+						<inherited>false</inherited>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-resolver-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>resolve-test</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>resolve</goal>
+						</goals>
+						<inherited>false</inherited>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-testing-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>testing</id>
+						<goals>
+							<goal>testing</goal>
+						</goals>
+						<inherited>false</inherited>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>biz.aQute.bnd</groupId>
+				<artifactId>bnd-baseline-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>baseline</id>
+						<goals>
+							<goal>baseline</goal>
+						</goals>
+						<!-- Disable baseline validation until we are at version > 1.0.0.
+							Then change inherited to false. -->
+						<inherited>true</inherited>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 			</plugin>
@@ -367,37 +529,8 @@
 				<artifactId>flatten-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-baseline-maven-plugin</artifactId>
-				<version>${bnd.version}</version>
-			</plugin>
-			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-maven-plugin</artifactId>
-				<version>${bnd.version}</version>
-				<executions>
-					<execution>
-						<id>bnd-process</id>
-						<goals>
-							<goal>bnd-process</goal>
-						</goals>
-					</execution>
-					<!-- Integration Test Configuration -->
-					<execution>
-						<id>bnd-process-tests</id>
-						<phase>process-test-classes</phase>
-						<goals>
-							<goal>bnd-process-tests</goal>
-						</goals>
-						<configuration>
-							<artifactFragment>true</artifactFragment>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>
