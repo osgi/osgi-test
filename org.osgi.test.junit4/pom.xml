@@ -89,7 +89,7 @@
 						<configuration>
 							<artifactFragment>true</artifactFragment>
 							<bnd><![CDATA[
-								p = org.osgi.test.junit4
+								p = ${project.artifactId}
 								Export-Package: !${p}.tb*,${p}.*;-split-package:=first
 								-fixupmessages: "Export-Package duplicate package name..."
 								-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
