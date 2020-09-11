@@ -164,12 +164,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>true</skipTests>
-				</configuration>
-			</plugin>
 			<!-- This dynamically calculates all the things we need to run our code. -->
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
