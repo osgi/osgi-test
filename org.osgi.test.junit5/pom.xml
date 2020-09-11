@@ -146,7 +146,7 @@
 						<configuration>
 							<artifactFragment>true</artifactFragment>
 							<bnd><![CDATA[
-								p = org.osgi.test.junit5
+								p = ${project.artifactId}
 								Export-Package: !${p}.tb*,${p}.*;-split-package:=first
 								-fixupmessages: "Export-Package duplicate package name..."
 								-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
@@ -167,74 +167,6 @@
 							]]></bnd>
 							<includeClassesDir>false</includeClassesDir>
 							<testCases>useTestCasesHeader</testCases>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>true</skipTests>
-				</configuration>
-			</plugin>
-			<!-- This dynamically calculates all the things we need to run our code. -->
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-resolver-maven-plugin</artifactId>
-				<version>${bnd.version}</version>
-				<executions>
-					<!-- Integration Test Configuration -->
-					<execution>
-						<id>resolve-test</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>resolve</goal>
-						</goals>
-						<configuration>
-							<bndruns>
-								<bndrun>test.bndrun</bndrun>
-							</bndruns>
-							<bundles>
-								<bundle>target/${project.build.finalName}-tests.jar</bundle>
-							</bundles>
-							<failOnChanges>false</failOnChanges>
-							<includeDependencyManagement>true</includeDependencyManagement>
-							<reportOptional>false</reportOptional>
-							<scopes>
-								<scope>compile</scope>
-								<scope>runtime</scope>
-								<scope>test</scope>
-							</scopes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- This is the plugin runs the OSGi integration tests. -->
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-testing-maven-plugin</artifactId>
-				<version>${bnd.version}</version>
-				<executions>
-					<execution>
-						<id>testing</id>
-						<goals>
-							<goal>testing</goal>
-						</goals>
-						<configuration>
-							<bndruns>
-								<bndrun>test.bndrun</bndrun>
-							</bndruns>
-							<bundles>
-								<bundle>target/${project.build.finalName}-tests.jar</bundle>
-							</bundles>
-							<failOnChanges>false</failOnChanges>
-							<includeDependencyManagement>true</includeDependencyManagement>
-							<resolve>false</resolve>
-							<scopes>
-								<scope>compile</scope>
-								<scope>runtime</scope>
-								<scope>test</scope>
-							</scopes>
 						</configuration>
 					</execution>
 				</executions>

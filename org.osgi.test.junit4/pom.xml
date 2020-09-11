@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.junit</artifactId>
-			<version>4.12_1</version>
+			<version>4.13_1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -89,7 +89,7 @@
 						<configuration>
 							<artifactFragment>true</artifactFragment>
 							<bnd><![CDATA[
-								p = org.osgi.test.junit4
+								p = ${project.artifactId}
 								Export-Package: !${p}.tb*,${p}.*;-split-package:=first
 								-fixupmessages: "Export-Package duplicate package name..."
 								-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
@@ -99,68 +99,6 @@
 							]]></bnd>
 							<testCases>junit4</testCases>
 							<includeClassesDir>false</includeClassesDir>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- This dynamically calculates all the things we need to run our code. -->
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-resolver-maven-plugin</artifactId>
-				<version>${bnd.version}</version>
-				<executions>
-					<!-- Integration Test Configuration -->
-					<execution>
-						<id>resolve-test</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>resolve</goal>
-						</goals>
-						<configuration>
-							<bndruns>
-								<bndrun>test.bndrun</bndrun>
-							</bndruns>
-							<bundles>
-								<bundle>target/${project.build.finalName}-tests.jar</bundle>
-							</bundles>
-							<failOnChanges>false</failOnChanges>
-							<includeDependencyManagement>true</includeDependencyManagement>
-							<reportOptional>false</reportOptional>
-							<scopes>
-								<scope>compile</scope>
-								<scope>runtime</scope>
-								<scope>test</scope>
-							</scopes>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<!-- This is the plugin runs the OSGi integration tests. -->
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-testing-maven-plugin</artifactId>
-				<version>${bnd.version}</version>
-				<executions>
-					<execution>
-						<id>testing</id>
-						<goals>
-							<goal>testing</goal>
-						</goals>
-						<configuration>
-							<bndruns>
-								<bndrun>test.bndrun</bndrun>
-							</bndruns>
-							<bundles>
-								<bundle>target/${project.build.finalName}-tests.jar</bundle>
-							</bundles>
-							<failOnChanges>false</failOnChanges>
-							<includeDependencyManagement>true</includeDependencyManagement>
-							<resolve>false</resolve>
-							<scopes>
-								<scope>compile</scope>
-								<scope>runtime</scope>
-								<scope>test</scope>
-							</scopes>
 						</configuration>
 					</execution>
 				</executions>
@@ -184,12 +122,6 @@
 						</configuration>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<skipTests>true</skipTests>
-				</configuration>
 			</plugin>
 		</plugins>
 	</build>
