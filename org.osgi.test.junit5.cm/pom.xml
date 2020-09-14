@@ -40,22 +40,25 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.test.common</artifactId>
-			<version>${project.version}</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<scope>compile</scope>
+			<version>${junit-jupiter.compile.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.platform</groupId>
 			<artifactId>junit-platform-commons</artifactId>
-			<scope>compile</scope>
+			<version>${junit-platform.compile.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-params</artifactId>
-			<scope>compile</scope>
+			<version>${junit-jupiter.compile.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
