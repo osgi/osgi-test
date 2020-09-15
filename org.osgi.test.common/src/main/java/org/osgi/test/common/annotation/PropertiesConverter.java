@@ -56,7 +56,7 @@ public class PropertiesConverter {
 
 					case Character :
 						char charVal = v.charAt(0);
-						val = primitive ? charVal : new Character(charVal);
+						val = primitive ? charVal : Character.valueOf(charVal);
 						break;
 
 					case Double :
