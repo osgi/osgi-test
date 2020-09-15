@@ -22,6 +22,7 @@ jobs:
           java: 8
           codecov: true
           canonical: ${{ (github.repository == 'osgi/osgi-test') && ((github.ref == 'refs/heads/main') || (github.ref == 'refs/heads/release')) && (github.event_name != 'pull_request') }}
+          mavenopts: -Pjacoco
         - os: ubuntu-latest
           java: 8
           experimental: true
