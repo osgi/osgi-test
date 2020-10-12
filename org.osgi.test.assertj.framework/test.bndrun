@@ -50,9 +50,9 @@
 	junit-platform-commons;version='[1.7.0,1.7.1)',\
 	junit-platform-engine;version='[1.7.0,1.7.1)',\
 	junit-platform-launcher;version='[1.7.0,1.7.1)',\
-	net.bytebuddy.byte-buddy;version='[1.10.13,1.10.14)',\
-	net.bytebuddy.byte-buddy-agent;version='[1.10.13,1.10.14)',\
-	org.mockito.mockito-core;version='[3.5.10,3.5.11)',\
+	net.bytebuddy.byte-buddy;version='[1.10.15,1.10.16)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.10.15,1.10.16)',\
+	org.mockito.mockito-core;version='[3.5.13,3.5.14)',\
 	org.objenesis;version='[3.1.0,3.1.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.test.assertj.framework;version='[0.11.0,0.11.1)',\
