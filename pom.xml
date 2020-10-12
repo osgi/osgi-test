@@ -86,6 +86,13 @@
 			<id>rotty3000</id>
 			<name>Ray Augé</name>
 			<email>raymond.auge@liferay.com</email>
+			<url>https://rotty3000.github.io</url>
+			<organization>Liferay Inc.</organization>
+			<organizationUrl>https://www.liferay.com</organizationUrl>
+			<roles>
+				<role>developer</role>
+			</roles>
+			<timezone>America/New_York</timezone>
 		</developer>
 		<developer>
 			<id>kriegfrj</id>
