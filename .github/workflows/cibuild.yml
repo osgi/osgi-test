@@ -1,6 +1,14 @@
 name: CI Build
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+    - '.github/**/*codeql*'
+    - '.github/*.yml'
+  pull_request:
+    paths-ignore:
+    - '.github/**/*codeql*'
+    - '.github/*.yml'
 
 env:
   LC_ALL: en_US.UTF-8
