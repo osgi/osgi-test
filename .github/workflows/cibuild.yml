@@ -4,11 +4,15 @@ on:
   push:
     paths-ignore:
     - '.github/**/*codeql*'
+    - '.github/**/*examples*'
     - '.github/*.yml'
+    - 'examples/**'
   pull_request:
     paths-ignore:
     - '.github/**/*codeql*'
+    - '.github/**/*examples*'
     - '.github/*.yml'
+    - 'examples/**'
 
 env:
   LC_ALL: en_US.UTF-8
