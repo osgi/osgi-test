@@ -66,6 +66,9 @@ public class DictionaryAssertTest {
 			public List<AssertionError> assertionErrorsCollected() {
 				return null;
 			}
+
+			@Override
+			public void succeeded() {}
 		};
 
 		softly.assertThat(provider.assertThat(sut))
