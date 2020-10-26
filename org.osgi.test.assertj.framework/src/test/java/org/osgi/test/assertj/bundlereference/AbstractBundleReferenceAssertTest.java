@@ -4,16 +4,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.assertj.core.api.AssertFactory;
-import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
 import org.osgi.test.assertj.testutil.AbstractAssertTest;
 
-@ExtendWith(SoftAssertionsExtension.class)
 public abstract class AbstractBundleReferenceAssertTest<ASSERT extends AbstractBundleReferenceAssert<ASSERT, ACTUAL>, ACTUAL extends BundleReference>
 	extends AbstractAssertTest<ASSERT, ACTUAL> {
 
@@ -36,15 +32,12 @@ public abstract class AbstractBundleReferenceAssertTest<ASSERT extends AbstractB
 	}
 
 	@Test
-	void refersToBundle(SoftAssertions softly) {
-		this.softly = softly;
-
+	void refersToBundle() {
 		assertEqualityAssertion("bundle", aut::refersToBundle, bundle, otherBundle);
 	}
 
 	@Test
-	void refersToBundleThat(SoftAssertions softly) {
-		this.softly = softly;
+	void refersToBundleThat() {
 		assertChildAssertion("bundle", aut::refersToBundleThat, actual::getBundle);
 	}
 }

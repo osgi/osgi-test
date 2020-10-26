@@ -26,11 +26,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.Bundle;
@@ -38,7 +35,6 @@ import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.test.assertj.testutil.AbstractAssertTest;
 
-@ExtendWith(SoftAssertionsExtension.class)
 public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 
 	public BundleAssertTest() {
@@ -62,9 +58,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void isFragment(SoftAssertions softly) throws Exception {
-		this.softly = softly;
-
+	public void isFragment() throws Exception {
 		assertPassing("isNot", x -> aut.isNotFragment(), null);
 		assertFailing("is", x -> aut.isFragment(), null)
 			.hasMessageMatching("(?si).*to be a fragment.*but it was not.*");
@@ -77,8 +71,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void hasPermission(SoftAssertions softly) throws Exception {
-		this.softly = softly;
+	public void hasPermission() throws Exception {
 		when(actual.hasPermission(anyString())).thenReturn(true);
 
 		assertPassing("has", aut::hasPermission, "aString");
@@ -92,16 +85,14 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void hasBundleId(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasBundleId() {
 		when(actual.getBundleId()).thenReturn(2L);
 
 		assertEqualityAssertion("bundle ID", aut::hasBundleId, 2L, 4L);
 	}
 
 	@Test
-	public void hasLocation(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasLocation() {
 		when(actual.getLocation()).thenReturn("file://my/path");
 
 		assertEqualityAssertion("location", aut::hasLocation, "file://my/path", "some.other.location");
@@ -112,16 +103,14 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void hasLocationThat(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasLocationThat() {
 		when(actual.getLocation()).thenReturn("file://my/path");
 
 		assertChildAssertion("location", aut::hasLocationThat, actual::getLocation);
 	}
 
 	@Test
-	public void hasSymbolicName(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasSymbolicName() {
 		when(actual.getSymbolicName()).thenReturn("a.bundle.name");
 
 		assertEqualityAssertion("symbolic name", aut::hasSymbolicName, "a.bundle.name", "some.other.name");
@@ -132,16 +121,14 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void hasSymbolicNameThat(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasSymbolicNameThat() {
 		when(actual.getSymbolicName()).thenReturn("a.bundle.name");
 
 		assertChildAssertion("symbolic name", aut::hasSymbolicNameThat, actual::getSymbolicName);
 	}
 
 	@Test
-	public void hasEntry(SoftAssertions softly) throws Exception {
-		this.softly = softly;
+	public void hasEntry() throws Exception {
 		URL url = Paths.get("/test")
 			.toUri()
 			.toURL();
@@ -157,8 +144,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void hasResource(SoftAssertions softly) throws Exception {
-		this.softly = softly;
+	public void hasResource() throws Exception {
 		URL url = Paths.get("/test")
 			.toUri()
 			.toURL();
@@ -174,8 +160,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void hasLastModified(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasLastModified() {
 		when(actual.getLastModified()).thenReturn(10L);
 
 		assertPassing(aut::hasLastModified, 10L);
@@ -189,80 +174,68 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void hasLastModifiedLongThat(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasLastModifiedLongThat() {
 		when(actual.getLastModified()).thenReturn(10L);
 
 		assertChildAssertion("last modified", aut::hasLastModifiedLongThat, actual::getLastModified);
 	}
 
 	@Test
-	public void hasLastModifiedDateThat(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasLastModifiedDateThat() {
 		when(actual.getLastModified()).thenReturn(10L);
 
 		assertChildAssertion("last modified", aut::hasLastModifiedDateThat, () -> new Date(actual.getLastModified()));
 	}
 
 	@Test
-	public void modifiedAsserts_withNonLongDateOrInstantExpected_throwIAE(SoftAssertions softly) throws Exception {
-		this.softly = softly;
+	public void modifiedAsserts_withNonLongDateOrInstantExpected_throwIAE() throws Exception {
 		when(actual.getLastModified()).thenReturn(10L);
 
 		assertModifiedIAE("hasLastModified", aut::hasLastModified);
 	}
 
 	private void assertModifiedIAE(String msg, Function<Object, BundleAssert> assertion) {
-		softly.assertThatThrownBy(() -> assertion.apply(new Object()))
+		softly().assertThatThrownBy(() -> assertion.apply(new Object()))
 			.as(msg)
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("long")
 			.hasMessageContaining("Instant")
 			.hasMessageContaining("Date");
-		softly.assertThatThrownBy(() -> assertion.apply(null))
+		softly().assertThatThrownBy(() -> assertion.apply(null))
 			.as(msg + ":null")
 			.isInstanceOf(IllegalArgumentException.class);
 	}
 
 	@Test
-	public void hasVersion(SoftAssertions softly) {
-		this.softly = softly;
-
+	public void hasVersion() {
 		assertEqualityAssertion("version", aut::hasVersion, Version.valueOf("1.2.3"), Version.valueOf("2.3.4"));
 		assertEqualityAssertion("version", aut::hasVersion, "1.2.3", "2.3.4");
 	}
 
 	@Test
-	public void hasVersionThat(SoftAssertions softly) {
-		this.softly = softly;
-
+	public void hasVersionThat() {
 		assertChildAssertion("version", aut::hasVersionThat, actual::getVersion);
 	}
 
 	@Test
-	public void hasVersion_withNullExpected(SoftAssertions softly) {
-		this.softly = softly;
-
+	public void hasVersion_withNullExpected() {
 		assertEqualityAssertion("version", aut::hasVersion, Version.valueOf("1.2.3"), null);
 	}
 
 	@Test
-	public void hasVersion_withNullActual(SoftAssertions softly) {
-		this.softly = softly;
+	public void hasVersion_withNullActual() {
 		when(actual.getVersion()).thenReturn(null);
 
 		assertEqualityAssertion("version", aut::hasVersion, null, Version.valueOf("1.2.3"));
 	}
 
 	@Test
-	public void versionAsserts_withNonStringOrVersionExpected_throwIAE(SoftAssertions softly) throws Exception {
-		this.softly = softly;
-
+	public void versionAsserts_withNonStringOrVersionExpected_throwIAE() throws Exception {
 		assertVersionIAE("hasVersion", aut::hasVersion);
 	}
 
 	private void assertVersionIAE(String msg, Function<Object, BundleAssert> assertion) {
-		softly.assertThatThrownBy(() -> assertion.apply(new Object()))
+		softly().assertThatThrownBy(() -> assertion.apply(new Object()))
 			.as(msg)
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining("Version")
@@ -274,9 +247,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	@ValueSource(strings = {
 		"1.2.0", "0.0.1", "0.0.0", "1.2.2", "1.2.2.qualifier"
 	})
-	public void hasVersionGreaterThan_withPassingValues(String version, SoftAssertions softly) {
-		this.softly = softly;
-
+	public void hasVersionGreaterThan_withPassingValues(String version) {
 		softly().assertThatCode(() -> aut.hasVersionThat()
 			.isGreaterThan(Version.valueOf(version)))
 			.doesNotThrowAnyException();
@@ -286,9 +257,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	@ValueSource(strings = {
 		"1.2.3", "1.2.4", "2.0.0", "3.2.2", "1.2.3.qualifier"
 	})
-	public void hasVersionGreaterThan_withFailingValues(String version, SoftAssertions softly) {
-		this.softly = softly;
-
+	public void hasVersionGreaterThan_withFailingValues(String version) {
 		softly().assertThatThrownBy(() -> aut.hasVersionThat()
 			.isGreaterThan(Version.valueOf(version)))
 			.isInstanceOf(AssertionError.class)
@@ -298,8 +267,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 
 	@ParameterizedTest
 	@StatesSource
-	public void isInState(int passingState, SoftAssertions softly) {
-		this.softly = softly;
+	public void isInState(int passingState) {
 		final int actualState = passingState | (passingState << 2);
 		when(actual.getState()).thenReturn(actualState);
 
@@ -312,11 +280,11 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 
 	@ParameterizedTest
 	@StatesSource
-	public void isInState_withMultipleStates_throwsIAE(int expected, SoftAssertions softly) {
+	public void isInState_withMultipleStates_throwsIAE(int expected) {
 		when(actual.getState()).thenReturn(ACTIVE);
 
 		final int mask = expected | (expected << 1);
-		softly.assertThatThrownBy(() -> aut.isInState(mask))
+		softly().assertThatThrownBy(() -> aut.isInState(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageMatching("(?si).*" + mask + ".*isInStateMaskedBy.*");
 	}
@@ -331,8 +299,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 
 	@ParameterizedTest
 	@StatesSource
-	public void isNotInState(int state, SoftAssertions softly) {
-		this.softly = softly;
+	public void isNotInState(int state) {
 		when(actual.getState()).thenReturn(state);
 
 		int passingState = state == ACTIVE ? RESOLVED : ACTIVE;
@@ -343,8 +310,7 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	}
 
 	@Test
-	public void isInStateMaskedBy(SoftAssertions softly) {
-		this.softly = softly;
+	public void isInStateMaskedBy() {
 		when(actual.getState()).thenReturn(ACTIVE);
 
 		assertPassing(aut::isInStateMaskedBy, ACTIVE | INSTALLED);
@@ -375,17 +341,16 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	@ValueSource(ints = {
 		-23, 0, 64, 512
 	})
-	public void isInStateMask_throwsIAE_forInvalidMask(int mask, SoftAssertions softly) {
+	public void isInStateMask_throwsIAE_forInvalidMask(int mask) {
 		when(actual.getState()).thenReturn(ACTIVE);
 
-		softly.assertThatThrownBy(() -> aut.isInStateMaskedBy(mask))
+		softly().assertThatThrownBy(() -> aut.isInStateMaskedBy(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(Integer.toString(mask));
 	}
 
 	@Test
-	public void isNotInStateMask(SoftAssertions softly) {
-		this.softly = softly;
+	public void isNotInStateMask() {
 		when(actual.getState()).thenReturn(STARTING);
 
 		assertPassing(aut::isNotInStateMask, ACTIVE | INSTALLED);
@@ -416,10 +381,10 @@ public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
 	@ValueSource(ints = {
 		-23, 0, 64, 512
 	})
-	public void isNotInStateMask_throwsIAE_forInvalidMask(int mask, SoftAssertions softly) {
+	public void isNotInStateMask_throwsIAE_forInvalidMask(int mask) {
 		when(actual.getState()).thenReturn(ACTIVE);
 
-		softly.assertThatThrownBy(() -> aut.isNotInStateMask(mask))
+		softly().assertThatThrownBy(() -> aut.isNotInStateMask(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(Integer.toString(mask));
 	}
