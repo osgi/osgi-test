@@ -6,17 +6,13 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 
-import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.assertj.bundlereference.AbstractBundleReferenceAssertTest;
 
-@ExtendWith(SoftAssertionsExtension.class)
 class BundleContextAssertTest extends AbstractBundleReferenceAssertTest<BundleContextAssert, BundleContext> {
 
 	BundleContextAssertTest() {
@@ -24,9 +20,7 @@ class BundleContextAssertTest extends AbstractBundleReferenceAssertTest<BundleCo
 	}
 
 	@Test
-	void hasProperty(SoftAssertions softly) throws Exception {
-		this.softly = softly;
-
+	void hasProperty() throws Exception {
 		when(actual.getProperty("key1")).thenReturn("value1");
 
 		assertPassing("has", aut::hasProperty, "key1");
@@ -42,9 +36,7 @@ class BundleContextAssertTest extends AbstractBundleReferenceAssertTest<BundleCo
 	@CsvSource({
 		"key1,value1", "key2,value2", "random121,fewl"
 	})
-	void hasPropertyWithKeyThat(String key, String value, SoftAssertions softly) throws Exception {
-		this.softly = softly;
-
+	void hasPropertyWithKeyThat(String key, String value) throws Exception {
 		when(actual.getProperty(key)).thenReturn(value);
 
 		assertChildAssertion("property(" + key + ")", () -> aut.hasPropertyWithKeyThat(key),
@@ -52,9 +44,7 @@ class BundleContextAssertTest extends AbstractBundleReferenceAssertTest<BundleCo
 	}
 
 	@Test
-	void hasBundleWithId(SoftAssertions softly) {
-		this.softly = softly;
-
+	void hasBundleWithId() {
 		when(actual.getBundle(1L)).thenReturn(otherBundle);
 
 		assertPassing("has", aut::hasBundleWithId, 1L);
@@ -67,18 +57,14 @@ class BundleContextAssertTest extends AbstractBundleReferenceAssertTest<BundleCo
 	}
 
 	@Test
-	void hasBundleWithIdThat(SoftAssertions softly) throws Exception {
-		this.softly = softly;
-
+	void hasBundleWithIdThat() throws Exception {
 		when(actual.getBundle(1L)).thenReturn(otherBundle);
 
 		assertChildAssertion("bundle(1)", () -> aut.hasBundleWithIdThat(1), () -> actual.getBundle(1));
 	}
 
 	@Test
-	void hasBundleWithLocation(SoftAssertions softly) {
-		this.softly = softly;
-
+	void hasBundleWithLocation() {
 		when(actual.getBundle("some/location")).thenReturn(otherBundle);
 
 		assertPassing("has", aut::hasBundleWithLocation, "some/location");
@@ -93,9 +79,7 @@ class BundleContextAssertTest extends AbstractBundleReferenceAssertTest<BundleCo
 	}
 
 	@Test
-	void hasBundleWithLocationThat(SoftAssertions softly) throws Exception {
-		this.softly = softly;
-
+	void hasBundleWithLocationThat() throws Exception {
 		when(actual.getBundle("some/location")).thenReturn(otherBundle);
 
 		assertChildAssertion("bundle(some/location)", () -> aut.hasBundleWithLocationThat("some/location"),
@@ -103,9 +87,7 @@ class BundleContextAssertTest extends AbstractBundleReferenceAssertTest<BundleCo
 	}
 
 	@Test
-	void hasBundles(SoftAssertions softly) throws Exception {
-		this.softly = softly;
-
+	void hasBundles() throws Exception {
 		Bundle[] bundles = new Bundle[] {
 			bundle, otherBundle
 		};

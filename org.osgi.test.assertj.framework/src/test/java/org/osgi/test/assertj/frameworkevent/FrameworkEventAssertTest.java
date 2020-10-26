@@ -36,18 +36,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.test.assertj.testutil.AbstractAssertTest;
 
-@ExtendWith(SoftAssertionsExtension.class)
 class FrameworkEventAssertTest extends AbstractAssertTest<FrameworkEventAssert, FrameworkEvent> {
 
 	FrameworkEventAssertTest() {
@@ -73,23 +69,18 @@ class FrameworkEventAssertTest extends AbstractAssertTest<FrameworkEventAssert, 
 	}
 
 	@Test
-	void hasBundle(SoftAssertions softly) {
-		this.softly = softly;
-
+	void hasBundle() {
 		assertEqualityAssertion("bundle", aut::hasBundle, bundle, otherBundle);
 	}
 
 	@Test
-	void hasThrowable(SoftAssertions softly) {
-		this.softly = softly;
-
+	void hasThrowable() {
 		assertEqualityAssertion("throwable", aut::hasThrowable, throwable, otherThrowable);
 	}
 
 	@ParameterizedTest
 	@TypeSource
-	public void isOfType(int passingType, SoftAssertions softly) {
-		this.softly = softly;
+	public void isOfType(int passingType) {
 		final int actualType = passingType | (passingType << 2);
 		setActual(actualType);
 
@@ -102,17 +93,16 @@ class FrameworkEventAssertTest extends AbstractAssertTest<FrameworkEventAssert, 
 
 	@ParameterizedTest
 	@TypeSource
-	public void isOfType_withMultipleTypes_throwsIAE(int expected, SoftAssertions softly) {
+	public void isOfType_withMultipleTypes_throwsIAE(int expected) {
 		final int mask = expected | (expected << 1);
-		softly.assertThatThrownBy(() -> aut.isOfType(mask))
+		softly().assertThatThrownBy(() -> aut.isOfType(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageMatching("(?si).*" + mask + ".*isOfTypeMaskedBy.*");
 	}
 
 	@ParameterizedTest
 	@TypeSource
-	public void isNotOfType(int type, SoftAssertions softly) {
-		this.softly = softly;
+	public void isNotOfType(int type) {
 		setActual(type);
 
 		int passingType = type == STARTED ? STOPPED : STARTED;
@@ -123,8 +113,7 @@ class FrameworkEventAssertTest extends AbstractAssertTest<FrameworkEventAssert, 
 	}
 
 	@Test
-	 public void isOfTypeMaskedBy(SoftAssertions softly) {
-	 this.softly = softly;
+	public void isOfTypeMaskedBy() {
 		setActual(STARTED);
 
 		assertPassing(aut::isOfTypeMaskedBy, STARTED | WARNING);
@@ -151,17 +140,16 @@ class FrameworkEventAssertTest extends AbstractAssertTest<FrameworkEventAssert, 
 	@ValueSource(ints = {
 		-23, 0, 1024, 2048
 	})
-	public void isOfTypeMask_throwsIAE_forInvalidMask(int mask, SoftAssertions softly) {
+	public void isOfTypeMask_throwsIAE_forInvalidMask(int mask) {
 		setActual(STARTED);
 
-		softly.assertThatThrownBy(() -> aut.isOfTypeMaskedBy(mask))
+		softly().assertThatThrownBy(() -> aut.isOfTypeMaskedBy(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(Integer.toString(mask));
 	}
 
 	@Test
-	public void isNotOfTypeMaskedBy(SoftAssertions softly) {
-		this.softly = softly;
+	public void isNotOfTypeMaskedBy() {
 		setActual(STARTED);
 
 		assertPassing(aut::isNotOfTypeMaskedBy, INFO | WARNING);
@@ -188,10 +176,10 @@ class FrameworkEventAssertTest extends AbstractAssertTest<FrameworkEventAssert, 
 	@ValueSource(ints = {
 		-23, 0, 1024, 2048
 	})
-	public void isNotOfTypeMaskedBy_throwsIAE_forInvalidMask(int mask, SoftAssertions softly) {
+	public void isNotOfTypeMaskedBy_throwsIAE_forInvalidMask(int mask) {
 		setActual(STOPPED);
 
-		softly.assertThatThrownBy(() -> aut.isNotOfTypeMaskedBy(mask))
+		softly().assertThatThrownBy(() -> aut.isNotOfTypeMaskedBy(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(Integer.toString(mask));
 	}

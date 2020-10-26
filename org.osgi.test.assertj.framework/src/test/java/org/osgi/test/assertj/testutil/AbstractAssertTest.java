@@ -3,14 +3,19 @@ package org.osgi.test.assertj.testutil;
 import org.assertj.core.api.Assert;
 import org.assertj.core.api.AssertFactory;
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
+import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(SoftAssertionsExtension.class)
 public abstract class AbstractAssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL>
 	implements AssertTest<SELF, ACTUAL> {
 
 	protected final AssertFactory<ACTUAL, SELF>	assertThat;
 	protected ACTUAL							actual;
 	protected SELF								aut;
-	protected SoftAssertions					softly;
+	@InjectSoftAssertions
+	SoftAssertions								softly;
 
 	protected AbstractAssertTest(AssertFactory<ACTUAL, SELF> assertThat) {
 		this.assertThat = assertThat;

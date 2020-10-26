@@ -4,10 +4,8 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.junit.jupiter.SoftlyExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,7 +14,6 @@ import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.osgi.test.assertj.testutil.AbstractAssertTest;
 
-@ExtendWith(SoftlyExtension.class)
 public class VersionRangeAssertTest extends AbstractAssertTest<VersionRangeAssert, VersionRange> {
 
 	public VersionRangeAssertTest() {
@@ -50,10 +47,10 @@ public class VersionRangeAssertTest extends AbstractAssertTest<VersionRangeAsser
 	})
 	public void withClosedLeftBound(String range) {
 		setActual(VersionRange.valueOf(range));
-		softly.assertThatCode(() -> aut.hasLeftThat()
+		softly().assertThatCode(() -> aut.hasLeftThat()
 			.isClosed())
 			.doesNotThrowAnyException();
-		softly.assertThatCode(() -> aut.hasLeftThat()
+		softly().assertThatCode(() -> aut.hasLeftThat()
 			.isOpen())
 			.isInstanceOf(AssertionError.class);
 
@@ -68,10 +65,10 @@ public class VersionRangeAssertTest extends AbstractAssertTest<VersionRangeAsser
 	})
 	public void withOpenLeftBound(String range) {
 		setActual(VersionRange.valueOf(range));
-		softly.assertThatCode(() -> aut.hasLeftThat()
+		softly().assertThatCode(() -> aut.hasLeftThat()
 			.isOpen())
 			.doesNotThrowAnyException();
-		softly.assertThatCode(() -> aut.hasLeftThat()
+		softly().assertThatCode(() -> aut.hasLeftThat()
 			.isClosed())
 			.isInstanceOf(AssertionError.class);
 
@@ -102,10 +99,10 @@ public class VersionRangeAssertTest extends AbstractAssertTest<VersionRangeAsser
 	})
 	public void withClosedRightBound(String range) {
 		setActual(VersionRange.valueOf(range));
-		softly.assertThatCode(() -> aut.hasRightThat()
+		softly().assertThatCode(() -> aut.hasRightThat()
 			.isClosed())
 			.doesNotThrowAnyException();
-		softly.assertThatCode(() -> aut.hasRightThat()
+		softly().assertThatCode(() -> aut.hasRightThat()
 			.isOpen())
 			.isInstanceOf(AssertionError.class);
 
@@ -120,10 +117,10 @@ public class VersionRangeAssertTest extends AbstractAssertTest<VersionRangeAsser
 	})
 	public void withOpenRightBound(String range) {
 		setActual(VersionRange.valueOf(range));
-		softly.assertThatCode(() -> aut.hasRightThat()
+		softly().assertThatCode(() -> aut.hasRightThat()
 			.isOpen())
 			.doesNotThrowAnyException();
-		softly.assertThatCode(() -> aut.hasRightThat()
+		softly().assertThatCode(() -> aut.hasRightThat()
 			.isClosed())
 			.isInstanceOf(AssertionError.class);
 

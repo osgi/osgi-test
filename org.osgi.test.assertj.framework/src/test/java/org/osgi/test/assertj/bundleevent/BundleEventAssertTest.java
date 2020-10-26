@@ -20,18 +20,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
 import org.osgi.test.assertj.testutil.AbstractAssertTest;
 
-@ExtendWith(SoftAssertionsExtension.class)
 class BundleEventAssertTest extends AbstractAssertTest<BundleEventAssert, BundleEvent> {
 
 	BundleEventAssertTest() {
@@ -52,35 +48,28 @@ class BundleEventAssertTest extends AbstractAssertTest<BundleEventAssert, Bundle
 	}
 
 	@Test
-	void hasBundle(SoftAssertions softly) {
-		this.softly = softly;
-
+	void hasBundle() {
 		assertEqualityAssertion("bundle", aut::hasBundle, bundle, thirdBundle);
 	}
 
 	@Test
-	void hasBundleThat(SoftAssertions softly) {
-		this.softly = softly;
+	void hasBundleThat() {
 		assertChildAssertion("bundle", aut::hasBundleThat, actual::getBundle);
 	}
 
 	@Test
-	void hasOrigin(SoftAssertions softly) {
-		this.softly = softly;
-
+	void hasOrigin() {
 		assertEqualityAssertion("origin", aut::hasOrigin, origin, thirdBundle);
 	}
 
 	@Test
-	void hasOriginThat(SoftAssertions softly) {
-		this.softly = softly;
+	void hasOriginThat() {
 		assertChildAssertion("bundle", aut::hasOriginThat, actual::getOrigin);
 	}
 
 	@ParameterizedTest
 	@TypeSource
-	public void isOfType(int passingType, SoftAssertions softly) {
-		this.softly = softly;
+	public void isOfType(int passingType) {
 		final int actualType = passingType | (passingType << 2);
 		setActual(new BundleEvent(actualType, bundle, origin));
 
@@ -93,17 +82,16 @@ class BundleEventAssertTest extends AbstractAssertTest<BundleEventAssert, Bundle
 
 	@ParameterizedTest
 	@TypeSource
-	public void isOfType_withMultipleTypes_throwsIAE(int expected, SoftAssertions softly) {
+	public void isOfType_withMultipleTypes_throwsIAE(int expected) {
 		final int mask = expected | (expected << 1);
-		softly.assertThatThrownBy(() -> aut.isOfType(mask))
+		softly().assertThatThrownBy(() -> aut.isOfType(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageMatching("(?si).*" + mask + ".*isOfTypeMaskedBy.*");
 	}
 
 	@ParameterizedTest
 	@TypeSource
-	public void isNotOfType(int type, SoftAssertions softly) {
-		this.softly = softly;
+	public void isNotOfType(int type) {
 		setActual(new BundleEvent(type, bundle, origin));
 
 		int passingType = type == LAZY_ACTIVATION ? RESOLVED : LAZY_ACTIVATION;
@@ -114,8 +102,7 @@ class BundleEventAssertTest extends AbstractAssertTest<BundleEventAssert, Bundle
 	}
 
 	@Test
-	public void isOfTypeMaskedBy(SoftAssertions softly) {
-		this.softly = softly;
+	public void isOfTypeMaskedBy() {
 		setActual(new BundleEvent(LAZY_ACTIVATION, bundle, origin));
 
 		assertPassing(aut::isOfTypeMaskedBy, LAZY_ACTIVATION | INSTALLED);
@@ -145,18 +132,17 @@ class BundleEventAssertTest extends AbstractAssertTest<BundleEventAssert, Bundle
 	@ValueSource(ints = {
 		-23, 0, 1024, 2048
 	})
-	public void isOfTypeMask_throwsIAE_forInvalidMask(int mask, SoftAssertions softly) {
+	public void isOfTypeMask_throwsIAE_forInvalidMask(int mask) {
 		setActual(new BundleEvent(LAZY_ACTIVATION, bundle, origin));
 
-		softly.assertThatThrownBy(() -> aut.isOfTypeMaskedBy(
+		softly().assertThatThrownBy(() -> aut.isOfTypeMaskedBy(
 			mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(Integer.toString(mask));
 	}
 
 	@Test
-	public void isNotOfTypeMaskedBy(SoftAssertions softly) {
-		this.softly = softly;
+	public void isNotOfTypeMaskedBy() {
 		setActual(new BundleEvent(STARTING, bundle, origin));
 
 		assertPassing(aut::isNotOfTypeMaskedBy, LAZY_ACTIVATION | INSTALLED);
@@ -199,10 +185,10 @@ class BundleEventAssertTest extends AbstractAssertTest<BundleEventAssert, Bundle
 	@ValueSource(ints = {
 		-23, 0, 1024, 2048
 	})
-	public void isNotOfTypeMaskedBy_throwsIAE_forInvalidMask(int mask, SoftAssertions softly) {
+	public void isNotOfTypeMaskedBy_throwsIAE_forInvalidMask(int mask) {
 		setActual(new BundleEvent(LAZY_ACTIVATION, bundle, origin));
 
-		softly.assertThatThrownBy(() -> aut.isNotOfTypeMaskedBy(
+		softly().assertThatThrownBy(() -> aut.isNotOfTypeMaskedBy(
 			mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(Integer.toString(mask));

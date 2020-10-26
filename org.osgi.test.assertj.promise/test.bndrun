@@ -43,7 +43,7 @@
     order=sortbynameversion,\
     begin=-1
 -runbundles: \
-	assertj-core;version='[3.17.2,3.17.3)',\
+	assertj-core;version='[3.18.0,3.18.1)',\
 	junit-jupiter-api;version='[5.7.0,5.7.1)',\
 	junit-jupiter-engine;version='[5.7.0,5.7.1)',\
 	junit-platform-commons;version='[1.7.0,1.7.1)',\

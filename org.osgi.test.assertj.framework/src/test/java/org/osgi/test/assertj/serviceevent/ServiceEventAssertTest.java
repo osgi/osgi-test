@@ -30,18 +30,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.test.assertj.testutil.AbstractAssertTest;
 
-@ExtendWith(SoftAssertionsExtension.class)
 class ServiceEventAssertTest extends AbstractAssertTest<ServiceEventAssert, ServiceEvent> {
 
 	ServiceEventAssertTest() {
@@ -59,16 +55,13 @@ class ServiceEventAssertTest extends AbstractAssertTest<ServiceEventAssert, Serv
 	}
 
 	@Test
-	void hasServiceReference(SoftAssertions softly) {
-		this.softly = softly;
-
+	void hasServiceReference() {
 		assertEqualityAssertion("serviceReference", aut::hasServiceReference, reference, otherReference);
 	}
 
 	@ParameterizedTest
 	@TypeSource
-	public void isOfType(int passingType, SoftAssertions softly) {
-		this.softly = softly;
+	public void isOfType(int passingType) {
 		final int actualType = passingType | (passingType << 2);
 		setActual(new ServiceEvent(actualType, reference));
 
@@ -81,17 +74,16 @@ class ServiceEventAssertTest extends AbstractAssertTest<ServiceEventAssert, Serv
 
 	@ParameterizedTest
 	@TypeSource
-	public void isOfType_withMultipleTypes_throwsIAE(int expected, SoftAssertions softly) {
+	public void isOfType_withMultipleTypes_throwsIAE(int expected) {
 		final int mask = expected | (expected << 1);
-		softly.assertThatThrownBy(() -> aut.isOfType(mask))
+		softly().assertThatThrownBy(() -> aut.isOfType(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageMatching("(?si).*" + mask + ".*isOfTypeMaskedBy.*");
 	}
 
 	@ParameterizedTest
 	@TypeSource
-	public void isNotOfType(int type, SoftAssertions softly) {
-		this.softly = softly;
+	public void isNotOfType(int type) {
 		setActual(new ServiceEvent(type, reference));
 
 		int passingType = type == REGISTERED ? UNREGISTERING : REGISTERED;
@@ -102,8 +94,7 @@ class ServiceEventAssertTest extends AbstractAssertTest<ServiceEventAssert, Serv
 	}
 
 	@Test
-	public void isOfTypeMaskedBy(SoftAssertions softly) {
-		this.softly = softly;
+	public void isOfTypeMaskedBy() {
 		setActual(new ServiceEvent(REGISTERED, reference));
 
 		assertPassing(aut::isOfTypeMaskedBy, REGISTERED | UNREGISTERING);
@@ -129,17 +120,16 @@ class ServiceEventAssertTest extends AbstractAssertTest<ServiceEventAssert, Serv
 	@ValueSource(ints = {
 		-23, 0, 1024, 2048
 	})
-	public void isOfTypeMask_throwsIAE_forInvalidMask(int mask, SoftAssertions softly) {
+	public void isOfTypeMask_throwsIAE_forInvalidMask(int mask) {
 		setActual(new ServiceEvent(REGISTERED, reference));
 
-		softly.assertThatThrownBy(() -> aut.isOfTypeMaskedBy(mask))
+		softly().assertThatThrownBy(() -> aut.isOfTypeMaskedBy(mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(Integer.toString(mask));
 	}
 
 	@Test
-	public void isNotOfTypeMaskedBy(SoftAssertions softly) {
-		this.softly = softly;
+	public void isNotOfTypeMaskedBy() {
 		setActual(new ServiceEvent(REGISTERED, reference));
 
 		assertPassing(aut::isNotOfTypeMaskedBy, MODIFIED_ENDMATCH | UNREGISTERING);
@@ -166,10 +156,10 @@ class ServiceEventAssertTest extends AbstractAssertTest<ServiceEventAssert, Serv
 	@ValueSource(ints = {
 		-23, 0, 1024, 2048
 	})
-	public void isNotOfTypeMaskedBy_throwsIAE_forInvalidMask(int mask, SoftAssertions softly) {
+	public void isNotOfTypeMaskedBy_throwsIAE_forInvalidMask(int mask) {
 		setActual(new ServiceEvent(UNREGISTERING, reference));
 
-		softly.assertThatThrownBy(() -> aut.isNotOfTypeMaskedBy(
+		softly().assertThatThrownBy(() -> aut.isNotOfTypeMaskedBy(
 			mask))
 			.isInstanceOf(IllegalArgumentException.class)
 			.hasMessageContaining(Integer.toString(mask));

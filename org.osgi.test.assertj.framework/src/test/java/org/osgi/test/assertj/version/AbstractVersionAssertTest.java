@@ -7,17 +7,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.regex.Pattern;
 
 import org.assertj.core.api.AssertFactory;
-import org.assertj.core.api.junit.jupiter.SoftlyExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 import org.osgi.test.assertj.testutil.AbstractAssertTest;
 
-@ExtendWith(SoftlyExtension.class)
 public abstract class AbstractVersionAssertTest<SELF extends AbstractVersionAssert<SELF, Version>>
 	extends AbstractAssertTest<SELF, Version> {
 	protected AbstractVersionAssertTest(AssertFactory<Version, SELF> assertThat) {
