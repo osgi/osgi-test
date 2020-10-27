@@ -41,7 +41,7 @@ public abstract class AbstractBundleContextAssert<SELF extends AbstractBundleCon
 	public SELF hasProperty(String key) {
 		isNotNull();
 		if (actual.getProperty(key) == null) {
-			failWithMessage("%nExpecting%n <%s>%nto have property:%n <%s>%n but it did not", actual, key);
+			throw failure("%nExpecting%n <%s>%nto have property:%n <%s>%n but it did not", actual, key);
 		}
 		return myself;
 	}
@@ -56,7 +56,7 @@ public abstract class AbstractBundleContextAssert<SELF extends AbstractBundleCon
 		isNotNull();
 		String value = actual.getProperty(key);
 		if (value != null) {
-			failWithMessage("%nExpecting%n  <%s>%nto not have property:%n  <%s>%n but it did:%n  <%s>", actual, key,
+			throw failure("%nExpecting%n  <%s>%nto not have property:%n  <%s>%n but it did:%n  <%s>", actual, key,
 				value);
 		}
 		return myself;
@@ -65,7 +65,7 @@ public abstract class AbstractBundleContextAssert<SELF extends AbstractBundleCon
 	public SELF hasBundleWithId(long id) {
 		isNotNull();
 		if (actual.getBundle(id) == null) {
-			failWithMessage("%nExpecting%n <%s>%nto have bundle with id:%n <%d>%n but it did not", actual, id);
+			throw failure("%nExpecting%n <%s>%nto have bundle with id:%n <%d>%n but it did not", actual, id);
 		}
 		return myself;
 	}
@@ -79,7 +79,7 @@ public abstract class AbstractBundleContextAssert<SELF extends AbstractBundleCon
 		isNotNull();
 		Bundle value = actual.getBundle(id);
 		if (value != null) {
-			failWithMessage("%nExpecting%n  <%s>%nto not have bundle with id:%n  <%d>%n but it did:%n  <%s>", actual,
+			throw failure("%nExpecting%n  <%s>%nto not have bundle with id:%n  <%d>%n but it did:%n  <%s>", actual,
 				id, value);
 		}
 		return myself;
@@ -88,7 +88,7 @@ public abstract class AbstractBundleContextAssert<SELF extends AbstractBundleCon
 	public SELF hasBundleWithLocation(String location) {
 		isNotNull();
 		if (actual.getBundle(location) == null) {
-			failWithMessage("%nExpecting%n <%s>%nto have bundle with location:%n <%s>%n but it did not", actual,
+			throw failure("%nExpecting%n <%s>%nto have bundle with location:%n <%s>%n but it did not", actual,
 				location);
 		}
 		return myself;
@@ -103,7 +103,7 @@ public abstract class AbstractBundleContextAssert<SELF extends AbstractBundleCon
 		isNotNull();
 		Bundle value = actual.getBundle(location);
 		if (value != null) {
-			failWithMessage("%nExpecting%n  <%s>%nto not have bundle with location:%n  <%s>%n but it did:%n  <%s>",
+			throw failure("%nExpecting%n  <%s>%nto not have bundle with location:%n  <%s>%n but it did:%n  <%s>",
 				actual, location, value);
 		}
 		return myself;

@@ -32,7 +32,7 @@ public class AbstractVersionBoundAssert<SELF extends AbstractVersionBoundAssert<
 	public SELF isClosed() {
 		isNotNull();
 		if (isOpen) {
-			failWithMessage("%nExpecting version bound%n <%s>%nto be closed, but it was open", actual);
+			throw failure("%nExpecting version bound%n <%s>%nto be closed, but it was open", actual);
 		}
 		return myself;
 	}
@@ -40,7 +40,7 @@ public class AbstractVersionBoundAssert<SELF extends AbstractVersionBoundAssert<
 	public SELF isOpen() {
 		isNotNull();
 		if (!isOpen) {
-			failWithMessage("%nExpecting version bound%n <%s>%nto be open, but it was closed", actual);
+			throw failure("%nExpecting version bound%n <%s>%nto be open, but it was closed", actual);
 		}
 		return myself;
 	}

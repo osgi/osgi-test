@@ -33,7 +33,7 @@ public abstract class AbstractServiceEventAssert<SELF extends AbstractServiceEve
 	public SELF hasServiceReference(ServiceReference<?> expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getServiceReference(), expected)) {
-			failWithActualExpectedAndMessage(actual.getServiceReference(),
+			throw failureWithActualExpected(actual.getServiceReference(),
 				expected,
 				"%nExpecting%n <%s>%nto have service reference:%n <%s>%n but was:%n<%s>", actual, expected,
 				actual.getServiceReference());
