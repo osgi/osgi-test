@@ -34,7 +34,7 @@ public abstract class AbstractFrameworkEventAssert<SELF extends AbstractFramewor
 	public SELF hasBundle(Bundle expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getBundle(), expected)) {
-			failWithActualExpectedAndMessage(actual
+			throw failureWithActualExpected(actual
 				.getBundle(),
 				expected,
 				"%nExpecting%n <%s>%nto have bundle source:%n <%s>%n but was:%n<%s>", actual, expected,
@@ -46,7 +46,7 @@ public abstract class AbstractFrameworkEventAssert<SELF extends AbstractFramewor
 	public SELF hasThrowable(Throwable expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getThrowable(), expected)) {
-			failWithActualExpectedAndMessage(actual.getThrowable(), expected,
+			throw failureWithActualExpected(actual.getThrowable(), expected,
 				"%nExpecting%n <%s>%nto have throwable:%n <%s>%n but was:%n<%s>", actual, expected,
 				actual.getThrowable());
 		}

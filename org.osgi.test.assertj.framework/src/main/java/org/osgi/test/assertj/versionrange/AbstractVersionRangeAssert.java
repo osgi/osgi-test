@@ -50,7 +50,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 		isNotNull();
 		Version a = actual.getLeft();
 		if (!Objects.equals(expected, a)) {
-			failWithActualExpectedAndMessage(a, expected,
+			throw failureWithActualExpected(a, expected,
 				"%nExpecting version range%n <%s>%nto have lower bound:%n <%s>%n but it was:%n <%s>", actual, expected,
 				a);
 		}
@@ -60,7 +60,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF isLeftOpen() {
 		isNotNull();
 		if (actual.getLeftType() != LEFT_OPEN) {
-			failWithMessage("%nExpecting version range%n <%s>%nto have open lower bound%n but it was closed", actual);
+			throw failure("%nExpecting version range%n <%s>%nto have open lower bound%n but it was closed", actual);
 		}
 		return myself;
 	}
@@ -68,7 +68,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF isLeftClosed() {
 		isNotNull();
 		if (actual.getLeftType() != LEFT_CLOSED) {
-			failWithMessage("%nExpecting version range%n <%s>%nto have closed lower bound%n but it was open", actual);
+			throw failure("%nExpecting version range%n <%s>%nto have closed lower bound%n but it was open", actual);
 		}
 		return myself;
 	}
@@ -86,7 +86,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 		isNotNull();
 		Version a = actual.getRight();
 		if (!Objects.equals(expected, a)) {
-			failWithActualExpectedAndMessage(a, expected,
+			throw failureWithActualExpected(a, expected,
 				"%nExpecting version range%n <%s>%nto have upper bound:%n <%s>%n but it was:%n <%s>", actual, expected,
 				a);
 		}
@@ -96,7 +96,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF isRightOpen() {
 		isNotNull();
 		if (actual.getRightType() != RIGHT_OPEN) {
-			failWithMessage("%nExpecting version range%n <%s>%nto have open upper bound%nbut it was closed", actual);
+			throw failure("%nExpecting version range%n <%s>%nto have open upper bound%nbut it was closed", actual);
 		}
 		return myself;
 	}
@@ -104,7 +104,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF isRightClosed() {
 		isNotNull();
 		if (actual.getRightType() != RIGHT_CLOSED) {
-			failWithMessage("%nExpecting version range%n <%s>%nto have closed upper bound%nbut it was open", actual);
+			throw failure("%nExpecting version range%n <%s>%nto have closed upper bound%nbut it was open", actual);
 		}
 		return myself;
 	}
@@ -116,7 +116,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF includes(Version version) {
 		isNotNull();
 		if (!actual.includes(version)) {
-			failWithMessage("%nExpecting version range%n <%s>%nto include version%n <%s>%nbut it does not", actual,
+			throw failure("%nExpecting version range%n <%s>%nto include version%n <%s>%nbut it does not", actual,
 				version);
 		}
 		return myself;
@@ -129,7 +129,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF doesNotInclude(Version version) {
 		isNotNull();
 		if (actual.includes(version)) {
-			failWithMessage("%nExpecting version range%n <%s>%nto not include version%n <%s>%nbut it does", actual,
+			throw failure("%nExpecting version range%n <%s>%nto not include version%n <%s>%nbut it does", actual,
 				version);
 		}
 		return myself;
@@ -138,7 +138,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF isEmpty() {
 		isNotNull();
 		if (!actual.isEmpty()) {
-			failWithMessage("%nExpecting version range%n <%s>%nto be empty%nbut it was not", actual);
+			throw failure("%nExpecting version range%n <%s>%nto be empty%nbut it was not", actual);
 		}
 		return myself;
 	}
@@ -146,7 +146,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF isNotEmpty() {
 		isNotNull();
 		if (actual.isEmpty()) {
-			failWithMessage("%nExpecting version range%n <%s>%nto be empty%nbut it was not", actual);
+			throw failure("%nExpecting version range%n <%s>%nto be empty%nbut it was not", actual);
 		}
 		return myself;
 	}
@@ -154,7 +154,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF isExact() {
 		isNotNull();
 		if (!actual.isExact()) {
-			failWithMessage("%nExpecting version range%n <%s>%nto be exact%nbut it was not", actual);
+			throw failure("%nExpecting version range%n <%s>%nto be exact%nbut it was not", actual);
 		}
 		return myself;
 	}
@@ -162,7 +162,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 	public SELF isNotExact() {
 		isNotNull();
 		if (actual.isExact()) {
-			failWithMessage("%nExpecting version range%n <%s>%nto be exact%nbut it was not", actual);
+			throw failure("%nExpecting version range%n <%s>%nto be exact%nbut it was not", actual);
 		}
 		return myself;
 	}
@@ -177,7 +177,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 		isNotNull();
 		if (actual.intersection(versions)
 			.isEmpty()) {
-			failWithMessage("%nExpecting version range%n <%s>%nto intersect all of%n <%s>%nbut it does not", actual,
+			throw failure("%nExpecting version range%n <%s>%nto intersect all of%n <%s>%nbut it does not", actual,
 				Arrays.toString(versions));
 		}
 		return myself;
@@ -194,7 +194,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 		VersionRange intersection = actual.intersection(versions);
 		if (!intersection
 			.isEmpty()) {
-			failWithMessage(
+			throw failure(
 				"%nExpecting version range%n <%s>%nto not intersect any of%n <%s>%nbut it has intersection%n <%s>",
 				actual, Arrays.toString(versions), intersection);
 		}

@@ -48,7 +48,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		isNotNull();
 		if ((actual.adapt(BundleRevision.class)
 			.getTypes() & BundleRevision.TYPE_FRAGMENT) == 0) {
-			failWithMessage("%nExpecting%n  <%s>%nto be a fragment, but it was not", actual);
+			throw failure("%nExpecting%n  <%s>%nto be a fragment, but it was not", actual);
 		}
 		return myself;
 	}
@@ -59,7 +59,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 			.getTypes() & BundleRevision.TYPE_FRAGMENT) != 0) {
 			String host = actual.getHeaders()
 				.get("Fragment-Host");
-			failWithMessage("%nExpecting%n  <%s>%nto not be a fragment, but it was, with host:%n  <%s>", actual, host);
+			throw failure("%nExpecting%n  <%s>%nto not be a fragment, but it was, with host:%n  <%s>", actual, host);
 		}
 		return myself;
 	}
@@ -67,7 +67,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasPermission(Object permission) {
 		isNotNull();
 		if (!actual.hasPermission(permission)) {
-			failWithMessage("%nExpecting%n  <%s>%nto have permission%n  <%s>%nbut it did not", actual, permission);
+			throw failure("%nExpecting%n  <%s>%nto have permission%n  <%s>%nbut it did not", actual, permission);
 		}
 		return myself;
 	}
@@ -75,7 +75,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF doesNotHavePermission(Object permission) {
 		isNotNull();
 		if (actual.hasPermission(permission)) {
-			failWithMessage("%nExpecting%n  <%s>%nnot to have permission%n  <%s>%nbut it did", actual, permission);
+			throw failure("%nExpecting%n  <%s>%nnot to have permission%n  <%s>%nbut it did", actual, permission);
 		}
 		return myself;
 	}
@@ -83,7 +83,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasSymbolicName(String expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getSymbolicName(), expected)) {
-			failWithActualExpectedAndMessage(actual.getSymbolicName(), expected,
+			throw failureWithActualExpected(actual.getSymbolicName(), expected,
 				"%nExpecting%n  <%s>%nto have symbolic name:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getSymbolicName());
 		}
@@ -98,7 +98,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasLocation(String expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getLocation(), expected)) {
-			failWithActualExpectedAndMessage(actual.getLocation(), expected,
+			throw failureWithActualExpected(actual.getLocation(), expected,
 				"%nExpecting%n  <%s>%nto have location:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getLocation());
 		}
@@ -113,7 +113,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasEntry(String entry) {
 		isNotNull();
 		if (actual.getEntry(entry) == null) {
-			failWithMessage("%nExpecting%n <%s>%nto have entry:%n <%s>%n but it did not", actual, entry);
+			throw failure("%nExpecting%n <%s>%nto have entry:%n <%s>%n but it did not", actual, entry);
 		}
 		return myself;
 	}
@@ -122,7 +122,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		isNotNull();
 		URL url = actual.getEntry(resource);
 		if (url != null) {
-			failWithMessage("%nExpecting%n  <%s>%nto not have entry:%n  <%s>%n but it did:%n  <%s>", actual, resource,
+			throw failure("%nExpecting%n  <%s>%nto not have entry:%n  <%s>%n but it did:%n  <%s>", actual, resource,
 				url);
 		}
 		return myself;
@@ -131,7 +131,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasResource(String resource) {
 		isNotNull();
 		if (actual.getResource(resource) == null) {
-			failWithMessage("%nExpecting%n  <%s>%nto have resource:%n  <%s>%n but it did not", actual, resource);
+			throw failure("%nExpecting%n  <%s>%nto have resource:%n  <%s>%n but it did not", actual, resource);
 		}
 		return myself;
 	}
@@ -140,7 +140,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		isNotNull();
 		URL url = actual.getResource(resource);
 		if (url != null) {
-			failWithMessage("%nExpecting%n  <%s>%nto not have resource:%n  <%s>%n but it did:%n  <%s>", actual,
+			throw failure("%nExpecting%n  <%s>%nto not have resource:%n  <%s>%n but it did:%n  <%s>", actual,
 				resource, url);
 		}
 		return myself;
@@ -149,7 +149,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	public SELF hasBundleId(long expected) {
 		isNotNull();
 		if (actual.getBundleId() != expected) {
-			failWithActualExpectedAndMessage(actual.getBundleId(), expected,
+			throw failureWithActualExpected(actual.getBundleId(), expected,
 				"%nExpecting%n  <%s>%nto have bundle ID:%n  <%d>%n but was:%n  <%d>", actual, expected,
 				actual.getBundleId());
 		}
@@ -179,7 +179,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		isNotNull();
 		Version expectedVersion = getVersion(expected);
 		if (!Objects.equals(actual.getVersion(), expectedVersion)) {
-			failWithActualExpectedAndMessage(actual.getVersion(), expected,
+			throw failureWithActualExpected(actual.getVersion(), expected,
 				"%nExpecting%n  <%s>%nto have version:%n  <%s>%n but was:%n  <%s>", actual, expected,
 				actual.getVersion());
 		}
@@ -190,7 +190,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		isNotNull();
 		long expectedTime = getTime(expected);
 		if (actual.getLastModified() != expectedTime) {
-			failWithMessage("%nExpecting%n <%s>%nto have last modified time:%n  <%d>%n but it was:%n  <%d>", actual,
+			throw failure("%nExpecting%n <%s>%nto have last modified time:%n  <%d>%n but it was:%n  <%d>", actual,
 				expectedTime, actual.getLastModified());
 		}
 		return myself;
@@ -231,7 +231,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		}
 		final String expectedString = BITMAP.toString(expected);
 		if ((actual.getState() & expected) == 0) {
-			failWithMessage("%nExpecting%n  <%s>%nto be in state:%n  <%d:%s>%n but was in state:%n  <%s>", actual,
+			throw failure("%nExpecting%n  <%s>%nto be in state:%n  <%d:%s>%n but was in state:%n  <%s>", actual,
 				expected, expectedString, BITMAP.maskToString(actual.getState()));
 		}
 		return myself;
@@ -241,7 +241,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		isNotNull();
 		final String expectedState = BITMAP.toString(expected);
 		if ((actual.getState() & expected) != 0) {
-			failWithMessage("%nExpecting%n  <%s>%nnot to be in state:%n  <%d:%s>%n but it was", actual, expected,
+			throw failure("%nExpecting%n  <%s>%nnot to be in state:%n  <%d:%s>%n but it was", actual, expected,
 				expectedState);
 		}
 		return myself;
@@ -254,7 +254,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		}
 		if ((actual.getState() & mask) == 0) {
 			final String states = BITMAP.maskToString(mask);
-			failWithMessage("%nExpecting%n  <%s>%nto be in one of states:%n  [%s]%n but was in state:%n  <%s>", actual,
+			throw failure("%nExpecting%n  <%s>%nto be in one of states:%n  [%s]%n but was in state:%n  <%s>", actual,
 				states, BITMAP.maskToString(actual.getState()));
 		}
 		return myself;
@@ -267,7 +267,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		}
 		if ((actual.getState() & mask) != 0) {
 			final String states = BITMAP.maskToString(mask);
-			failWithMessage("%nExpecting%n  <%s>%nto not be in one of states:%n  [%s]%n but was in state:%n  <%s>",
+			throw failure("%nExpecting%n  <%s>%nto not be in one of states:%n  [%s]%n but was in state:%n  <%s>",
 				actual, states, BITMAP.maskToString(actual.getState()));
 		}
 		return myself;

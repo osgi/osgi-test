@@ -43,7 +43,7 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		isNotNull();
 		int a = actual.getMajor();
 		if (expected != a) {
-			failWithActualExpectedAndMessage(a, expected,
+			throw failureWithActualExpected(a, expected,
 				"%nExpecting%n <%s>%nto have major version:%n  <%d>%n but it was:%n  <%d>", actual, expected, a);
 		}
 		return myself;
@@ -57,7 +57,7 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		isNotNull();
 		int a = actual.getMinor();
 		if (expected != a) {
-			failWithActualExpectedAndMessage(a, expected,
+			throw failureWithActualExpected(a, expected,
 				"%nExpecting%n <%s>%nto have minor version:%n  <%d>%n but it was:%n  <%d>", actual, expected, a);
 		}
 		return myself;
@@ -71,7 +71,7 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		isNotNull();
 		int a = actual.getMicro();
 		if (expected != a) {
-			failWithActualExpectedAndMessage(a, expected,
+			throw failureWithActualExpected(a, expected,
 				"%nExpecting%n <%s>%nto have micro version:%n <%d>%n but it was:%n <%d>", actual, expected, a);
 		}
 		return myself;
@@ -85,7 +85,7 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		isNotNull();
 		String a = actual.getQualifier();
 		if (!Objects.equals(a, expected)) {
-			failWithActualExpectedAndMessage(a, expected,
+			throw failureWithActualExpected(a, expected,
 				"%nExpecting%n <%s>%nto have qualifier:%n <%s>%n but it was:%n <%s>", actual, expected, a);
 		}
 		return myself;
@@ -102,7 +102,7 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 	public SELF isInRange(VersionRange range) {
 		isNotNull();
 		if (!range.includes(actual)) {
-			failWithMessage("%nExpecting%n <%s>%nto be in range:%n <%s>%n but it was not", actual, range);
+			throw failure("%nExpecting%n <%s>%nto be in range:%n <%s>%n but it was not", actual, range);
 		}
 		return myself;
 	}
@@ -114,7 +114,7 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 	public SELF isNotInRange(VersionRange range) {
 		isNotNull();
 		if (range.includes(actual)) {
-			failWithMessage("%nExpecting%n <%s>%nto not be in range:%n <%s>%n but it was", actual, range);
+			throw failure("%nExpecting%n <%s>%nto not be in range:%n <%s>%n but it was", actual, range);
 		}
 		return myself;
 	}

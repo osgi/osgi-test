@@ -47,7 +47,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 
 	void assertDone() {
 		if (!actual.isDone()) {
-			failWithMessage("%nExpecting%n  <%s>%nto be done.", actual);
+			throw failure("%nExpecting%n  <%s>%nto be done.", actual);
 		}
 	}
 
@@ -65,7 +65,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 
 	void assertNotDone() {
 		if (actual.isDone()) {
-			failWithMessage("%nExpecting%n  <%s>%nto not be done.", actual);
+			throw failure("%nExpecting%n  <%s>%nto not be done.", actual);
 		}
 	}
 
@@ -98,7 +98,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 			actual.onResolve(latch::countDown);
 			try {
 				if (!latch.await(timeout, unit)) {
-					failWithMessage("%nExpecting%n  <%s>%nto have resolved.", actual);
+					throw failure("%nExpecting%n  <%s>%nto have resolved.", actual);
 				}
 			} catch (InterruptedException e) {
 				Thread.currentThread()
@@ -139,7 +139,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		actual.onResolve(latch::countDown);
 		try {
 			if (latch.await(timeout, unit)) {
-				failWithMessage("%nExpecting%n  <%s>%nto not have resolved.", actual);
+				throw failure("%nExpecting%n  <%s>%nto not have resolved.", actual);
 			}
 		} catch (InterruptedException e) {
 			Thread.currentThread()
@@ -177,7 +177,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	void assertFailed() {
 		Throwable fail = getFailure(actual);
 		if (fail == null) {
-			failWithMessage("%nExpecting%n  <%s>%nto have failed.", actual);
+			throw failure("%nExpecting%n  <%s>%nto have failed.", actual);
 		}
 	}
 
@@ -210,7 +210,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		if (actual.isDone()) {
 			Throwable fail = getFailure(actual);
 			if (fail != null) {
-				failWithMessage("%nExpecting%n  <%s>%nto have not failed but failed with:%n%s", actual,
+				throw failure("%nExpecting%n  <%s>%nto have not failed but failed with:%n%s", actual,
 					Exceptions.toString(fail));
 			}
 		}
@@ -244,14 +244,12 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 		try {
 			return promise.getValue();
 		} catch (InvocationTargetException e) {
-			failWithMessage("%nExpecting%n  <%s>%nto have not failed but failed with %s", promise,
+			throw failure("%nExpecting%n  <%s>%nto have not failed but failed with %s", promise,
 				Exceptions.toString(e.getCause()));
-			return null;
 		} catch (InterruptedException e) {
 			Thread.currentThread()
 				.interrupt();
-			fail("unexpected exception", e);
-			return null;
+			throw new AssertionError("unexpected exception", e);
 		}
 	}
 

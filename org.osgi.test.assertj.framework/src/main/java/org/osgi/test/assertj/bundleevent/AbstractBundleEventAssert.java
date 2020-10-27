@@ -37,7 +37,7 @@ public abstract class AbstractBundleEventAssert<SELF extends AbstractBundleEvent
 	public SELF hasBundle(Bundle expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getBundle(), expected)) {
-			failWithActualExpectedAndMessage(actual.getBundle(), expected,
+			throw this.failureWithActualExpected(actual.getBundle(), expected,
 				"%nExpecting%n <%s>%nto have bundle source:%n <%s>%n but was:%n<%s>", actual, expected,
 				actual.getBundle());
 		}
@@ -52,7 +52,7 @@ public abstract class AbstractBundleEventAssert<SELF extends AbstractBundleEvent
 	public SELF hasOrigin(Bundle expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getOrigin(), expected)) {
-			failWithActualExpectedAndMessage(actual.getOrigin(), expected,
+			throw failureWithActualExpected(actual.getOrigin(), expected,
 				"%nExpecting%n <%s>%nto have originating bundle:%n <%s>%n but was:%n<%s>", actual, expected,
 				actual.getOrigin());
 		}

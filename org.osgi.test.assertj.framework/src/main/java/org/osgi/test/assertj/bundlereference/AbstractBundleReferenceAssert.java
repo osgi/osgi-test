@@ -35,7 +35,7 @@ public abstract class AbstractBundleReferenceAssert<SELF extends AbstractBundleR
 	public SELF refersToBundle(Bundle expected) {
 		isNotNull();
 		if (!Objects.equals(actual.getBundle(), expected)) {
-			failWithActualExpectedAndMessage(actual.getBundle(), expected,
+			throw failureWithActualExpected(actual.getBundle(), expected,
 				"%nExpecting%n <%s>%nto have bundle source:%n <%s>%n but was:%n<%s>", actual, expected,
 				actual.getBundle());
 		}
