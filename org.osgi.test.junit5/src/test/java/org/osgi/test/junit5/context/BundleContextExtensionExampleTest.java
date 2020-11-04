@@ -89,7 +89,8 @@ public class BundleContextExtensionExampleTest {
 
 		@BeforeEach
 		void beforeEach(@InjectBundleContext BundleContext bc) {
-			assertThat(classLevelContext).isNotEqualTo(bc);
+			assertThat(classLevelContext).isNotSameAs(bc)
+				.isEqualTo(bc);
 		}
 
 		@InjectBundleContext

@@ -16,14 +16,18 @@
 
 package org.osgi.test.common.context;
 
+import static java.util.stream.Collectors.toMap;
 import static org.osgi.test.common.exceptions.ConsumerWithException.asConsumer;
 import static org.osgi.test.common.exceptions.ConsumerWithException.asConsumerIgnoreException;
 
 import java.io.InputStream;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -31,7 +35,9 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.osgi.framework.Bundle;
@@ -48,30 +54,80 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.exceptions.Exceptions;
 
 public class CloseableBundleContext implements AutoCloseable, InvocationHandler {
-	private static final Consumer<ServiceRegistration<?>>	unregisterService	= asConsumerIgnoreException(
+	private static final Consumer<ServiceRegistration<?>>					unregisterService	= asConsumerIgnoreException(
 		ServiceRegistration::unregister);
-	private static final Consumer<AutoCloseable>			autoclose			= asConsumer(AutoCloseable::close);
-	private static final Predicate<Bundle>					installed			= bundle -> (bundle.getState()
-		& Bundle.UNINSTALLED) != Bundle.UNINSTALLED;
-	private static final Consumer<Bundle>					uninstallBundle		= asConsumer(Bundle::uninstall);
-	static final ClassLoader								PROXY_CLASS_LOADER	= CloseableBundleContext.class
+	private static final Consumer<AutoCloseable>							autoclose			= asConsumer(
+		AutoCloseable::close);
+	private static final Predicate<Bundle>									installed			= bundle -> (bundle
+		.getState() & Bundle.UNINSTALLED) != Bundle.UNINSTALLED;
+	private static final Consumer<Bundle>									uninstallBundle		= asConsumer(
+		Bundle::uninstall);
+	static final ClassLoader												PROXY_CLASS_LOADER	= CloseableBundleContext.class
 		.getClassLoader();
 
-	private final BundleContext								bundleContext;
-	private final Set<ServiceRegistration<?>>				regs				= Collections
+	private final BundleContext												bundleContext;
+	private final Set<ServiceRegistration<?>>								regs				= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<FrameworkListener>					fwListeners			= Collections
+	private final Set<FrameworkListener>									fwListeners			= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<ServiceListener>						sListeners			= Collections
+	private final Set<ServiceListener>										sListeners			= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<BundleListener>						bListeners			= Collections
+	private final Set<BundleListener>										bListeners			= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<Bundle>								bundles				= Collections
+	private final Set<Bundle>												bundles				= Collections
 		.synchronizedSet(new HashSet<>());
-	private final Map<ServiceReference<?>, Integer>			services			= Collections
+	private final Map<ServiceReference<?>, Integer>							services			= Collections
 		.synchronizedMap(new HashMap<>());
-	private final Set<ServiceObjects<?>>					serviceobjects		= Collections
+	private final Set<ServiceObjects<?>>									serviceobjects		= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
+
+	private static final Map<Method, BiFunction<Object, Object[], Object>>	methods;
+	static {
+		methods = Arrays.stream(BundleContext.class.getMethods())
+			.collect(toMap(Function.identity(), method -> {
+				try {
+					return invoker(CloseableBundleContext.class.getMethod(method.getName(), method.getParameterTypes()),
+						CloseableBundleContext::closeableBundleContext);
+				} catch (NoSuchMethodException e) {
+					return invoker(method, CloseableBundleContext::realBundleContext);
+				}
+			}));
+		try {
+			methods.put(AutoCloseable.class.getMethod("close"), CloseableBundleContext::delegatedClose);
+			methods.put(Object.class.getMethod("toString"), CloseableBundleContext::delegatedToString);
+			methods.put(Object.class.getMethod("hashCode"), CloseableBundleContext::delegatedHashCode);
+			methods.put(Object.class.getMethod("equals", Object.class), CloseableBundleContext::delegatedEquals);
+		} catch (NoSuchMethodException e) {
+			throw Exceptions.duck(e);
+		}
+	}
+
+	static BiFunction<Object, Object[], Object> invoker(Method method, Function<? super Object, Object> mapper) {
+		try {
+			MethodHandle mh = MethodHandles.publicLookup()
+				.unreflect(method);
+			if (Modifier.isStatic(method.getModifiers())) {
+				return (Object proxy, Object[] args) -> {
+					try {
+						return mh.invokeWithArguments(args);
+					} catch (Throwable e) {
+						throw Exceptions.duck(e);
+					}
+				};
+			} else {
+				return (Object proxy, Object[] args) -> {
+					try {
+						return mh.bindTo(mapper.apply(proxy))
+							.invokeWithArguments(args);
+					} catch (Throwable e) {
+						throw Exceptions.duck(e);
+					}
+				};
+			}
+		} catch (Exception e) {
+			throw Exceptions.duck(e);
+		}
+	}
 
 	public static BundleContext proxy(BundleContext bundleContext) {
 		return (BundleContext) Proxy.newProxyInstance(PROXY_CLASS_LOADER, new Class<?>[] {
@@ -85,40 +141,41 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		if (method.getDeclaringClass()
-			.equals(AutoCloseable.class)) {
-			close();
-			return null;
+		BiFunction<Object, Object[], Object> invoker = methods.get(method);
+		if (invoker == null) {
+			throw new IllegalArgumentException();
 		}
-		if (method.getDeclaringClass()
-			.equals(BundleContext.class)) {
-
-			try {
-				Method ourMethod = getClass().getMethod(method.getName(), method.getParameterTypes());
-
-				return ourMethod.invoke(this, args);
-			} catch (NoSuchMethodException t) {
-				return method.invoke(bundleContext, args);
-			}
-		}
-		if (method.getDeclaringClass()
-			.equals(Object.class)) {
-			switch (method.getName()) {
-				case "toString" :
-					return delegatedToString(proxy);
-				case "hashCode" :
-					return bundleContext.hashCode();
-				case "equals" :
-					return bundleContext.equals(args[0]);
-			}
-		}
-
-		throw new IllegalArgumentException();
+		return invoker.apply(proxy, args);
 	}
 
-	public static void close(BundleContext bundleContext) {
-		CloseableBundleContext cbc = (CloseableBundleContext) Proxy.getInvocationHandler(bundleContext);
-		cbc.close();
+	private static CloseableBundleContext closeableBundleContext(Object proxy) {
+		InvocationHandler invocationHandler;
+		try {
+			invocationHandler = Proxy.getInvocationHandler(proxy);
+		} catch (IllegalArgumentException e) {
+			return null;
+		}
+		if (invocationHandler instanceof CloseableBundleContext) {
+			return (CloseableBundleContext) invocationHandler;
+		}
+		return null;
+	}
+
+	private static BundleContext realBundleContext(Object proxy) {
+		CloseableBundleContext closeableBundleContext = closeableBundleContext(proxy);
+		if (closeableBundleContext == null) {
+			return null;
+		}
+		BundleContext real = closeableBundleContext.bundleContext;
+		while ((closeableBundleContext = closeableBundleContext(real)) != null) {
+			real = closeableBundleContext.bundleContext;
+		}
+		return real;
+	}
+
+	private static Void delegatedClose(Object proxy, Object[] args) {
+		closeableBundleContext(proxy).close();
+		return null;
 	}
 
 	@Override
@@ -153,8 +210,21 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		fwListeners.clear();
 	}
 
-	public String delegatedToString(Object proxy) {
-		return "CloseableBundleContext[" + System.identityHashCode(proxy) + "]:" + bundleContext.toString();
+	private static String delegatedToString(Object proxy, Object[] args) {
+		return "CloseableBundleContext[" + System.identityHashCode(proxy) + "]:" + realBundleContext(proxy).toString();
+	}
+
+	private static int delegatedHashCode(Object proxy, Object[] args) {
+		return realBundleContext(proxy).hashCode();
+	}
+
+	private static boolean delegatedEquals(Object proxy, Object[] args) {
+		BundleContext bundleContext = realBundleContext(proxy);
+		BundleContext real = realBundleContext(args[0]);
+		if (real != null) {
+			return bundleContext.equals(real);
+		}
+		return bundleContext.equals(args[0]);
 	}
 
 	public Bundle installBundle(String location, InputStream input) throws BundleException {
@@ -212,7 +282,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 	public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
 		final ServiceObjects<S> so = bundleContext.getServiceObjects(reference);
-		ServiceObjects<S> serviceObjects = ClosableServiceObjects.proxy(so);
+		ServiceObjects<S> serviceObjects = CloseableServiceObjects.proxy(so);
 		serviceobjects.add(serviceObjects);
 		return serviceObjects;
 	}
@@ -254,91 +324,5 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 			return true;
 		}
 		return false;
-	}
-
-	private static class ClosableServiceObjects<S> implements AutoCloseable, InvocationHandler {
-		private final ServiceObjects<S>	so;
-		private final Map<S, Integer>	instances	= Collections.synchronizedMap(new IdentityHashMap<>());
-
-		@SuppressWarnings("unchecked")
-		public static <S> ServiceObjects<S> proxy(ServiceObjects<S> so) {
-			return (ServiceObjects<S>) Proxy.newProxyInstance(PROXY_CLASS_LOADER, new Class<?>[] {
-				ServiceObjects.class, AutoCloseable.class
-			}, new ClosableServiceObjects<>(so));
-		}
-
-		public ClosableServiceObjects(ServiceObjects<S> so) {
-			this.so = so;
-		}
-
-		@Override
-		public void close() {
-			instances.forEach((service, useCount) -> {
-				for (int i = useCount; i > 0; i--) {
-					so.ungetService(service);
-				}
-			});
-			instances.clear();
-		}
-
-		@Override
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-			if (method.getDeclaringClass()
-				.equals(AutoCloseable.class)) {
-				close();
-				return null;
-			}
-			if (method.getDeclaringClass()
-				.equals(ServiceObjects.class)) {
-
-				try {
-					try {
-						Method ourMethod = getClass().getMethod(method.getName(), method.getParameterTypes());
-
-						return ourMethod.invoke(this, args);
-					} catch (NoSuchMethodException t) {
-						return method.invoke(so, args);
-					}
-				} catch (InvocationTargetException e) {
-					throw Exceptions.duck(e.getCause());
-				}
-			}
-			if (method.getDeclaringClass()
-				.equals(Object.class)) {
-				switch (method.getName()) {
-					case "toString" :
-						return delegatedToString(proxy);
-					case "hashCode" :
-						return so.hashCode();
-					case "equals" :
-						return so.equals(args[0]);
-				}
-			}
-
-			throw new IllegalArgumentException();
-		}
-
-		public String delegatedToString(Object proxy) {
-			return "CloseableServiceObjects[" + System.identityHashCode(proxy) + "]:" + so.toString();
-		}
-
-		@SuppressWarnings("unused")
-		public S getService() {
-			S service = so.getService();
-			instances.merge(service, 1, (oldValue, dummy) -> oldValue + 1);
-			return service;
-		}
-
-		@SuppressWarnings("unused")
-		public void ungetService(S service) {
-			instances.compute(service, (key, oldValue) -> {
-				if (oldValue == null) {
-					throw new AssertionError("Attempt to ungetService " + service
-						+ " but there are no outstanding references to this object");
-				}
-				return oldValue == 1 ? null : oldValue - 1;
-			});
-			so.ungetService(service);
-		}
 	}
 }

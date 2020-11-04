@@ -37,8 +37,7 @@ public class CloseableBundleContextTest extends SoftAssertions {
 	void toString_showsDelegateInfo(String value) {
 		when(upstream.toString()).thenReturn(value);
 
-		assertThat(sut.toString()).contains(String.valueOf(System.identityHashCode(sut)))
-			.contains(value)
+		assertThat(sut.toString()).contains(value)
 			.startsWith(CloseableBundleContext.class.getSimpleName());
 	}
 
@@ -139,9 +138,8 @@ public class CloseableBundleContextTest extends SoftAssertions {
 		void toString_showsDelegateInfo(String value) {
 			when(upstreamSO.toString()).thenReturn(value);
 
-			assertThat(sutSO.toString()).contains(String.valueOf(System.identityHashCode(sutSO)))
-				.contains(value)
-				.startsWith("CloseableServiceObjects");
+			assertThat(sutSO.toString()).contains(value)
+				.startsWith(CloseableServiceObjects.class.getSimpleName());
 		}
 
 		@Test

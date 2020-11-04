@@ -232,10 +232,9 @@ public class BundleContextRuleTest {
 			.getBundleContext();
 		BundleContext closeableBC = CloseableBundleContext.proxy(upstream);
 
-		closeableBC.toString();
-		assertThat(closeableBC).as("toString")
-			.hasToString("CloseableBundleContext[" + System.identityHashCode(closeableBC) + "]:" + upstream.toString())
-			.isEqualTo(upstream);
+		assertThat(closeableBC.toString()).as("toString")
+			.startsWith(CloseableBundleContext.class.getSimpleName())
+			.contains(upstream.toString());
 		assertThat(closeableBC.hashCode()).as("hashcode")
 			.isEqualTo(upstream.hashCode());
 	}
