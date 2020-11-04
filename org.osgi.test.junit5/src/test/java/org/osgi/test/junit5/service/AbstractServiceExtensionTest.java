@@ -88,8 +88,8 @@ abstract class AbstractServiceExtensionTest {
 	}
 
 	@AfterEach
-	public void afterEach() {
-		CloseableBundleContext.close(bundleContext);
+	public void afterEach() throws Exception {
+		((AutoCloseable) bundleContext).close();
 		assertThat(FrameworkUtil.getBundle(getClass())
 			.getRegisteredServices()).as("registered services")
 				.isNull();
