@@ -39,7 +39,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkListener;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceFactory;
 import org.osgi.framework.ServiceListener;
@@ -55,9 +54,10 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 	private static final Predicate<Bundle>					installed			= bundle -> (bundle.getState()
 		& Bundle.UNINSTALLED) != Bundle.UNINSTALLED;
 	private static final Consumer<Bundle>					uninstallBundle		= asConsumer(Bundle::uninstall);
+	static final ClassLoader								PROXY_CLASS_LOADER	= CloseableBundleContext.class
+		.getClassLoader();
 
 	private final BundleContext								bundleContext;
-	private final Class<?>									host;
 	private final Set<ServiceRegistration<?>>				regs				= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
 	private final Set<FrameworkListener>					fwListeners			= Collections
@@ -73,21 +73,13 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 	private final Set<ServiceObjects<?>>					serviceobjects		= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
 
-	public static BundleContext proxy(Class<?> host) {
-		return (BundleContext) Proxy.newProxyInstance(host.getClassLoader(), new Class<?>[] {
+	public static BundleContext proxy(BundleContext bundleContext) {
+		return (BundleContext) Proxy.newProxyInstance(PROXY_CLASS_LOADER, new Class<?>[] {
 			BundleContext.class, AutoCloseable.class
-		}, new CloseableBundleContext(host, FrameworkUtil.getBundle(host)
-			.getBundleContext()));
+		}, new CloseableBundleContext(bundleContext));
 	}
 
-	public static BundleContext proxy(Class<?> host, BundleContext bundleContext) {
-		return (BundleContext) Proxy.newProxyInstance(host.getClassLoader(), new Class<?>[] {
-			BundleContext.class, AutoCloseable.class
-		}, new CloseableBundleContext(host, bundleContext));
-	}
-
-	public CloseableBundleContext(Class<?> host, BundleContext bundleContext) {
-		this.host = host;
+	public CloseableBundleContext(BundleContext bundleContext) {
 		this.bundleContext = bundleContext;
 	}
 
@@ -220,7 +212,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 	public <S> ServiceObjects<S> getServiceObjects(ServiceReference<S> reference) {
 		final ServiceObjects<S> so = bundleContext.getServiceObjects(reference);
-		ServiceObjects<S> serviceObjects = ClosableServiceObjects.proxy(host, so);
+		ServiceObjects<S> serviceObjects = ClosableServiceObjects.proxy(so);
 		serviceobjects.add(serviceObjects);
 		return serviceObjects;
 	}
@@ -269,8 +261,8 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 		private final Map<S, Integer>	instances	= Collections.synchronizedMap(new IdentityHashMap<>());
 
 		@SuppressWarnings("unchecked")
-		public static <S> ServiceObjects<S> proxy(Class<?> host, ServiceObjects<S> so) {
-			return (ServiceObjects<S>) Proxy.newProxyInstance(host.getClassLoader(), new Class<?>[] {
+		public static <S> ServiceObjects<S> proxy(ServiceObjects<S> so) {
+			return (ServiceObjects<S>) Proxy.newProxyInstance(PROXY_CLASS_LOADER, new Class<?>[] {
 				ServiceObjects.class, AutoCloseable.class
 			}, new ClosableServiceObjects<>(so));
 		}

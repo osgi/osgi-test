@@ -230,7 +230,7 @@ public class BundleContextRuleTest {
 	public void closeableBundleContext_handlesSelectedMethodsOfObject() throws Exception {
 		BundleContext upstream = FrameworkUtil.getBundle(getClass())
 			.getBundleContext();
-		BundleContext closeableBC = CloseableBundleContext.proxy(getClass(), upstream);
+		BundleContext closeableBC = CloseableBundleContext.proxy(upstream);
 
 		closeableBC.toString();
 		assertThat(closeableBC).as("toString")

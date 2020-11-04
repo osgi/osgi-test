@@ -27,7 +27,7 @@ public class CloseableBundleContextTest extends SoftAssertions {
 	@BeforeEach
 	void beforeEach() {
 		upstream = mock(BundleContext.class);
-		sut = CloseableBundleContext.proxy(CloseableBundleContextTest.class, upstream);
+		sut = CloseableBundleContext.proxy(upstream);
 	}
 
 	@ParameterizedTest

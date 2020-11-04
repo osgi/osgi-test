@@ -162,8 +162,7 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 	public static BundleContext getBundleContext(ExtensionContext extensionContext) {
 		BundleContext bundleContext = getStore(extensionContext)
 			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
-				key -> new CloseableResourceBundleContext(extensionContext.getRequiredTestClass(),
-					getParentBundleContext(extensionContext)),
+				key -> new CloseableResourceBundleContext(getParentBundleContext(extensionContext)),
 				CloseableResourceBundleContext.class)
 			.get();
 		return bundleContext;
@@ -188,8 +187,8 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 
 		private final BundleContext bundleContext;
 
-		CloseableResourceBundleContext(Class<?> testClass, BundleContext bundleContext) {
-			this.bundleContext = CloseableBundleContext.proxy(testClass, bundleContext);
+		CloseableResourceBundleContext(BundleContext bundleContext) {
+			this.bundleContext = CloseableBundleContext.proxy(bundleContext);
 		}
 
 		@Override
