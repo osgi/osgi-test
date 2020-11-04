@@ -69,10 +69,8 @@ public class BundleContextRule implements AutoCloseable, MethodRule {
 			return this;
 		}
 
-		BundleContext bundleContext = CloseableBundleContext.proxy(testInstance
-			.getClass(),
-			FrameworkUtil.getBundle(testInstance.getClass())
-				.getBundleContext());
+		BundleContext bundleContext = CloseableBundleContext.proxy(FrameworkUtil.getBundle(testInstance.getClass())
+			.getBundleContext());
 
 		installBundle = new InstallBundle(bundleContext);
 

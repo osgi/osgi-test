@@ -83,7 +83,8 @@ abstract class AbstractServiceExtensionTest {
 			.get()
 			.getName();
 
-		bundleContext = CloseableBundleContext.proxy(ServiceExtensionTest.class);
+		bundleContext = CloseableBundleContext.proxy(FrameworkUtil.getBundle(ServiceExtensionTest.class)
+			.getBundleContext());
 	}
 
 	@AfterEach
