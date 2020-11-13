@@ -51,6 +51,13 @@ public @interface WithConfiguration {
 	String pid();
 
 	/**
+	 * The location of the Configuration.<br>
+	 *
+	 * @return The location
+	 */
+	String location() default (Property.NOT_SET);
+
+	/**
 	 * Indicate the properties, that will be updated (if set) after selecting a
 	 * Configuration. If empty no update will be done.
 	 *
