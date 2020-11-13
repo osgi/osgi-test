@@ -43,8 +43,6 @@ import org.osgi.test.common.annotation.Property;
 
 public @interface WithFactoryConfiguration {
 
-	public static final String NOT_SET = "org.osgi.test.common.annotation.config.notset";
-
 	/**
 	 * The factoryPid of the Configuration.<br>
 	 *
@@ -58,6 +56,13 @@ public @interface WithFactoryConfiguration {
 	 * @return The name
 	 */
 	String name();
+
+	/**
+	 * The location of the Configuration.<br>
+	 *
+	 * @return The location
+	 */
+	String location() default (Property.NOT_SET);
 
 	/**
 	 * Indicate the properties, that will be updated (if set) after selecting a

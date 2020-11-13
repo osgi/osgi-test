@@ -45,8 +45,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
-import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.PropertiesConverter;
+import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithConfigurations;
@@ -57,12 +57,12 @@ import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
-public class ConfigurationExtension implements BeforeEachCallback, ParameterResolver,
-	BeforeAllCallback, AfterAllCallback, AfterEachCallback {
+public class ConfigurationExtension
+	implements BeforeEachCallback, ParameterResolver, BeforeAllCallback, AfterAllCallback, AfterEachCallback {
 
-	private static final String							STORE_CONFIGURATION_KEY	= "store.configurationAdmin";
+	private static final String					STORE_CONFIGURATION_KEY	= "store.configurationAdmin";
 
-	private static BlockingConfigurationHandler			blockingConfigHandler;
+	private static BlockingConfigurationHandler	blockingConfigHandler;
 
 	static BundleContext bc(ExtensionContext extensionContext) {
 		return BundleContextExtension.getBundleContext(extensionContext);
@@ -122,7 +122,13 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin, configAnnotation.pid(),
 				0l);
 
-			Configuration configuration = configurationAdmin.getConfiguration(configAnnotation.pid());
+			Configuration configuration;
+			if (Property.NOT_SET.equals(configAnnotation.location())) {
+				configuration = configurationAdmin.getConfiguration(configAnnotation.pid());
+			} else {
+				configuration = configurationAdmin.getConfiguration(configAnnotation.pid(),
+					configAnnotation.location());
+			}
 
 			updateConfigurationRespectNew(configuration, PropertiesConverter.of(configAnnotation.properties()),
 				configBefore == null);
@@ -142,8 +148,14 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin,
 				configAnnotation.factoryPid() + "~" + configAnnotation.name());
 
-			Configuration configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
-				configAnnotation.name());
+			Configuration configuration;
+			if (Property.NOT_SET.equals(configAnnotation.location())) {
+				configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
+					configAnnotation.name());
+			} else {
+				configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
+					configAnnotation.name(), configAnnotation.location());
+			}
 
 			updateConfigurationRespectNew(configuration, PropertiesConverter.of(configAnnotation.properties()),
 				configBefore == null);
@@ -266,8 +278,7 @@ public class ConfigurationExtension implements BeforeEachCallback, ParameterReso
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
 
 		BlockingConfigurationHandlerImpl blockingConfigHandlerImpl = new BlockingConfigurationHandlerImpl();
-		bc(extensionContext).registerService(ConfigurationListener.class,
-			blockingConfigHandlerImpl, null);
+		bc(extensionContext).registerService(ConfigurationListener.class, blockingConfigHandlerImpl, null);
 		blockingConfigHandler = blockingConfigHandlerImpl;
 		storeConfigCopy(extensionContext);
 		handleAnnotationsOnActiveElement(extensionContext);
