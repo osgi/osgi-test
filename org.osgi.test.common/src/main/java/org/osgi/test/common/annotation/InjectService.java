@@ -88,4 +88,17 @@ public @interface InjectService {
 	 */
 	long timeout() default DEFAULT_TIMEOUT;
 
+	/**
+	 * Indicate to take the serviceClass from not from the parameter. Use
+	 * `org.osgi.test.common.annotation.InjectService.AnyService` and the
+	 * ParameterType or FieldType`java.lang.Object` for any Service.
+	 *
+	 * @return The service class.
+	 */
+	Class<?> service() default Object.class;
+
+	public static final class AnyService {
+		private AnyService() {}
+	}
+
 }
