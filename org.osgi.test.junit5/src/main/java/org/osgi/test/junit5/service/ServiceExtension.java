@@ -25,6 +25,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Optional;
 
@@ -131,7 +132,7 @@ public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, 
 			serviceType = ((ParameterizedType) genericMemberType).getActualTypeArguments()[0];
 		}
 		// The service type must be a raw type
-		if (serviceType instanceof Class) {
+		if (serviceType instanceof Class || serviceType instanceof WildcardType) {
 			return true;
 		}
 		throw new ParameterResolutionException("Can only resolve @" + InjectService.class.getSimpleName()
@@ -171,7 +172,16 @@ public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, 
 
 		// supportsParameter() If Jupiter does the right thing then this method
 		// should not be called without serviceType being a class
-		assert serviceType instanceof Class;
+		assert serviceType instanceof Class || serviceType instanceof WildcardType;
+
+		if (serviceType instanceof WildcardType) {
+			serviceType = Object.class;
+
+		}
+		if (!injectService.service()
+			.equals(Object.class)) {
+			serviceType = injectService.service();
+		}
 
 		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType, injectService.filter(),
 			injectService.filterArguments(), injectService.cardinality(), injectService.timeout(), extensionContext);
