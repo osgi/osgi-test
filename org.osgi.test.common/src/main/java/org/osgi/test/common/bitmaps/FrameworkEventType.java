@@ -29,7 +29,7 @@ import static org.osgi.framework.FrameworkEvent.WARNING;
 
 public class FrameworkEventType {
 
-	public static String typeToString(int type) {
+	public static String toString(int type) {
 		switch (type) {
 			case STARTED :
 				return "STARTED";
@@ -62,5 +62,5 @@ public class FrameworkEventType {
 	};
 
 	public static final Bitmap	BITMAP	= new Bitmap(TYPES,
-		FrameworkEventType::typeToString);
+		FrameworkEventType::toString);
 }
