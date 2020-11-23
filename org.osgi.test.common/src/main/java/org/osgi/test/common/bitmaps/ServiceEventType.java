@@ -23,7 +23,7 @@ import static org.osgi.framework.ServiceEvent.UNREGISTERING;
 
 public class ServiceEventType {
 
-	public static String typeToString(int type) {
+	public static String toString(int type) {
 		switch (type) {
 			case REGISTERED :
 				return "REGISTERED";
@@ -41,5 +41,5 @@ public class ServiceEventType {
 	public static final int[]	TYPES	= {
 		REGISTERED, MODIFIED, UNREGISTERING, MODIFIED_ENDMATCH
 	};
-	public static final Bitmap	BITMAP	= new Bitmap(TYPES, ServiceEventType::typeToString);
+	public static final Bitmap	BITMAP	= new Bitmap(TYPES, ServiceEventType::toString);
 }
