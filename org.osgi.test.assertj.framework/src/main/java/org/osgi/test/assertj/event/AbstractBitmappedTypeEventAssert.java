@@ -54,8 +54,7 @@ public abstract class AbstractBitmappedTypeEventAssert<SELF extends AbstractBitm
 	public SELF isNotOfType(int expected) {
 		isNotNull();
 		if ((actualType() & expected) != 0) {
-			throw failure("%nExpecting%n <%s>%nnot to be of type:%n <%d:%s>%nbut it was", actual,
-				expected,
+			throw failure("%nExpecting%n <%s>%nnot to be of type:%n <%d:%s>%nbut it was", actual, expected,
 				bitmap.toString(expected));
 		}
 		return myself;
@@ -67,8 +66,7 @@ public abstract class AbstractBitmappedTypeEventAssert<SELF extends AbstractBitm
 			throw new IllegalArgumentException("Mask testing for an illegal type: " + mask);
 		}
 		if ((actualType() & mask) == 0) {
-			throw failure("%nExpecting%n <%s>%nto be of one of types:%n [%s]%n but was of type:%n <%s>",
-				actual,
+			throw failure("%nExpecting%n <%s>%nto be of one of types:%n [%s]%n but was of type:%n <%s>", actual,
 				bitmap.maskToString(mask), bitmap.maskToString(actualType()));
 		}
 		return myself;
@@ -80,8 +78,7 @@ public abstract class AbstractBitmappedTypeEventAssert<SELF extends AbstractBitm
 			throw new IllegalArgumentException("Mask testing for an illegal type: " + mask);
 		}
 		if ((actualType() & mask) != 0) {
-			throw failure("%nExpecting%n <%s>%nto not be of one of types:%n [%s]%n but was of type:%n <%s>",
-				actual,
+			throw failure("%nExpecting%n <%s>%nto not be of one of types:%n [%s]%n but was of type:%n <%s>", actual,
 				bitmap.maskToString(mask), bitmap.maskToString(actualType()));
 		}
 		return myself;
