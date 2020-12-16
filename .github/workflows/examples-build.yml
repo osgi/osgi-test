@@ -2,6 +2,8 @@ name: Examples Build
 
 on:
   push:
+    branches-ignore:
+    - 'dependabot/**'
     paths:
     - 'examples/**'
     - '.github/**/*examples*'
