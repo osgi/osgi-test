@@ -22,7 +22,7 @@
 		<bnd.version>5.2.0</bnd.version>
 		<junit-jupiter.version>5.7.0</junit-jupiter.version>
 		<junit-platform.version>1.7.0</junit-platform.version>
-		<assertj.version>3.18.1</assertj.version>
+		<assertj.version>3.19.0</assertj.version>
 		<osgi-test.version>0.10.0</osgi-test.version>
 	</properties>
 
