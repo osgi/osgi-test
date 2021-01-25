@@ -89,7 +89,9 @@ public abstract class AbstractVersionAssertTest<SELF extends AbstractVersionAsse
 
 	@Test
 	public void isEmpty() {
-		assertFailing("non-empty", ignored -> aut.isEmpty(), null).hasMessageMatching("(?si).*equal.*0.0.0.*was not.*");
+		assertFailing("non-empty", ignored -> aut.isEmpty(), null)
+			.hasMessageContaining("0.0.0") // expected
+			.hasMessageContaining("1.2.3.qualifier"); // but was
 
 		setActual(Version.emptyVersion);
 
