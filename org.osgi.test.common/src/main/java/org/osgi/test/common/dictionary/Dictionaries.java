@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2018, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2018, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
@@ -35,6 +36,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.osgi.framework.ServiceReference;
 import org.osgi.test.common.stream.MapStream;
 
 public class Dictionaries {
@@ -445,5 +447,82 @@ public class Dictionaries {
 		return Collectors.collectingAndThen(MapStream.toMap((u, v) -> {
 			throw new IllegalArgumentException("duplicate keys");
 		}, (Supplier<Map<K, V>>) LinkedHashMap::new), map -> new MapAsDictionary<>(Collections.unmodifiableMap(map)));
+	}
+
+	private static class ServiceReferenceAsDictionary extends Dictionary<String, Object> {
+		private final ServiceReference<?> serviceReference;
+
+		@SuppressWarnings("unchecked")
+		ServiceReferenceAsDictionary(ServiceReference<?> serviceReference) {
+			this.serviceReference = requireNonNull(serviceReference);
+			boolean nullKey = keysInternal().contains(null);
+
+			if (nullKey) {
+				throw new NullPointerException("a Dictionary cannot contain a null key");
+			}
+			boolean nullValue = false;
+
+			for (String key : keysInternal()) {
+				if (Objects.isNull(serviceReference.getProperty(key))) {
+					nullValue = true;
+					break;
+				}
+			}
+
+			if (nullValue) {
+				throw new NullPointerException("a Dictionary cannot contain a null value");
+			}
+		}
+
+		private List<String> keysInternal() {
+			String[] keys = serviceReference.getPropertyKeys();
+			return Objects.isNull(keys) ? Collections.EMPTY_LIST : Arrays.asList(keys);
+		}
+
+		@Override
+		public int size() {
+			return keysInternal().size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return keysInternal().isEmpty();
+		}
+
+		@Override
+		public Enumeration<String> keys() {
+			return Collections.enumeration(keysInternal());
+		}
+
+		@Override
+		public Enumeration<Object> elements() {
+			List<Object> values = new ArrayList<>();
+			for (String key : keysInternal()) {
+				values.add(serviceReference.getProperty(key));
+			}
+			return Collections.enumeration(values);
+		}
+
+		@Override
+		public Object get(Object key) {
+			if (key instanceof String || key == null) {
+				return serviceReference.getProperty((String) key);
+			}
+			throw new IllegalArgumentException();
+		}
+
+		@Override
+		public Object put(String key, Object value) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Object remove(Object key) {
+			throw new UnsupportedOperationException();
+		}
+	}
+
+	public static <K, V> Dictionary<String, Object> asDictionary(ServiceReference<?> serviceReference) {
+		return new ServiceReferenceAsDictionary(serviceReference);
 	}
 }

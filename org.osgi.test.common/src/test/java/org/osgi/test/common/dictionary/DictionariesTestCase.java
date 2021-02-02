@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,15 +22,20 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
@@ -40,16 +45,24 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.osgi.framework.ServiceReference;
 
 public class DictionariesTestCase {
 
 	Dictionary<String, String>	dict;
 	Dictionary<String, String>	asDictionary;
+	Dictionary<String, Object>	asDictionarySr;
+
 	Map<String, String>			map;
 	Map<String, String>			asMap;
 	Hashtable<String, String>	hashtable;
+
+	ServiceReference<?>			sr;
 	Map<String, String>			asMapEmpty;
 	Dictionary<String, String>	asDictionaryEmpty;
+
+	List<String>				srKeys;
+	List<String>				srValues;
 
 	@BeforeEach
 	public void setUp() throws Exception {
@@ -67,10 +80,24 @@ public class DictionariesTestCase {
 		map.put("key4", "value4");
 		map.put("key5", "value5");
 
+		sr = mock(ServiceReference.class);
+
+		srKeys = Arrays.asList("key1", "key2", "key3", "key4", "key5");
+		srValues = Arrays.asList("value1", "value2", "value3", "value4", "value5");
+
+		when(sr.getPropertyKeys()).thenReturn(map.keySet()
+			.stream()
+			.toArray(String[]::new));
+
+		for (Entry<String, String> entry : map.entrySet()) {
+			when(sr.getProperty(entry.getKey())).thenReturn(entry.getValue());
+		}
+
 		hashtable = new Hashtable<>(map);
 
 		asMap = Dictionaries.asMap(dict);
 		asDictionary = Dictionaries.asDictionary(map);
+		asDictionarySr = Dictionaries.asDictionary(sr);
 
 		asMapEmpty = Dictionaries.asMap(new TestDictionary<>());
 		asDictionaryEmpty = Dictionaries.asDictionary(new HashMap<>());
@@ -80,6 +107,7 @@ public class DictionariesTestCase {
 	public void not_same_as() {
 		assertThat(asDictionary).isNotSameAs(map);
 		assertThat(asMap).isNotSameAs(dict);
+		assertThat(asDictionarySr).isNotSameAs(sr);
 	}
 
 	@Test
@@ -98,6 +126,9 @@ public class DictionariesTestCase {
 
 		assertThat(Collections.list(asDictionary.keys())).hasSize(map.size())
 			.containsExactlyInAnyOrderElementsOf(map.keySet());
+
+		assertThat(Collections.list(asDictionarySr.keys())).hasSize(map.size())
+			.containsExactlyInAnyOrderElementsOf(map.keySet());
 	}
 
 	@Test
@@ -110,6 +141,9 @@ public class DictionariesTestCase {
 
 		assertThat(Collections.list(asDictionary.elements())).hasSize(map.size())
 			.containsExactlyInAnyOrderElementsOf(map.values());
+
+		assertThat(Collections.list(asDictionarySr.elements())).hasSize(map.size())
+			.containsExactlyInAnyOrderElementsOf(map.values());
 	}
 
 	@Test
@@ -118,7 +152,9 @@ public class DictionariesTestCase {
 		assertThat(asMapEmpty.isEmpty()).isTrue();
 
 		assertThat(asDictionary.isEmpty()).isEqualTo(map.isEmpty());
+		assertThat(asDictionarySr.isEmpty()).isEqualTo(map.isEmpty());
 		assertThat(asDictionaryEmpty.isEmpty()).isTrue();
+
 	}
 
 	@Test
@@ -127,7 +163,9 @@ public class DictionariesTestCase {
 		assertThat(asMapEmpty.size()).isZero();
 
 		assertThat(asDictionary.size()).isEqualTo(map.size());
+		assertThat(asDictionarySr.size()).isEqualTo(map.size());
 		assertThat(asDictionaryEmpty.size()).isZero();
+
 	}
 
 	@Test
@@ -139,9 +177,11 @@ public class DictionariesTestCase {
 		}
 
 		assertThat(asDictionary.get("foo")).isNull();
+		assertThat(asDictionarySr.get("foo")).isNull();
 		assertThat(asDictionaryEmpty.get("foo")).isNull();
 		for (String key : map.keySet()) {
 			assertThat(asDictionary.get(key)).isSameAs(map.get(key));
+			assertThat(asDictionarySr.get(key)).isSameAs(map.get(key));
 		}
 	}
 
@@ -172,6 +212,10 @@ public class DictionariesTestCase {
 			.isEqualTo("value6");
 		assertThat(asDictionary.size()).isEqualTo(map.size())
 			.isEqualTo(size + 1);
+
+		assertThatThrownBy(() -> {
+			asDictionarySr.put("key6", "value6");
+		}).isInstanceOf(UnsupportedOperationException.class);
 	}
 
 	@Test
@@ -199,6 +243,10 @@ public class DictionariesTestCase {
 		}
 		assertThat(asDictionary.isEmpty()).isTrue();
 		assertThat(asDictionary.size()).isZero();
+
+		assertThatThrownBy(() -> {
+			asDictionarySr.remove("key1");
+		}).isInstanceOf(UnsupportedOperationException.class);
 	}
 
 	@Test
@@ -207,7 +255,10 @@ public class DictionariesTestCase {
 			Dictionaries.asMap(null);
 		});
 		assertThatNullPointerException().isThrownBy(() -> {
-			Dictionaries.asDictionary(null);
+			Dictionaries.asDictionary((Map<?, ?>) null);
+		});
+		assertThatNullPointerException().isThrownBy(() -> {
+			Dictionaries.asDictionary((ServiceReference<?>) null);
 		});
 		Map<String, String> nullKeyMap = new HashMap<>();
 		nullKeyMap.put(null, "value");
@@ -225,6 +276,7 @@ public class DictionariesTestCase {
 		assertThat(asMap.remove(null)).isNull();
 		assertThat(asDictionary.get(null)).isNull();
 		assertThat(asDictionary.remove(null)).isNull();
+		assertThat(asDictionarySr.get(null)).isNull();
 
 		assertThatNullPointerException().isThrownBy(() -> {
 			asMap.put(null, "value1");
