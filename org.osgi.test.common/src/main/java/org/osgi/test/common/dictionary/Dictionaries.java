@@ -476,7 +476,7 @@ public class Dictionaries {
 
 		private List<String> keysInternal() {
 			String[] keys = serviceReference.getPropertyKeys();
-			return Objects.isNull(keys) ? Collections.EMPTY_LIST : Arrays.asList(keys);
+			return Objects.isNull(keys) ? Collections.emptyList() : Arrays.asList(keys);
 		}
 
 		@Override
