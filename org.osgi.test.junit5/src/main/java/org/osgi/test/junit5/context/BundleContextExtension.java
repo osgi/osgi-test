@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,9 +41,9 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
-import org.osgi.test.common.annotation.InjectInstallBundle;
+import org.osgi.test.common.annotation.InjectBundleInstaller;
 import org.osgi.test.common.context.CloseableBundleContext;
-import org.osgi.test.common.install.InstallBundle;
+import org.osgi.test.common.install.BundleInstaller;
 
 /**
  * A JUnit 5 Extension to get the OSGi {@link BundleContext} of the test bundle.
@@ -70,8 +70,8 @@ import org.osgi.test.common.install.InstallBundle;
  */
 public class BundleContextExtension implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
 
-	public static final String		BUNDLE_CONTEXT_KEY	= "bundle.context";
-	public static final String		INSTALL_BUNDLE_KEY	= "install.bundle";
+	public static final String	BUNDLE_CONTEXT_KEY	= "bundle.context";
+	public static final String	INSTALL_BUNDLE_KEY	= "bundle.installer";
 
 	@Override
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
@@ -84,14 +84,15 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 			setField(field, null, getBundleContext(extensionContext));
 		});
 
-		fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectInstallBundle.class,
+		fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectBundleInstaller.class,
 			m -> Modifier.isStatic(m.getModifiers()));
 
 		fields.forEach(field -> {
-			assertFieldIsOfType(field, InstallBundle.class, InjectInstallBundle.class,
+			assertFieldIsOfType(field, BundleInstaller.class, InjectBundleInstaller.class,
 				ExtensionConfigurationException::new);
-			setField(field, null, getInstallbundle(extensionContext));
+			setField(field, null, getBundleInstaller(extensionContext));
 		});
+
 	}
 
 	@Override
@@ -107,35 +108,36 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 				setField(field, instance, getBundleContext(extensionContext));
 			});
 
-			fields = findAnnotatedNonStaticFields(testClass, InjectInstallBundle.class);
+			fields = findAnnotatedNonStaticFields(testClass, InjectBundleInstaller.class);
 
 			fields.forEach(field -> {
-				assertFieldIsOfType(field, InstallBundle.class, InjectInstallBundle.class,
+				assertFieldIsOfType(field, BundleInstaller.class, InjectBundleInstaller.class,
 					ExtensionConfigurationException::new);
-				setField(field, instance, getInstallbundle(extensionContext));
+				setField(field, instance, getBundleInstaller(extensionContext));
 			});
+
 		}
 	}
 
 	/**
 	 * Resolve {@link Parameter} annotated with
-	 * {@link InjectBundleContext @BundleContextParameter} OR
-	 * {@link InjectInstallBundle @InstallBundleParameter} in the supplied
+	 * {@link InjectBundleContext @InjectBundleContext} OR
+	 * {@link InjectBundleInstaller @InjectBundleInstaller} in the supplied
 	 * {@link ParameterContext}.
 	 */
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		Class<?> parameterType = parameterContext.getParameter()
-			.getType();
+		Parameter parameter = parameterContext.getParameter();
+		Class<?> parameterType = parameter.getType();
 
 		if (parameterContext.isAnnotated(InjectBundleContext.class)) {
 			assertParameterIsOfType(parameterType, BundleContext.class, InjectBundleContext.class,
 				ParameterResolutionException::new);
 			return getBundleContext(extensionContext);
-		} else if (parameterContext.isAnnotated(InjectInstallBundle.class)) {
-			assertParameterIsOfType(parameterType, InstallBundle.class, InjectInstallBundle.class,
+		} else if (parameterContext.isAnnotated(InjectBundleInstaller.class)) {
+			assertParameterIsOfType(parameterType, BundleInstaller.class, InjectBundleInstaller.class,
 				ParameterResolutionException::new);
-			return getInstallbundle(extensionContext);
+			return getBundleInstaller(extensionContext);
 		}
 
 		throw new ExtensionConfigurationException("No parameter types known to BundleContextExtension were found");
@@ -144,19 +146,20 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 	/**
 	 * Determine if the {@link Parameter} in the supplied
 	 * {@link ParameterContext} is annotated with
-	 * {@link InjectBundleContext @BundleContextParameter} OR
-	 * {@link InjectInstallBundle @InstallBundleParameter}.
+	 * {@link InjectBundleContext @InjectBundleContext} OR
+	 * {@link InjectBundleInstaller @InjectBundleInstaller}.
 	 */
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		boolean annotatedBundleContextParameter = parameterContext.isAnnotated(InjectBundleContext.class);
-		boolean annotatedInstallBundleParameter = parameterContext.isAnnotated(InjectInstallBundle.class);
-		if ((annotatedBundleContextParameter || annotatedInstallBundleParameter)
+		boolean annotatedInjectBundleContext = parameterContext.isAnnotated(InjectBundleContext.class);
+		boolean annotatedInjectBundleInstaller = parameterContext.isAnnotated(InjectBundleInstaller.class);
+
+		if ((annotatedInjectBundleContext || annotatedInjectBundleInstaller)
 			&& (parameterContext.getDeclaringExecutable() instanceof Constructor)) {
 			throw new ParameterResolutionException(
 				"BundleContextExtension does not support parameter injection on constructors");
 		}
-		return annotatedBundleContextParameter || annotatedInstallBundleParameter;
+		return annotatedInjectBundleContext || annotatedInjectBundleInstaller;
 	}
 
 	public static BundleContext getBundleContext(ExtensionContext extensionContext) {
@@ -178,9 +181,9 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 		return parentContext;
 	}
 
-	public static InstallBundle getInstallbundle(ExtensionContext extensionContext) {
+	public static BundleInstaller getBundleInstaller(ExtensionContext extensionContext) {
 		return getStore(extensionContext).getOrComputeIfAbsent(INSTALL_BUNDLE_KEY,
-			key -> new InstallBundle(getBundleContext(extensionContext)), InstallBundle.class);
+			key -> new BundleInstaller(getBundleContext(extensionContext)), BundleInstaller.class);
 	}
 
 	public static class CloseableResourceBundleContext implements CloseableResource {
@@ -210,4 +213,5 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 		return extensionContext
 			.getStore(Namespace.create(BundleContextExtension.class, extensionContext.getUniqueId()));
 	}
+
 }

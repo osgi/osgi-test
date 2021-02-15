@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,31 +54,31 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.exceptions.Exceptions;
 
 public class CloseableBundleContext implements AutoCloseable, InvocationHandler {
-	private static final Consumer<ServiceRegistration<?>>					unregisterService	= asConsumerIgnoreException(
+	private static final Consumer<ServiceRegistration<?>>					unregisterService				= asConsumerIgnoreException(
 		ServiceRegistration::unregister);
-	private static final Consumer<AutoCloseable>							autoclose			= asConsumer(
+	private static final Consumer<AutoCloseable>							autoclose						= asConsumer(
 		AutoCloseable::close);
-	private static final Predicate<Bundle>									installed			= bundle -> (bundle
+	private static final Predicate<Bundle>									installed						= bundle -> (bundle
 		.getState() & Bundle.UNINSTALLED) != Bundle.UNINSTALLED;
-	private static final Consumer<Bundle>									uninstallBundle		= asConsumer(
+	private static final Consumer<Bundle>									uninstallBundle					= asConsumer(
 		Bundle::uninstall);
-	static final ClassLoader												PROXY_CLASS_LOADER	= CloseableBundleContext.class
+	static final ClassLoader												PROXY_CLASS_LOADER				= CloseableBundleContext.class
 		.getClassLoader();
 
 	private final BundleContext												bundleContext;
-	private final Set<ServiceRegistration<?>>								regs				= Collections
+	private final Set<ServiceRegistration<?>>								regs							= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<FrameworkListener>									fwListeners			= Collections
+	private final Set<FrameworkListener>									fwListeners						= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<ServiceListener>										sListeners			= Collections
+	private final Set<ServiceListener>										sListeners						= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<BundleListener>										bListeners			= Collections
+	private final Set<BundleListener>										bListeners						= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
-	private final Set<Bundle>												bundles				= Collections
+	private final Set<Bundle>												bundlesToBeUninstalledOnClose	= Collections
 		.synchronizedSet(new HashSet<>());
-	private final Map<ServiceReference<?>, Integer>							services			= Collections
+	private final Map<ServiceReference<?>, Integer>							services						= Collections
 		.synchronizedMap(new HashMap<>());
-	private final Set<ServiceObjects<?>>									serviceobjects		= Collections
+	private final Set<ServiceObjects<?>>									serviceobjects					= Collections
 		.synchronizedSet(Collections.newSetFromMap(new IdentityHashMap<>()));
 
 	private static final Map<Method, BiFunction<Object, Object[], Object>>	methods;
@@ -180,10 +180,10 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 
 	@Override
 	public void close() {
-		bundles.stream()
+		bundlesToBeUninstalledOnClose.stream()
 			.filter(installed)
 			.forEach(uninstallBundle);
-		bundles.clear();
+		bundlesToBeUninstalledOnClose.clear();
 
 		services.forEach((reference, useCount) -> {
 			for (int i = useCount; i > 0; i--) {
@@ -228,14 +228,28 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 	}
 
 	public Bundle installBundle(String location, InputStream input) throws BundleException {
-		Bundle bundle = bundleContext.installBundle(location, input);
-		bundles.add(bundle);
+
+		Bundle bundle = bundleContext.getBundle(location);
+		// Check whether the Bundle already exists because we should only add
+		// new bundles to the bundlesToBeUninstalledOnClose-Set of this
+		// CloseableBundleContext. On close all Bundles in this Set will be
+		// uninstalled. We are not allowed to uninstall bundles, that exist
+		// before. Same in installBundle(String location)
+		if (bundle == null) {
+			bundle = bundleContext.installBundle(location, input);
+			bundlesToBeUninstalledOnClose.add(bundle);
+		}
 		return bundle;
 	}
 
 	public Bundle installBundle(String location) throws BundleException {
-		Bundle bundle = bundleContext.installBundle(location);
-		bundles.add(bundle);
+
+		Bundle bundle = bundleContext.getBundle(location);
+		// see installBundle(String location, InputStream input)
+		if (bundle == null) {
+			bundle = bundleContext.installBundle(location);
+			bundlesToBeUninstalledOnClose.add(bundle);
+		}
 		return bundle;
 	}
 

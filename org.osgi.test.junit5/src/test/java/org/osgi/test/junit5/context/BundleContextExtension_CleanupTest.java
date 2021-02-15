@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -233,8 +233,8 @@ public class BundleContextExtension_CleanupTest {
 	}
 
 	@TestFactory
-	public Stream<DynamicNode> cleansUpInstallBundlesMultiLevel() {
-		return runMultilevelTestClass("Install Bundle", InstallBundleMultiLevelCleanupTest.class);
+	public Stream<DynamicNode> cleansUpBundleInstallerMultiLevel() {
+		return runMultilevelTestClass("Install Bundle", BundleInstallerMultiLevelCleanupTest.class);
 	}
 
 	static public class BundleListenerResourceChecker extends BundleContextResourceChecker<BundleListener> {
@@ -258,7 +258,8 @@ public class BundleContextExtension_CleanupTest {
 		public void doAssertSetup(CallbackPoint currentPoint, CallbackPoint pointThatShouldBeSetup,
 			BundleListener listener) throws BundleException {
 			reset(listener);
-			assertThat(bundle).isInStateMaskedBy(Bundle.RESOLVED | Bundle.INSTALLED);
+			assertThat(bundle)
+				.isInStateMaskedBy(Bundle.RESOLVED | Bundle.INSTALLED);
 			bundle.start();
 
 			OSGiSoftAssertions softly = new OSGiSoftAssertions();

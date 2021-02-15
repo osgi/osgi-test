@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,32 +25,12 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import org.osgi.test.common.install.InstallBundle;
-
 /**
- * Inject {@link InstallBundle} into test classes and methods.
- * <p>
- * The {@link InstallBundle} implementation provided by this rule simplifies
- * installation of embedded bundles.
- * <p>
- * Example:
+ * Loads a Bundle from a given location and installs the Bundle.
  *
  * <pre>
- * // For JUnit5
- * &#64;ExtendWith(BundleContextExtension.class)
- * class MyTests {
- * 	// For JUnit4
- * 	&#64;Rule
- * 	BundleContextRule bcr = new BundleContextRule();
- *
- * 	&#64;InjectInstallBundle
- * 	InstallBundle installBundle;
- *
- * 	&#64;Test
- * 	public void test() {
- * 		// use installBundle
- * 	}
- * }
+ * &#64;InjectInstalledBundle
+ * Bundle installedBundle;
  * </pre>
  */
 @Inherited
@@ -59,4 +39,21 @@ import org.osgi.test.common.install.InstallBundle;
 })
 @Retention(RUNTIME)
 @Documented
-public @interface InjectInstallBundle {}
+public @interface InjectInstalledBundle {
+
+	/**
+	 * @return value that would be processed in condition to the @sourceType
+	 *         bundle:<bsn> (if bsn is empty, resolves to the current bundle)
+	 *         <br>
+	 *         bundle:<bsn>/path/to.jar for an embedded bundle (again, if bsn is
+	 *         empty, resolves to the current bundle).<br>
+	 *         file:/path/to.jar
+	 */
+	String value();
+
+	/**
+	 * @return start if true, indicates to start the bundle
+	 */
+	boolean start() default false;
+
+}
