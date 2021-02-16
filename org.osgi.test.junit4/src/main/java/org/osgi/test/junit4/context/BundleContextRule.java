@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import org.junit.runners.model.Statement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
-import org.osgi.test.common.annotation.InjectInstallBundle;
+import org.osgi.test.common.annotation.InjectBundleInstaller;
 import org.osgi.test.common.context.CloseableBundleContext;
-import org.osgi.test.common.install.InstallBundle;
+import org.osgi.test.common.install.BundleInstaller;
 
 /**
  * A JUnit 4 Rule to get the OSGi {@link BundleContext} of the test bundle.
@@ -58,7 +58,7 @@ import org.osgi.test.common.install.InstallBundle;
 public class BundleContextRule implements AutoCloseable, MethodRule {
 
 	private volatile BundleContext	bundleContext;
-	private volatile InstallBundle	installBundle;
+	private volatile BundleInstaller	bundleInstaller;
 
 	public BundleContext getBundleContext() {
 		return bundleContext;
@@ -72,7 +72,7 @@ public class BundleContextRule implements AutoCloseable, MethodRule {
 		BundleContext bundleContext = CloseableBundleContext.proxy(FrameworkUtil.getBundle(testInstance.getClass())
 			.getBundleContext());
 
-		installBundle = new InstallBundle(bundleContext);
+		bundleInstaller = new BundleInstaller(bundleContext);
 
 		List<Field> fields = findAnnotatedNonStaticFields(testInstance.getClass(), InjectBundleContext.class);
 
@@ -81,11 +81,11 @@ public class BundleContextRule implements AutoCloseable, MethodRule {
 			setField(field, testInstance, bundleContext);
 		});
 
-		fields = findAnnotatedNonStaticFields(testInstance.getClass(), InjectInstallBundle.class);
+		fields = findAnnotatedNonStaticFields(testInstance.getClass(), InjectBundleInstaller.class);
 
 		fields.forEach(field -> {
-			assertFieldIsInstallBundle(field);
-			setField(field, testInstance, installBundle);
+			assertFieldIsBundleInstaller(field);
+			setField(field, testInstance, bundleInstaller);
 		});
 
 		this.bundleContext = bundleContext;
@@ -97,7 +97,7 @@ public class BundleContextRule implements AutoCloseable, MethodRule {
 		if (bundleContext != null) {
 			((AutoCloseable) bundleContext).close();
 			bundleContext = null;
-			installBundle = null;
+			bundleInstaller = null;
 		}
 	}
 
@@ -123,10 +123,10 @@ public class BundleContextRule implements AutoCloseable, MethodRule {
 		}
 	}
 
-	private void assertIsInstallBundle(Class<?> type) {
-		if (type != InstallBundle.class) {
-			throw new RuntimeException("Can only resolve @" + InjectInstallBundle.class.getSimpleName()
-				+ " field of type " + InstallBundle.class.getName() + " but was: " + type.getName());
+	private void assertIsBundleInstaller(Class<?> type) {
+		if (type != BundleInstaller.class) {
+			throw new RuntimeException("Can only resolve @" + InjectBundleInstaller.class.getSimpleName()
+				+ " field of type " + BundleInstaller.class.getName() + " but was: " + type.getName());
 		}
 	}
 
@@ -139,12 +139,12 @@ public class BundleContextRule implements AutoCloseable, MethodRule {
 		}
 	}
 
-	private void assertFieldIsInstallBundle(Field field) {
-		assertIsInstallBundle(field.getType());
+	private void assertFieldIsBundleInstaller(Field field) {
+		assertIsBundleInstaller(field.getType());
 		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
 			|| Modifier.isStatic(field.getModifiers())) {
 			throw new RuntimeException(
-				InjectInstallBundle.class.getName() + " field [" + field + "] must not be final, private or static.");
+				InjectBundleInstaller.class.getName() + " field [" + field + "] must not be final, private or static.");
 		}
 	}
 

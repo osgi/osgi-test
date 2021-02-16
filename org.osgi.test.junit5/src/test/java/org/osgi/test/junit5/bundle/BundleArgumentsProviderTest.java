@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2020, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.osgi.framework.Bundle;
 import org.osgi.test.assertj.bundle.BundleAssert;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
-import org.osgi.test.common.annotation.InjectInstallBundle;
-import org.osgi.test.common.install.InstallBundle;
+import org.osgi.test.common.annotation.InjectBundleInstaller;
+import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.context.BundleContextExtension;
 
 @ExtendWith(BundleContextExtension.class)
@@ -34,8 +34,8 @@ public class BundleArgumentsProviderTest {
 	static Bundle bundleInstalled;
 
 	@BeforeAll
-	static void beforeAll(@InjectInstallBundle InstallBundle installBundle) {
-		bundleInstalled = installBundle.installBundle("tb1.jar", false);
+	static void beforeAll(@InjectBundleInstaller BundleInstaller bundleInstaller) {
+		bundleInstalled = bundleInstaller.installBundle("tb1.jar", false);
 	}
 
 	@ParameterizedTest

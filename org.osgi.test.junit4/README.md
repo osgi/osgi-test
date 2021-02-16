@@ -36,11 +36,11 @@ Now that the rule is in place, a `BundleContext` instance can be injected into a
 BundleContext bundleContext;
 ```
 
-#### Test Utility `InstallBundle`
+#### Test Utility `BundleInstaller`
 
-In OSGi testing there are many scenarios that require installing pre-built bundles. The [Bnd](https://bnd.bndtools.org/) tool has support for easily building and embedding bundles within bundles. As a matter of convenience the `InstallBundle` utility was designed to simplify the task of finding and installing such embedded bundles. 
+In OSGi testing there are many scenarios that require installing pre-built bundles. The [Bnd](https://bnd.bndtools.org/) tool has support for easily building and embedding bundles within bundles. As a matter of convenience the `BundleInstaller` utility was designed to simplify the task of finding and installing such embedded bundles. 
 
-The `InstallBundle` utility provides three convenience methods 
+The `BundleInstaller` utility provides three convenience methods 
 
 - `Bundle installBundle(String pathToEmbeddedJar)` 
 - `Bundle installBundle(String pathToEmbeddedJar, boolean startBundle)` 
@@ -48,11 +48,11 @@ The `InstallBundle` utility provides three convenience methods
 
 to simplify these use cases. The `installBundle` methods use the `findEntries` method from the Bundle API to locate embedded bundles.
 
-An instance of this utility can be injected much like the `BundleContext` using the `@InjectInstallBundle`.
+An instance of this utility can be injected much like the `BundleContext` using the `@InjectBundleInstaller`.
 
 ```java
-@InjectInstallBundle
-InstallBundle installBundle;
+@InjectBundleInstaller
+BundleInstaller bundleInstaller;
 ```
 
 ## Testing with OSGi Services

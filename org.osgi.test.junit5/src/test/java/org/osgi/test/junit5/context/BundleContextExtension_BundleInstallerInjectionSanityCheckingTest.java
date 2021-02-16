@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.osgi.framework.BundleContext;
-import org.osgi.test.common.annotation.InjectBundleContext;
+import org.osgi.test.common.annotation.InjectBundleInstaller;
+import org.osgi.test.common.install.BundleInstaller;
 
-public class BundleContextExtension_BundleContextSanityCheckingTest {
+public class BundleContextExtension_BundleInstallerInjectionSanityCheckingTest {
 
 	@ExtendWith(BundleContextExtension.class)
 	static class TestBase {
@@ -21,19 +21,19 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 	static class IncorrectParameterType {
 		@SuppressWarnings("unused")
 		@Test
-		void myParameterTest(@InjectBundleContext String param) {}
+		void myParameterTest(@InjectBundleInstaller String param) {}
 	}
 
 	@Test
 	void annotatedParameter_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectParameterType.class).isInstanceOf(ParameterResolutionException.class)
 			.hasMessageEndingWith(
-				"Can only resolve @InjectBundleContext parameter of type org.osgi.framework.BundleContext but was: java.lang.String");
+				"Can only resolve @InjectBundleInstaller parameter of type org.osgi.test.common.install.BundleInstaller but was: java.lang.String");
 	}
 
 	static class IncorrectFieldType extends TestBase {
 
-		@InjectBundleContext
+		@InjectBundleInstaller
 		String myField;
 
 		@Override
@@ -45,12 +45,12 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 	void annotatedField_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectFieldType.class).isInstanceOf(ExtensionConfigurationException.class)
 			.hasMessage(
-				"[myField] Can only resolve @InjectBundleContext field of type org.osgi.framework.BundleContext but was: java.lang.String");
+				"[myField] Can only resolve @InjectBundleInstaller field of type org.osgi.test.common.install.BundleInstaller but was: java.lang.String");
 	}
 
 	static class IncorrectStaticFieldType extends TestBase {
 
-		@InjectBundleContext
+		@InjectBundleInstaller
 		static String myStaticField;
 
 		@Override
@@ -62,12 +62,12 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 	void annotatedStaticField_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectStaticFieldType.class).isInstanceOf(ExtensionConfigurationException.class)
 			.hasMessage(
-				"[myStaticField] Can only resolve @InjectBundleContext field of type org.osgi.framework.BundleContext but was: java.lang.String");
+				"[myStaticField] Can only resolve @InjectBundleInstaller field of type org.osgi.test.common.install.BundleInstaller but was: java.lang.String");
 	}
 
 	static class FinalStaticField extends TestBase {
-		@InjectBundleContext
-		static final BundleContext bc = null;
+		@InjectBundleInstaller
+		static final BundleInstaller bc = null;
 
 		@Override
 		@Test
@@ -77,12 +77,12 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsFinal_throwsException() {
 		assertThatTest(FinalStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*final.*");
+			.hasMessageMatching("@InjectBundleInstaller field \\[bc\\] must not be .*final.*");
 	}
 
 	static class FinalField extends TestBase {
-		@InjectBundleContext
-		final BundleContext bc = null;
+		@InjectBundleInstaller
+		final BundleInstaller bc = null;
 
 		@Override
 		@Test
@@ -92,12 +92,27 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 	@Test
 	void annotatedField_thatIsFinal_throwsException() {
 		assertThatTest(FinalField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*final.*");
+			.hasMessageMatching("@InjectBundleInstaller field \\[bc\\] must not be .*final.*");
+	}
+
+	static class PrivateStaticField extends TestBase {
+		@InjectBundleInstaller
+		static final BundleInstaller bc = null;
+
+		@Override
+		@Test
+		void myTest() {}
+	}
+
+	@Test
+	void annotatedStaticField_thatIsPrivate_throwsException() {
+		assertThatTest(PrivateStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
+			.hasMessageMatching("@InjectBundleInstaller field \\[bc\\] must not be .*private.*");
 	}
 
 	static class PrivateField extends TestBase {
-		@InjectBundleContext
-		private BundleContext bc = null;
+		@InjectBundleInstaller
+		final BundleInstaller bc = null;
 
 		@Override
 		@Test
@@ -107,37 +122,6 @@ public class BundleContextExtension_BundleContextSanityCheckingTest {
 	@Test
 	void annotatedField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*private.*");
-	}
-
-	static class StaticPrivateField extends TestBase {
-		@InjectBundleContext
-		static private BundleContext bc = null;
-
-		@Override
-		@Test
-		void myTest() {}
-	}
-
-	@Test
-	void annotatedStaticField_thatIsPrivate_throwsException() {
-		assertThatTest(StaticPrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*private.*");
-	}
-
-	static class AnnotatedConstructor extends TestBase {
-		AnnotatedConstructor(@InjectBundleContext BundleContext context) {
-
-		}
-
-		@Override
-		@Test
-		void myTest() {}
-	}
-
-	@Test
-	void annotatedConstructor_throwsException() {
-		assertThatTest(AnnotatedConstructor.class).isInstanceOf(ParameterResolutionException.class)
-			.hasMessageMatching("BundleContextExtension does not support parameter injection on constructors");
+			.hasMessageMatching("@InjectBundleInstaller field \\[bc\\] must not be .*private.*");
 	}
 }

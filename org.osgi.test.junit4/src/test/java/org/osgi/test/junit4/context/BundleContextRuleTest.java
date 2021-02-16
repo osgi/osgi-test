@@ -1,5 +1,5 @@
 /*
- * Copyright (c) OSGi Alliance (2019, 2020). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2019, 2021). All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.framework.SynchronousBundleListener;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.dictionary.Dictionaries;
-import org.osgi.test.common.install.InstallBundle;
+import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit4.types.Foo;
 
 public class BundleContextRuleTest {
@@ -47,11 +47,11 @@ public class BundleContextRuleTest {
 	public TestName name = new TestName();
 
 	@Test
-	public void testInstallBundle_B() throws Exception {
+	public void testBundleInstaller_B() throws Exception {
 		Bundle bundle = null;
 
 		try (WithContextRule it = new WithContextRule(this)) {
-			InstallBundle installBundle = new InstallBundle(it.rule.getBundleContext());
+			BundleInstaller installBundle = new BundleInstaller(it.rule.getBundleContext());
 
 			bundle = installBundle.installBundle("foo/tbfoo.jar", false);
 
@@ -64,13 +64,13 @@ public class BundleContextRuleTest {
 	}
 
 	@Test
-	public void testInstallBundle() throws Exception {
+	public void testBundleInstaller() throws Exception {
 		Bundle bundle = null;
 
 		try (WithContextRule it = new WithContextRule(this)) {
-			InstallBundle installBundle = new InstallBundle(it.rule.getBundleContext());
+			BundleInstaller bundleInstaller = new BundleInstaller(it.rule.getBundleContext());
 
-			bundle = installBundle.installBundle("tb1.jar", false);
+			bundle = bundleInstaller.installBundle("tb1.jar", false);
 
 			assertThat(bundle).extracting(Bundle::getState)
 				.is(new Condition<Integer>(state -> (state & INSTALLED) == INSTALLED, "Installed"));

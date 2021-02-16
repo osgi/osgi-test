@@ -13,64 +13,67 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectBundleContext;
-import org.osgi.test.common.annotation.InjectInstallBundle;
-import org.osgi.test.common.install.InstallBundle;
+import org.osgi.test.common.annotation.InjectBundleInstaller;
+import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.testutils.OSGiSoftAssertions;
 
 @ExtendWith(BundleContextExtension.class)
-public class BundleContextExtension_InstallBundleInjectionTest {
+public class BundleContextExtension_BundleInstallerInjectionTest {
 
 	@InjectBundleContext
 	static BundleContext		staticBC;
 
-	@InjectInstallBundle
-	static InstallBundle		staticIB;
+	@InjectBundleInstaller
+	static BundleInstaller		staticBI;
 
 	@InjectBundleContext
 	BundleContext				bundleContext;
 
-	@InjectInstallBundle
-	InstallBundle				installBundle;
+	@InjectBundleInstaller
+	BundleInstaller				bundleInstaller;
 
 	static OSGiSoftAssertions	staticSoftly;
 
 	OSGiSoftAssertions			softly;
 
 	@BeforeAll
-	static void beforeAll(@InjectInstallBundle InstallBundle ib) {
-		assertThat(staticIB).isNotNull();
+	static void beforeAll(@InjectBundleInstaller
+	BundleInstaller bi) {
+		assertThat(staticBI).isNotNull();
 		staticSoftly = new OSGiSoftAssertions();
-		staticSoftly.assertThat(staticIB)
-			.as("staticIB:beforeAll")
+		staticSoftly.assertThat(staticBI)
+			.as("staticBI:beforeAll")
 			.isNotNull()
-			.isSameAs(ib);
-		staticSoftly.assertThat(staticIB.getBundleContext())
+			.isSameAs(bi);
+		staticSoftly.assertThat(staticBI.getBundleContext())
 			.isSameAs(staticBC);
 		staticSoftly.assertAll();
 	}
 
 	@BeforeEach
-	void beforeEach(@InjectInstallBundle InstallBundle ib) {
-		assertThat(installBundle).isNotNull();
+	void beforeEach(@InjectBundleInstaller
+	BundleInstaller bi) {
+		assertThat(bundleInstaller).isNotNull();
 		softly = new OSGiSoftAssertions();
-		softly.assertThat(installBundle)
-			.as("installBundle:beforeEach")
+		softly.assertThat(bundleInstaller)
+			.as("bundleInstaller:beforeEach")
 			.isNotNull()
-			.isSameAs(ib)
-			.extracting(InstallBundle::getBundleContext)
+			.isSameAs(bi)
+			.extracting(BundleInstaller::getBundleContext)
 			.isSameAs(bundleContext);
 		softly.assertAll();
 	}
 
 	@Test
-	void innerTest(@InjectInstallBundle InstallBundle ib) {
-		assertThat(installBundle).isNotNull();
+	void innerTest(@InjectBundleInstaller
+	BundleInstaller b) {
+		assertThat(bundleInstaller).isNotNull();
 		softly = new OSGiSoftAssertions();
-		softly.assertThat(installBundle)
-			.as("installBundle:innerTest")
+		softly.assertThat(bundleInstaller)
+			.as("bundleInstaller:innerTest")
 			.isNotNull()
-			.isSameAs(ib)
-			.extracting(InstallBundle::getBundleContext)
+			.isSameAs(b)
+			.extracting(BundleInstaller::getBundleContext)
 			.isSameAs(bundleContext);
 		softly.assertAll();
 	}
@@ -82,14 +85,15 @@ public class BundleContextExtension_InstallBundleInjectionTest {
 	// This test is meant to check that the extension is doing the
 	// right thing before and after parameterized tests, hence
 	// the parameter is not actually used.
-	void parameterizedTest(int unused, @InjectInstallBundle InstallBundle ib) {
-		assertThat(installBundle).isNotNull();
+	void parameterizedTest(int unused, @InjectBundleInstaller
+	BundleInstaller bi) {
+		assertThat(bundleInstaller).isNotNull();
 		softly = new OSGiSoftAssertions();
-		softly.assertThat(installBundle)
-			.as("installBundle:parameterizedTest")
+		softly.assertThat(bundleInstaller)
+			.as("bundleInstaller:parameterizedTest")
 			.isNotNull()
-			.isSameAs(ib)
-			.extracting(InstallBundle::getBundleContext)
+			.isSameAs(bi)
+			.extracting(BundleInstaller::getBundleContext)
 			.isSameAs(bundleContext);
 		softly.assertAll();
 	}
@@ -100,67 +104,72 @@ public class BundleContextExtension_InstallBundleInjectionTest {
 		@InjectBundleContext
 		BundleContext	nestedBC;
 
-		@InjectInstallBundle
-		InstallBundle	nestedIB;
+		@InjectBundleInstaller
+		BundleInstaller	nestedIB;
 
 		@BeforeEach
-		void beforeEach(@InjectInstallBundle InstallBundle ib) {
-			assertThat(installBundle).isNotNull();
+		void beforeEach(@InjectBundleInstaller
+		BundleInstaller bi) {
+			assertThat(bundleInstaller).isNotNull();
 			softly = new OSGiSoftAssertions();
 			softly.assertThat(nestedIB)
-				.as("installBundle:nested.beforeEach")
+				.as("bundleInstaller:nested.beforeEach")
 				.isNotNull()
-				.isSameAs(ib)
-				.extracting(InstallBundle::getBundleContext)
+				.isSameAs(bi)
+				.extracting(BundleInstaller::getBundleContext)
 				.isSameAs(nestedBC);
 			softly.assertAll();
 		}
 
 		@Test
-		void test(@InjectInstallBundle InstallBundle ib) {
+		void test(@InjectBundleInstaller
+		BundleInstaller bi) {
 			softly = new OSGiSoftAssertions();
 			softly.assertThat(nestedIB)
-				.as("installBundle:nested.test")
+				.as("bundleInstaller:nested.test")
 				.isNotNull()
-				.isSameAs(ib)
-				.extracting(InstallBundle::getBundleContext)
+				.isSameAs(bi)
+				.extracting(BundleInstaller::getBundleContext)
 				.isSameAs(nestedBC);
 			softly.assertAll();
 		}
 
 		@AfterEach
-		void afterEach(@InjectInstallBundle InstallBundle ib) {
+		void afterEach(@InjectBundleInstaller
+		BundleInstaller bi) {
 			softly = new OSGiSoftAssertions();
 			softly.assertThat(nestedIB)
-				.as("installBundle:nested.afterEach")
+				.as("bundleInstaller:nested.afterEach")
 				.isNotNull()
-				.isSameAs(ib)
-				.extracting(InstallBundle::getBundleContext)
+				.isSameAs(bi)
+				.extracting(BundleInstaller::getBundleContext)
 				.isSameAs(nestedBC);
 			softly.assertAll();
 		}
 	}
 
 	@AfterEach
-	void afterEach(@InjectInstallBundle InstallBundle ib) {
+	void afterEach(@InjectBundleInstaller
+	BundleInstaller bi) {
 		softly = new OSGiSoftAssertions();
-		softly.assertThat(installBundle)
-			.as("installBundle:afterEach")
+		softly.assertThat(bundleInstaller)
+			.as("bundleInstaller:afterEach")
 			.isNotNull()
-			.isSameAs(ib)
-			.extracting(InstallBundle::getBundleContext)
+			.isSameAs(bi)
+			.extracting(BundleInstaller::getBundleContext)
 			.isSameAs(bundleContext);
 		softly.assertAll();
 	}
 
 	@AfterAll
-	static void afterAll(@InjectInstallBundle InstallBundle ib) {
+	static void afterAll(@InjectBundleInstaller
+	BundleInstaller bi) {
 		staticSoftly = new OSGiSoftAssertions();
-		staticSoftly.assertThat(staticIB)
-			.as("staticIB:beforeAll")
+		staticSoftly.assertThat(staticBI)
+			.as("staticBI:AfterAll")
 			.isNotNull()
-			.isSameAs(ib)
-			.extracting(InstallBundle::getBundleContext)
+			.isSameAs(bi)
+			.extracting(BundleInstaller::getBundleContext)
 			.isSameAs(staticBC);
 		staticSoftly.assertAll();
 	}

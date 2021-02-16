@@ -136,7 +136,7 @@ public class BundleContextExtension_BundleContextInjectionTest {
 	static void afterAll(@InjectBundleContext BundleContext bc) {
 		staticSoftly = new OSGiSoftAssertions();
 		staticSoftly.assertThat(staticBC)
-			.as("staticBC:beforeAll")
+			.as("staticBC:afterAll")
 			.isNotNull()
 			.isSameAs(bc)
 			.refersToBundle(bundle);
