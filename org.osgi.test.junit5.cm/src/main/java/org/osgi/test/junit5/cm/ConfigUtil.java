@@ -107,7 +107,7 @@ public class ConfigUtil {
 					.anyMatch((copy) -> {
 						if (Objects.equals(conf.getPid(), copy.getPid())) {
 							try {
-								timeoutListener.update(conf, copy.getProperties(), 3000);
+								timeoutListener.update(conf, copy.getProperties(), 3000, false);
 							} catch (IOException e) {
 								throw new UncheckedIOException(e);
 							} catch (InterruptedException e) {
@@ -145,7 +145,7 @@ public class ConfigUtil {
 					}
 
 					try {
-						timeoutListener.update(conf, copy.getProperties(), 3000);
+						timeoutListener.update(conf, copy.getProperties(), 3000, true);
 
 					} catch (IOException e) {
 						throw new UncheckedIOException(e);

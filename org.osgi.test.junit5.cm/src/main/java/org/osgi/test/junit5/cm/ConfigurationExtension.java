@@ -373,10 +373,11 @@ public class ConfigurationExtension
 			if (newConfigurationProperties != null
 				&& !ConfigUtil.isDictionaryWithNotSetMarker(newConfigurationProperties)) {
 				// has relevant Properties to update
-				blockingConfigHandler.update(configurationToBeUpdated, newConfigurationProperties, 1000);
+				blockingConfigHandler.update(configurationToBeUpdated, newConfigurationProperties, 1000, false);
 			} else if (isNewConfiguration) {
 				// is new created Configuration. must be updated
-				blockingConfigHandler.update(configurationToBeUpdated, Dictionaries.dictionaryOf(), 1000);
+				blockingConfigHandler.update(configurationToBeUpdated, Dictionaries.dictionaryOf(), 1000,
+					true);
 			}
 		}
 	}

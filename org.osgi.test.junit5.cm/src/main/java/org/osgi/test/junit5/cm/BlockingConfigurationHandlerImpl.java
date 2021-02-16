@@ -18,10 +18,15 @@ public class BlockingConfigurationHandlerImpl implements ConfigurationListener, 
 	private Map<String, CountDownLatch>	deleteMap	= new HashMap<String, CountDownLatch>();
 
 	@Override
-	public boolean update(Configuration configuration, Dictionary<String, Object> dictionary, long timeout)
+	public boolean update(Configuration configuration, Dictionary<String, Object> dictionary, long timeout,
+		boolean ignoredDiff)
 		throws InterruptedException, IOException {
 		CountDownLatch latch = createCountdownLatchUpdate(configuration.getPid());
-		configuration.update(dictionary);
+		if (ignoredDiff) {
+			configuration.update(dictionary);
+		} else {
+			configuration.updateIfDifferent(dictionary);
+		}
 		boolean isOk = latch.await(timeout, TimeUnit.MILLISECONDS);
 		return isOk;
 	}

@@ -7,7 +7,7 @@ import org.osgi.service.cm.Configuration;
 
 public interface BlockingConfigurationHandler {
 
-	boolean update(Configuration configuration, Dictionary<String, Object> dictionary, long timeout)
+	boolean update(Configuration configuration, Dictionary<String, Object> dictionary, long timeout, boolean ignoreDiff)
 		throws InterruptedException, IOException;
 
 	boolean delete(Configuration configuration, long timeout) throws InterruptedException, IOException;
