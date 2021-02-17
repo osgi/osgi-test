@@ -40,7 +40,6 @@ import org.osgi.test.common.annotation.Property;
 @Repeatable(WithConfigurations.class)
 @Retention(RUNTIME)
 @Documented
-
 public @interface WithConfiguration {
 
 	/**
@@ -67,4 +66,10 @@ public @interface WithConfiguration {
 		@Property(key = Property.NOT_SET)
 	};
 
+	/**
+	 * By default a configuration will be updated by using
+	 * {@link org.osgi.service.cm.Configuration#updateIfDifferent}. If set to
+	 * true, {@link org.osgi.service.cm.Configuration#update] will be used.
+	 */
+	boolean forceUpdate() default false;
 }

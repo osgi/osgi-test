@@ -22,13 +22,16 @@ public class BlockingConfigurationHandlerImpl implements ConfigurationListener, 
 		boolean ignoredDiff)
 		throws InterruptedException, IOException {
 		CountDownLatch latch = createCountdownLatchUpdate(configuration.getPid());
+		boolean wait = true;
 		if (ignoredDiff) {
 			configuration.update(dictionary);
 		} else {
-			configuration.updateIfDifferent(dictionary);
+			wait = configuration.updateIfDifferent(dictionary);
 		}
-		boolean isOk = latch.await(timeout, TimeUnit.MILLISECONDS);
-		return isOk;
+		if (wait) {
+			return latch.await(timeout, TimeUnit.MILLISECONDS);
+		}
+		return true;
 	}
 
 	@Override

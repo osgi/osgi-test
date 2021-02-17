@@ -131,7 +131,7 @@ public class ConfigurationExtension
 			}
 
 			updateConfigurationRespectNew(configuration, PropertiesConverter.of(configAnnotation.properties()),
-				configBefore == null);
+				configBefore == null || configAnnotation.forceUpdate());
 
 			return configuration;
 
@@ -158,7 +158,7 @@ public class ConfigurationExtension
 			}
 
 			updateConfigurationRespectNew(configuration, PropertiesConverter.of(configAnnotation.properties()),
-				configBefore == null);
+				configBefore == null || configAnnotation.forceUpdate());
 
 			return configuration;
 
@@ -367,17 +367,17 @@ public class ConfigurationExtension
 	}
 
 	public void updateConfigurationRespectNew(Configuration configurationToBeUpdated,
-		Dictionary<String, Object> newConfigurationProperties, boolean isNewConfiguration)
+		Dictionary<String, Object> newConfigurationProperties, boolean forceUpdate)
 		throws InterruptedException, IOException {
 		if (configurationToBeUpdated != null) {
 			if (newConfigurationProperties != null
 				&& !ConfigUtil.isDictionaryWithNotSetMarker(newConfigurationProperties)) {
 				// has relevant Properties to update
-				blockingConfigHandler.update(configurationToBeUpdated, newConfigurationProperties, 1000, false);
-			} else if (isNewConfiguration) {
+				blockingConfigHandler.update(configurationToBeUpdated, newConfigurationProperties, 1000, forceUpdate);
+			} else if (forceUpdate) {
 				// is new created Configuration. must be updated
 				blockingConfigHandler.update(configurationToBeUpdated, Dictionaries.dictionaryOf(), 1000,
-					true);
+					forceUpdate);
 			}
 		}
 	}

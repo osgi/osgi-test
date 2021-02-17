@@ -40,7 +40,6 @@ import org.osgi.test.common.annotation.Property;
 @Repeatable(WithFactoryConfigurations.class)
 @Retention(RUNTIME)
 @Documented
-
 public @interface WithFactoryConfiguration {
 
 	/**
@@ -73,5 +72,12 @@ public @interface WithFactoryConfiguration {
 	Property[] properties() default {
 		@Property(key = Property.NOT_SET)
 	};
+
+	/**
+	 * By default a configuration will be updated by using
+	 * {@link org.osgi.service.cm.Configuration#updateIfDifferent}. If set to
+	 * true, {@link org.osgi.service.cm.Configuration#update] will be used.
+	 */
+	boolean forceUpdate() default false;
 
 }
