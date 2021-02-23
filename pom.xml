@@ -683,7 +683,7 @@
 		<profile>
 			<id>bnd-next</id>
 			<properties>
-				<bnd.version>5.3.0-SNAPSHOT</bnd.version>
+				<bnd.version>5.4.0-SNAPSHOT</bnd.version>
 			</properties>
 			<repositories>
 				<repository>
