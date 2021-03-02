@@ -54,7 +54,6 @@ public class BundleInstaller_EmbeddedLocationTest {
 
 		SoftAssertions softly = new SoftAssertions();
 		for (String spec : specs) {
-			System.out.println(spec);
 			EmbeddedLocation location = BundleInstaller.EmbeddedLocation.of(bc, spec);
 			softly.assertThat(location)
 				.isNotNull()
@@ -80,7 +79,6 @@ public class BundleInstaller_EmbeddedLocationTest {
 
 		softly = new SoftAssertions();
 		for (String spec : specs) {
-			System.out.println(spec);
 			EmbeddedLocation location = BundleInstaller.EmbeddedLocation.of(bc, spec);
 
 			assertThat(location).isNotNull()
