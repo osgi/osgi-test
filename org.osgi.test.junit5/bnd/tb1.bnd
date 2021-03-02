@@ -1,1 +1,2 @@
 Export-Package: ${p}.tb1.*;-split-package:=first
+Test-Header: tb1

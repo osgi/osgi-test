@@ -53,8 +53,8 @@
 
 	<url>https://www.osgi.org</url>
 	<organization>
-		<name>OSGi Alliance</name>
-		<url>https://www.osgi.org</url>
+		<name>Eclipse Foundation</name>
+		<url>https://www.eclipse.org</url>
 	</organization>
 	<licenses>
 		<license>
@@ -68,6 +68,7 @@
 		<url>https://github.com/osgi/osgi-test</url>
 		<connection>scm:git:https://github.com/osgi/osgi-test.git</connection>
 		<developerConnection>scm:git:git@github.com:osgi/osgi-test.git</developerConnection>
+		<tag>HEAD</tag>
 	</scm>
 	<developers>
 		<developer>
@@ -107,11 +108,9 @@
 	</issueManagement>
 	<mailingLists>
 		<mailingList>
-			<name>OSGi Developer List</name>
-			<subscribe>osgi-dev-request@mail.osgi.org?subject=subscribe</subscribe>
-			<unsubscribe>osgi-dev-request@mail.osgi.org?subject=unsubscribe</unsubscribe>
-			<post>osgi-dev@mail.osgi.org</post>
-			<archive>https://mail.osgi.org/pipermail/osgi-dev/</archive>
+			<name>OSGi Users List</name>
+			<post>osgi-users@eclipse.org</post>
+			<archive>http://www.eclipse.org/lists/osgi-users</archive>
 		</mailingList>
 	</mailingLists>
 
@@ -129,6 +128,13 @@
 							<goals>
 								<goal>bnd-process</goal>
 							</goals>
+							<configuration>
+								<bnd><![CDATA[
+-includeresource.legal:\
+ META-INF/=${project.parent.basedir}/LICENSE,\
+ META-INF/=${project.parent.basedir}/NOTICE
+]]></bnd>
+							</configuration>
 						</execution>
 						<!-- Integration Test Configuration -->
 						<execution>

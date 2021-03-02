@@ -63,10 +63,10 @@ public class BundleArgumentsProviderTest {
 	}
 
 	@ParameterizedTest
-	@BundleSource(headerFilter = "(Bundle-Vendor=OSGi Alliance)")
+	@BundleSource(headerFilter = "(Test-Header=tb1)")
 	public void testHeader(Bundle bundle) throws Exception {
 		DictionaryAssert.assertThat(bundle.getHeaders())
-			.containsEntry("Bundle-Vendor", "OSGi Alliance");
+			.containsEntry("Test-Header", "tb1");
 	}
 
 	static final String pattern = ".*\\.junit5";
