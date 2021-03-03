@@ -133,8 +133,8 @@
 							<configuration>
 								<bnd><![CDATA[
 -includeresource.legal:\
- META-INF/=${project.parent.basedir}/LICENSE,\
- META-INF/=${project.parent.basedir}/NOTICE
+ "META-INF/=${project.parent.basedir}/LICENSE",\
+ "META-INF/=${project.parent.basedir}/NOTICE"
 ]]></bnd>
 							</configuration>
 						</execution>
