@@ -51,6 +51,7 @@
 		<module>org.osgi.test.junit4</module>
 		<module>org.osgi.test.junit5</module>
 		<module>org.osgi.test.junit5.cm</module>
+		<module>org.osgi.test.bom</module>
 	</modules>
 
 	<url>https://www.osgi.org</url>
