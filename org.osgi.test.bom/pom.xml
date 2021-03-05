@@ -1,115 +1,87 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-	* Copyright (c) OSGi Alliance (2021). All Rights Reserved.
-	*
-	* Licensed under the Apache License, Version 2.0 (the "License");
-	* you may not use this file except in compliance with the License.
-	* You may obtain a copy of the License at
-	*
-	* http://www.apache.org/licenses/LICENSE-2.0
-	*
-	* Unless required by applicable law or agreed to in writing, software
-	* distributed under the License is distributed on an "AS IS" BASIS,
-	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	* See the License for the specific language governing permissions and
-	* limitations under the License.
+	Copyright (c) Contributors to the Eclipse Foundation
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+		http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+	SPDX-License-Identifier: Apache-2.0
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.osgi</groupId>
+
+	<parent>
+		<groupId>org.osgi</groupId>
+		<artifactId>org.osgi.test.parent</artifactId>
+		<version>${revision}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
 	<artifactId>org.osgi.test.bom</artifactId>
-	<version>${revision}</version>
-	<packaging>pom</packaging>
-	<name>OSGi-Test Bill of Materials</name>
 	<description>OSGi-Test Bill of Materials</description>
+	<name>${project.groupId}:${project.artifactId}</name>
+	<url>https://www.osgi.org</url>
+	<scm>
+		<url>https://github.com/osgi/osgi-test</url>
+		<connection>scm:git:https://github.com/osgi/osgi-test.git</connection>
+		<developerConnection>scm:git:git@github.com:osgi/osgi-test.git</developerConnection>
+	</scm>
+
+	<packaging>pom</packaging>
+
+	<properties>
+		<bnd.resolve.skip>true</bnd.resolve.skip>
+		<maven.test.skip>true</maven.test.skip>
+	</properties>
+
 	<dependencyManagement>
 		<dependencies>
 			<!-- OSGi Test base Bundles -->
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.assertj.framework</artifactId>
-				<version>{revision}</version>
+				<version>${project.version}</version>
 				<scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>*</groupId>
-						<artifactId>*</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.assertj.promise</artifactId>
-				<version>{revision}</version>
+				<version>${project.version}</version>
 				<scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>*</groupId>
-						<artifactId>*</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.junit4</artifactId>
-				<version>{revision}</version>
+				<version>${project.version}</version>
 				<scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>*</groupId>
-						<artifactId>*</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.junit5</artifactId>
-				<version>{revision}</version>
+				<version>${project.version}</version>
 				<scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>*</groupId>
-						<artifactId>*</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.junit5.cm</artifactId>
-				<version>{revision}</version>
+				<version>${project.version}</version>
 				<scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>*</groupId>
-						<artifactId>*</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.test.common</artifactId>
-				<version>{revision}</version>
-				<scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>*</groupId>
-						<artifactId>*</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<!-- -->
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.util.function</artifactId>
-				<version>1.0.0</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.util.promise</artifactId>
-				<version>1.0.0</version>
+				<version>${project.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -162,4 +134,16 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<configuration>
+					<flattenMode>bom</flattenMode>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
