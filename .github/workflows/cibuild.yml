@@ -18,6 +18,10 @@ on:
 
 env:
   LC_ALL: en_US.UTF-8
+  MAVEN_OPTS: >-
+    -Dhttp.keepAlive=false
+    -Dmaven.wagon.http.pool=false
+    -Dmaven.wagon.http.retryHandler.count=3
 
 defaults:
   run:
