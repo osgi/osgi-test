@@ -45,7 +45,7 @@ jobs:
   JDK_Matrix:
     strategy:
       matrix:
-        java: [ '8' ]
+        java: [ '8', '11', '16' ]
         os: [ 'ubuntu-latest' ]
     name: JDK${{ matrix.java }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
