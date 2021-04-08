@@ -16,4 +16,4 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #*******************************************************************************
-./mvnw --batch-mode --settings settings.xml deploy "$@"
+./mvnw --batch-mode deploy "$@"
