@@ -19,6 +19,7 @@
 package org.osgi.test.junit4.context;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 import static org.osgi.framework.Bundle.INSTALLED;
 import static org.osgi.framework.Bundle.UNINSTALLED;
 import static org.osgi.test.junit4.TestUtil.getBundle;
@@ -32,6 +33,7 @@ import org.junit.rules.TestName;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleEvent;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.BundleListener;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceObjects;
@@ -230,14 +232,37 @@ public class BundleContextRuleTest {
 
 	@Test
 	public void closeableBundleContext_handlesSelectedMethodsOfObject() throws Exception {
-		BundleContext upstream = FrameworkUtil.getBundle(getClass())
-			.getBundleContext();
+		Bundle upstream = FrameworkUtil.getBundle(getClass());
+		BundleContext upstreamContext = upstream.getBundleContext();
 		BundleContext closeableBC = CloseableBundleContext.proxy(upstream);
 
 		assertThat(closeableBC.toString()).as("toString")
 			.startsWith(CloseableBundleContext.class.getSimpleName())
-			.contains(upstream.toString());
+			.contains(upstreamContext.toString());
 		assertThat(closeableBC.hashCode()).as("hashcode")
-			.isEqualTo(upstream.hashCode());
+			.isEqualTo(upstreamContext.hashCode());
+	}
+
+	@Test
+	public void closeableBundleContext_survivesBundleRestart() throws BundleException {
+		Bundle upstream = FrameworkUtil.getBundle(getClass());
+		BundleContext upstreamContext = upstream.getBundleContext();
+		BundleContext closeableBC = CloseableBundleContext.proxy(upstream);
+
+		// Should not throw an exception
+		closeableBC.getServiceReference(Object.class);
+
+		upstream.stop();
+
+		try {
+			// Should throw an exception
+			closeableBC.getServiceReference(Object.class);
+			fail("Expected an IllegalStateException");
+		} catch (IllegalStateException ise) {}
+
+		upstream.start();
+
+		// Should not throw an exception
+		closeableBC.getServiceReference(Object.class);
 	}
 }

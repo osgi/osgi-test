@@ -25,6 +25,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static org.osgi.framework.Bundle.ACTIVE;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
@@ -34,18 +35,23 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceObjects;
 import org.osgi.framework.ServiceReference;
 
 public class CloseableBundleContextTest extends SoftAssertions {
+	Bundle			upstreamBundle;
 	BundleContext			upstream;
 	BundleContext			sut;
 
 	@BeforeEach
 	void beforeEach() {
+		upstreamBundle = mock(Bundle.class);
 		upstream = mock(BundleContext.class);
-		sut = CloseableBundleContext.proxy(upstream);
+		when(upstreamBundle.getBundleContext()).thenReturn(upstream);
+		when(upstreamBundle.getState()).thenReturn(ACTIVE);
+		sut = CloseableBundleContext.proxy(upstreamBundle);
 	}
 
 	@ParameterizedTest

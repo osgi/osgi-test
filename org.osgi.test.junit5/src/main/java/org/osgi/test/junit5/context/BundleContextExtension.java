@@ -40,7 +40,9 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleReference;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectBundleInstaller;
@@ -167,20 +169,20 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 	public static BundleContext getBundleContext(ExtensionContext extensionContext) {
 		BundleContext bundleContext = getStore(extensionContext)
 			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
-				key -> new CloseableResourceBundleContext(getParentBundleContext(extensionContext)),
+				key -> new CloseableResourceBundleContext(getParentBundle(extensionContext)),
 				CloseableResourceBundleContext.class)
 			.get();
 		return bundleContext;
 	}
 
-	private static BundleContext getParentBundleContext(ExtensionContext extensionContext) {
-		BundleContext parentContext = extensionContext.getParent()
+	private static Bundle getParentBundle(ExtensionContext extensionContext) {
+		Bundle parentBundle = extensionContext.getParent()
 			.filter(context -> context.getTestClass()
 				.isPresent())
 			.map(BundleContextExtension::getBundleContext)
-			.orElseGet(() -> FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
-				.getBundleContext());
-		return parentContext;
+			.map(BundleReference::getBundle)
+			.orElseGet(() -> FrameworkUtil.getBundle(extensionContext.getRequiredTestClass()));
+		return parentBundle;
 	}
 
 	public static BundleInstaller getBundleInstaller(ExtensionContext extensionContext) {
@@ -192,8 +194,8 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 
 		private final BundleContext bundleContext;
 
-		CloseableResourceBundleContext(BundleContext bundleContext) {
-			this.bundleContext = CloseableBundleContext.proxy(bundleContext);
+		CloseableResourceBundleContext(Bundle bundle) {
+			this.bundleContext = CloseableBundleContext.proxy(bundle);
 		}
 
 		@Override
