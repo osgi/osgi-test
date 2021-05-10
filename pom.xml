@@ -660,7 +660,7 @@
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.configadmin</artifactId>
-				<version>1.9.20</version>
+				<version>1.9.22</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
