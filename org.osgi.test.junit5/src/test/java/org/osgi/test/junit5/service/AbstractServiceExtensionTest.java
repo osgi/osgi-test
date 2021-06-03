@@ -121,7 +121,7 @@ abstract class AbstractServiceExtensionTest {
 		checkClass(testClass);
 		try {
 			return executor.schedule(() -> assertThatTest(testClass), delay, TimeUnit.MILLISECONDS)
-				.get(delay + 200000, TimeUnit.MILLISECONDS);
+				.get(200000L + delay, TimeUnit.MILLISECONDS);
 		} catch (InterruptedException | ExecutionException | TimeoutException e) {
 			throw Exceptions.duck(e);
 		}

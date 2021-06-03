@@ -310,4 +310,56 @@ public class ServiceExtension_ServiceAwareTest extends AbstractServiceExtensionT
 
 		softly.assertAll();
 	}
+
+	static class ServiceClose extends TestBase {
+		@InjectService
+		ServiceAware<Foo> serviceAware;
+
+		@Override
+		Foo getService() {
+			return serviceAware.getService();
+		}
+
+		@Override
+		List<Foo> getServices() {
+			return serviceAware.getServices();
+		}
+
+		@Override
+		@Test
+		void test() throws Exception {
+			softly.assertThat(serviceAware.isEmpty())
+				.as("isEmpty %s", serviceAware)
+				.isFalse();
+			softly.assertThat(serviceAware.size())
+				.as("size %s", serviceAware)
+				.isEqualTo(1);
+			softly.assertThatCode(() -> serviceAware.close())
+				.doesNotThrowAnyException();
+			softly.assertThat(serviceAware.isEmpty())
+				.as("isEmpty %s", serviceAware)
+				.isTrue();
+			softly.assertThat(serviceAware.size())
+				.as("size %s", serviceAware)
+				.isEqualTo(0);
+		}
+	}
+
+	@Test
+	public void successClose() throws Exception {
+		final Foo afoo = new Foo() {};
+
+		schedule(afoo);
+
+		futureAssertThatTest(ServiceClose.class).doesNotThrowAnyException();
+		SoftAssertions softly = TestBase.lastSoftAssertions.get();
+		Foo service = TestBase.lastService.get();
+
+		softly.assertThat(service)
+			.as("getService %s", service)
+			.isNull();
+
+		softly.assertAll();
+	}
+
 }

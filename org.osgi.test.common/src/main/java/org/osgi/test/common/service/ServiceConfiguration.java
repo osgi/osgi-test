@@ -119,7 +119,7 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 	}
 
 	@Override
-	public void close() throws Exception {
+	public void close() {
 		final ServiceTracker<S, S> tracker = this.tracker;
 		if (tracker != null) {
 			tracker.close();
