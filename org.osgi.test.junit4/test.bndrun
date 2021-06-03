@@ -40,7 +40,7 @@
     begin=-1
 -runbundles: \
 	assertj-core;version='[3.19.0,3.19.1)',\
-	org.apache.servicemix.bundles.junit;version='[4.13.1,4.13.2)',\
+	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
 	org.osgi.test.common;version='[0.11.0,0.11.1)',\
 	org.osgi.test.junit4;version='[0.11.0,0.11.1)',\
 	org.osgi.test.junit4-tests;version='[0.11.0,0.11.1)'
