@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 @Export
-@Version("1.1.0")
+@Version("1.2.0")
 package org.osgi.test.common.stream;
 
 import org.osgi.annotation.bundle.Export;
