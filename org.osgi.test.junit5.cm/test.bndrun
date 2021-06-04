@@ -52,8 +52,8 @@
 	org.apache.felix.configadmin;version='[1.9.22,1.9.23)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
-	org.osgi.test.assertj.framework;version='[0.11.0,0.11.1)',\
-	org.osgi.test.common;version='[0.11.0,0.11.1)',\
-	org.osgi.test.junit5;version='[0.11.0,0.11.1)',\
-	org.osgi.test.junit5.cm;version='[0.11.0,0.11.1)',\
-	org.osgi.test.junit5.cm-tests;version='[0.11.0,0.11.1)'
+	org.osgi.test.assertj.framework;version='[1.0.0,1.0.1)',\
+	org.osgi.test.common;version='[1.0.0,1.0.1)',\
+	org.osgi.test.junit5;version='[1.0.0,1.0.1)',\
+	org.osgi.test.junit5.cm;version='[1.0.0,1.0.1)',\
+	org.osgi.test.junit5.cm-tests;version='[1.0.0,1.0.1)'

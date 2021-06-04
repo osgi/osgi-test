@@ -29,7 +29,7 @@
 	<version>${revision}</version>
 
 	<properties>
-		<revision>0.11.0-SNAPSHOT</revision>
+		<revision>1.0.0-SNAPSHOT</revision>
 		<project.build.outputTimestamp>1980-02-01T00:00:00Z</project.build.outputTimestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
@@ -672,13 +672,6 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.annotation</artifactId>
-		</dependency>
-	</dependencies>
-
 	<profiles>
 		<profile>
 			<id>java-release</id>
@@ -692,7 +685,7 @@
 		<profile>
 			<id>bnd-next</id>
 			<properties>
-				<bnd.version>5.4.0-SNAPSHOT</bnd.version>
+				<bnd.version>6.0.0-SNAPSHOT</bnd.version>
 			</properties>
 			<repositories>
 				<repository>

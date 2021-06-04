@@ -41,6 +41,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.osgi</groupId>
+			<artifactId>osgi.annotation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.test.common</artifactId>
 			<version>${revision}</version>
 		</dependency>
