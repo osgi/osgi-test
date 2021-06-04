@@ -437,7 +437,7 @@ public class MapStreamTest {
 
 	@Test
 	public void empty() {
-		Supplier<MapStream<String, String>> supplier = () -> MapStream.empty();
+		Supplier<MapStream<String, String>> supplier = MapStream::empty;
 		assertThat(supplier.get()).isNotNull();
 		assertThat(supplier.get()
 			.count()).isEqualTo(0);
@@ -517,7 +517,7 @@ public class MapStreamTest {
 		Supplier<MapStream<String, String>> supplier = () -> MapStream.concat(MapStream.of(testMap),
 			MapStream.of(testMap));
 		LinkedHashMap<String, String> result = supplier.get()
-			.collect(MapStream.toMap((v1, v2) -> v1.concat(v2), LinkedHashMap::new));
+			.collect(MapStream.toMap(String::concat, LinkedHashMap<String, String>::new));
 		assertThat(result).isInstanceOf(LinkedHashMap.class)
 			.containsOnly(entry("key1", "value1value1"), entry("key2", "value2value2"), entry("key3", "value3value3"),
 				entry("key4", "value4value4"), entry("key5", "value5value5"));
@@ -689,7 +689,7 @@ public class MapStreamTest {
 	@Test
 	public void mapValue() {
 		Supplier<MapStream<String, String>> supplier = () -> MapStream.of(testMap)
-			.mapValue(v -> "0".concat(v));
+			.mapValue("0"::concat);
 		assertThat(supplier.get()
 			.count()).isEqualTo(testMap.size());
 		assertThat(supplier.get()
@@ -716,7 +716,7 @@ public class MapStreamTest {
 	@Test
 	public void mapToObj() {
 		Supplier<Stream<String>> supplier = () -> MapStream.of(testMap)
-			.mapToObj((k, v) -> k.concat(v));
+			.mapToObj(String::concat);
 		assertThat(supplier.get()
 			.count()).isEqualTo(testMap.size());
 		assertThat(supplier.get()).containsExactlyInAnyOrder("key1value1", "key2value2", "key3value3", "key4value4",
@@ -788,6 +788,71 @@ public class MapStreamTest {
 	}
 
 	@Test
+	public void flatMapKey() {
+		Supplier<MapStream<String, String>> supplier = () -> MapStream.of(testMap)
+			.flatMapKey(k -> Stream.of(k, k.concat("0")));
+		assertThat(supplier.get()
+			.count()).isEqualTo(2L * testMap.size());
+		assertThat(supplier.get()
+			.entries()
+			.count()).isEqualTo(2L * testMap.size());
+		assertThat(supplier.get()
+			.keys()
+			.count()).isEqualTo(2L * testMap.size());
+		assertThat(supplier.get()
+			.values()
+			.count()).isEqualTo(2L * testMap.size());
+		assertThat(supplier.get()
+			.keys()).containsExactlyInAnyOrder("key1", "key2", "key3", "key4", "key5", "key10", "key20", "key30",
+				"key40", "key50");
+		assertThat(supplier.get()
+			.values()).containsExactlyInAnyOrder("value1", "value2", "value3", "value4", "value5", "value1", "value2",
+				"value3", "value4", "value5");
+		assertThat(supplier.get()
+			.entries()).containsExactlyInAnyOrder(entry("key1", "value1"), entry("key2", "value2"),
+				entry("key3", "value3"), entry("key4", "value4"), entry("key5", "value5"), entry("key10", "value1"),
+				entry("key20", "value2"), entry("key30", "value3"), entry("key40", "value4"), entry("key50", "value5"));
+		assertThat(supplier.get()
+			.collect(MapStream.toMap())).hasSize(testMap.size() * 2)
+				.containsOnly(entry("key1", "value1"), entry("key2", "value2"), entry("key3", "value3"),
+					entry("key4", "value4"), entry("key5", "value5"), entry("key10", "value1"),
+					entry("key20", "value2"), entry("key30", "value3"), entry("key40", "value4"),
+					entry("key50", "value5"));
+	}
+
+	@Test
+	public void flatMapValue() {
+		Supplier<MapStream<String, String>> supplier = () -> MapStream.of(testMap)
+			.flatMapValue(v -> Stream.of(v, v.concat("0")));
+		assertThat(supplier.get()
+			.count()).isEqualTo(2L * testMap.size());
+		assertThat(supplier.get()
+			.entries()
+			.count()).isEqualTo(2L * testMap.size());
+		assertThat(supplier.get()
+			.keys()
+			.count()).isEqualTo(2L * testMap.size());
+		assertThat(supplier.get()
+			.values()
+			.count()).isEqualTo(2L * testMap.size());
+		assertThat(supplier.get()
+			.keys()).containsExactlyInAnyOrder("key1", "key2", "key3", "key4", "key5", "key1", "key2", "key3",
+				"key4", "key5");
+		assertThat(supplier.get()
+			.values()).containsExactlyInAnyOrder("value1", "value2", "value3", "value4", "value5", "value10",
+				"value20", "value30", "value40", "value50");
+		assertThat(supplier.get()
+			.entries()).containsExactlyInAnyOrder(entry("key1", "value1"), entry("key2", "value2"),
+				entry("key3", "value3"), entry("key4", "value4"), entry("key5", "value5"), entry("key1", "value10"),
+				entry("key2", "value20"), entry("key3", "value30"), entry("key4", "value40"),
+				entry("key5", "value50"));
+		assertThat(supplier.get()
+			.collect(MapStream.toMap((String v1, String v2) -> v1.concat(v2)))).hasSize(testMap.size())
+				.containsOnly(entry("key1", "value1value10"), entry("key2", "value2value20"), entry("key3", "value3value30"),
+					entry("key4", "value4value40"), entry("key5", "value5value50"));
+	}
+
+	@Test
 	public void flatMapToObj() {
 		Supplier<Stream<String>> supplier = () -> MapStream.of(testMap)
 			.flatMapToObj((k, v) -> Stream.of(k, v, k.concat(v)));
@@ -804,7 +869,7 @@ public class MapStreamTest {
 		assertThat(supplier.get()
 			.count()).isEqualTo(2L * testMap.size());
 		assertThat(supplier.get()
-			.sum()).isEqualTo(testMap.size() * 5);
+			.sum()).isEqualTo(5L * testMap.size());
 	}
 
 	@Test
@@ -1288,8 +1353,7 @@ public class MapStreamTest {
 			.values()).containsExactlyInAnyOrder("value1", "value2", "value3", "value4", "value5");
 		assertThat(supplier.get()
 			.entries()).containsExactlyInAnyOrder(entry("key1", "value1"), entry("key2", "value2"),
-				entry("key3", "value3"),
-				entry("key4", "value4"), entry("key5", "value5"));
+				entry("key3", "value3"), entry("key4", "value4"), entry("key5", "value5"));
 		assertThat(supplier.get()
 			.collect(MapStream.toMap())).contains(entry("key1", "value1"), entry("key2", "value2"),
 				entry("key3", "value3"), entry("key4", "value4"), entry("key5", "value5"));
@@ -1393,8 +1457,7 @@ public class MapStreamTest {
 		assertThat(supplier.get()
 			.entries()).containsExactly(entry("key3", "value3"), entry("key4", "value4"), entry("key5", "value5"));
 		assertThat(supplier.get()
-			.collect(MapStream.toMap())).contains(entry("key3", "value3"),
-				entry("key4", "value4"),
+			.collect(MapStream.toMap())).contains(entry("key3", "value3"), entry("key4", "value4"),
 				entry("key5", "value5"));
 	}
 
@@ -1419,8 +1482,7 @@ public class MapStreamTest {
 			.values()).containsExactlyInAnyOrder("value1", "value2", "value3", "value4", "value5");
 		assertThat(supplier.get()
 			.entries()).containsExactlyInAnyOrder(entry("key1", "value1"), entry("key2", "value2"),
-				entry("key3", "value3"),
-				entry("key4", "value4"), entry("key5", "value5"));
+				entry("key3", "value3"), entry("key4", "value4"), entry("key5", "value5"));
 		assertThat(supplier.get()
 			.collect(MapStream.toMap())).contains(entry("key1", "value1"), entry("key2", "value2"),
 				entry("key3", "value3"), entry("key4", "value4"), entry("key5", "value5"));

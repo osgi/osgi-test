@@ -56,4 +56,5 @@ public interface ServiceAware<T> {
 
 	long getTimeout();
 
+	void close();
 }
