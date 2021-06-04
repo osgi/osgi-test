@@ -672,13 +672,6 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.annotation</artifactId>
-		</dependency>
-	</dependencies>
-
 	<profiles>
 		<profile>
 			<id>java-release</id>
