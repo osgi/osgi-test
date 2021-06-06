@@ -44,7 +44,8 @@ public abstract class AbstractServiceReferenceAssert<SELF extends AbstractServic
 	}
 
 	public DictionaryAssert<String, Object> hasServicePropertiesThat() {
-		return new DictionaryAssert<String, Object>(Dictionaries.asDictionary(actual));
+		isNotNull();
+		return DictionaryAssert.assertThat(Dictionaries.asDictionary(actual));
 	}
 
 	public BundleAssert isRegisteredInBundleThat() {

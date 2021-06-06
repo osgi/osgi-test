@@ -16,28 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-package org.osgi.test.assertj.servicereference;
+package org.osgi.test.assertj.serviceregistration;
 
-import org.osgi.framework.ServiceReference;
+import org.assertj.core.api.SoftAssertions;
+import org.osgi.framework.ServiceRegistration;
 
-public class ServiceReferenceAssert
-	extends AbstractServiceReferenceAssert<ServiceReferenceAssert, ServiceReference<?>> {
-	/**
-	 * Create assertion for {@link org.osgi.framework.ServiceReference}.
-	 *
-	 * @param actual the actual value.
-	 */
-	public ServiceReferenceAssert(ServiceReference<?> actual) {
-		super(actual, ServiceReferenceAssert.class);
-	}
-
-	/**
-	 * Create assertion for {@link org.osgi.framework.ServiceReference}.
-	 *
-	 * @param actual the actual value.
-	 * @return the created assertion object.
-	 */
-	public static ServiceReferenceAssert assertThat(ServiceReference<?> actual) {
-		return new ServiceReferenceAssert(actual);
-	}
-}
+/**
+ * Soft assertions for {@link ServiceRegistration}s.
+ */
+public class ServiceRegistrationSoftAssertions extends SoftAssertions implements ServiceRegistrationSoftAssertionsProvider {}

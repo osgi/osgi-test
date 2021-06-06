@@ -16,28 +16,27 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-package org.osgi.test.assertj.servicereference;
+package org.osgi.test.assertj.serviceregistration;
 
-import org.osgi.framework.ServiceReference;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
-public class ServiceReferenceAssert
-	extends AbstractServiceReferenceAssert<ServiceReferenceAssert, ServiceReference<?>> {
-	/**
-	 * Create assertion for {@link org.osgi.framework.ServiceReference}.
-	 *
-	 * @param actual the actual value.
-	 */
-	public ServiceReferenceAssert(ServiceReference<?> actual) {
-		super(actual, ServiceReferenceAssert.class);
+import org.junit.jupiter.api.Test;
+import org.osgi.framework.ServiceRegistration;
+
+class ServiceRegistrationAssertTest {
+
+	@Test
+	void hasServiceReference() {
+		ServiceRegistration<?> serviceRegistration = mock(ServiceRegistration.class);
+
+		assertNotNull(ServiceRegistrationAssert.assertThat(serviceRegistration)
+			.hasServiceReferenceThat());
+
+		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> ServiceRegistrationAssert.assertThat(null)
+			.hasServiceReferenceThat())
+			.withFailMessage("Expecting actual not to be null");
 	}
 
-	/**
-	 * Create assertion for {@link org.osgi.framework.ServiceReference}.
-	 *
-	 * @param actual the actual value.
-	 * @return the created assertion object.
-	 */
-	public static ServiceReferenceAssert assertThat(ServiceReference<?> actual) {
-		return new ServiceReferenceAssert(actual);
-	}
 }
