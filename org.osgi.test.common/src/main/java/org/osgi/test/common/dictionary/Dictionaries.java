@@ -55,7 +55,7 @@ public class Dictionaries {
 	 *         specified dictionary can be cast to a Map, then the specified
 	 *         dictionary is returned.
 	 */
-	public static <K, V> Map<K, V> asMap(Dictionary<? extends K, ? extends V> dictionary) {
+	public static <K, V> Map<K, V> asMap(Dictionary<K, V> dictionary) {
 		if (dictionary instanceof Map) {
 			@SuppressWarnings("unchecked")
 			Map<K, V> coerced = (Map<K, V>) dictionary;
@@ -67,9 +67,8 @@ public class Dictionaries {
 	private static class DictionaryAsMap<K, V> extends AbstractMap<K, V> {
 		private final Dictionary<K, V> dict;
 
-		@SuppressWarnings("unchecked")
-		DictionaryAsMap(Dictionary<? extends K, ? extends V> dict) {
-			this.dict = (Dictionary<K, V>) requireNonNull(dict);
+		DictionaryAsMap(Dictionary<K, V> dict) {
+			this.dict = requireNonNull(dict);
 		}
 
 		Iterator<K> keys() {
@@ -302,7 +301,7 @@ public class Dictionaries {
 	 *         specified map can be cast to a Dictionary, then the specified map
 	 *         is returned.
 	 */
-	public static <K, V> Dictionary<K, V> asDictionary(Map<? extends K, ? extends V> map) {
+	public static <K, V> Dictionary<K, V> asDictionary(Map<K, V> map) {
 		if (map instanceof Dictionary) {
 			@SuppressWarnings("unchecked")
 			Dictionary<K, V> coerced = (Dictionary<K, V>) map;
@@ -314,9 +313,8 @@ public class Dictionaries {
 	private static class MapAsDictionary<K, V> extends Dictionary<K, V> implements Map<K, V> {
 		private final Map<K, V> map;
 
-		@SuppressWarnings("unchecked")
-		MapAsDictionary(Map<? extends K, ? extends V> map) {
-			this.map = (Map<K, V>) requireNonNull(map);
+		MapAsDictionary(Map<K, V> map) {
+			this.map = requireNonNull(map);
 			boolean nullKey;
 			try {
 				nullKey = map.containsKey(null);
@@ -454,7 +452,6 @@ public class Dictionaries {
 	private static class ServiceReferenceAsDictionary extends Dictionary<String, Object> {
 		private final ServiceReference<?> serviceReference;
 
-		@SuppressWarnings("unchecked")
 		ServiceReferenceAsDictionary(ServiceReference<?> serviceReference) {
 			this.serviceReference = requireNonNull(serviceReference);
 			boolean nullKey = keysInternal().contains(null);
