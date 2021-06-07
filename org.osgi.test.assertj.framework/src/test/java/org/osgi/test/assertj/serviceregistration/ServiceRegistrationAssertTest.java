@@ -21,11 +21,29 @@ package org.osgi.test.assertj.serviceregistration;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.test.assertj.testutil.AbstractAssertTest;
 
-class ServiceRegistrationAssertTest {
+class ServiceRegistrationAssertTest extends AbstractAssertTest<ServiceRegistrationAssert, ServiceRegistration<?>> {
+
+	public ServiceRegistrationAssertTest() {
+		super(ServiceRegistrationAssert::assertThat);
+	}
+
+	ServiceReference<Object> reference;
+
+	@BeforeEach
+	public void setUp() {
+		ServiceRegistration<Object> reg = mock(ServiceRegistration.class);
+		reference = mock(ServiceReference.class);
+		when(reg.getReference()).thenReturn(reference);
+		setActual(reg);
+	}
 
 	@Test
 	void hasServiceReference() {
@@ -39,4 +57,8 @@ class ServiceRegistrationAssertTest {
 			.withFailMessage("Expecting actual not to be null");
 	}
 
+	@Test
+	public void hasServiceReferenceThat() {
+		assertChildAssertion("service reference", aut::hasServiceReferenceThat, actual::getReference);
+	}
 }
