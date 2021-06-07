@@ -42,7 +42,11 @@ on your local machine.
 
 [![Coverage Status](https://img.shields.io/codecov/c/github/osgi/osgi-test.svg)](https://codecov.io/github/osgi/osgi-test)
 
+## Code Quality
 
+We use CodeQL to analyse the code and look for potential bugs. The results are visible on [LGTM.com](https://lgtm.com/projects/g/osgi/osgi-test/?mode=list).
+
+[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/osgi/osgi-test.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/osgi/osgi-test/context:java)
 
 ## Repository
 
