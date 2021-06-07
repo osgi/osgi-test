@@ -50,7 +50,9 @@ We use CodeQL to analyse the code and look for potential bugs. The results are v
 
 ## Repository
 
-Currently OSGi Testing artifacts are available as snapshots from the Sonatype OSS repository:
+Release versions of osgi-test bundles are available on Maven Central under the `org.osgi` group ID. You can find them [here](https://search.maven.org/search?q=a:org.osgi.test.*).
+
+For those who want the bleeding edge, snapshot artifacts are published to the Sonatype OSS repository:
 
 [https://oss.sonatype.org/content/repositories/snapshots/](https://oss.sonatype.org/content/repositories/snapshots/)
 
