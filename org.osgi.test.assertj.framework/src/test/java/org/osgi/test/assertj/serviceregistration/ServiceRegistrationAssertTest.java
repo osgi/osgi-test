@@ -37,6 +37,7 @@ class ServiceRegistrationAssertTest extends AbstractAssertTest<ServiceRegistrati
 
 	ServiceReference<Object> reference;
 
+	@SuppressWarnings("unchecked")
 	@BeforeEach
 	public void setUp() {
 		ServiceRegistration<Object> reg = mock(ServiceRegistration.class);
