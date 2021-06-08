@@ -18,11 +18,20 @@
 
 package org.osgi.test.assertj.promise;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.osgi.test.assertj.promise.PromiseAssert.assertThat;
+import static org.osgi.test.assertj.testutils.TestUtil.waitForThreadToWait;
 
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReference;
 
+import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.InstanceOfAssertFactories;
+import org.assertj.core.api.StandardSoftAssertionsProvider;
+import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,10 +41,94 @@ import org.osgi.util.promise.Promises;
 
 @ExtendWith(SoftAssertionsExtension.class)
 public class PromiseAssertTest {
-	public static final Duration WAIT_TIME = Duration.ofSeconds(2L);
+	public static final Duration	WAIT_TIME	= Duration.ofSeconds(2L);
+
+	static final long				TIMEOUT_MS	= 10000;
+
+	static class OurSoftAssertions extends PromiseSoftAssertions implements StandardSoftAssertionsProvider {}
+
+	@InjectSoftAssertions
+	OurSoftAssertions softly;
 
 	@Test
-	public void testUnresolvedPromise(PromiseSoftAssertions softly) throws Exception {
+	void testPromise_thatIsExpectedToResolveInTheFuture_butDoesnt() throws InterruptedException {
+		final String value = new String("value");
+		final Deferred<String> d = new Deferred<>();
+		final Promise<String> p = d.getPromise();
+
+		AtomicReference<AbstractThrowableAssert<?, ?>> pa = new AtomicReference<>();
+		Thread t = new Thread(() -> pa.set(assertThatCode(() -> assertThat(p).as("foo")
+			.doesNotResolveWithin(WAIT_TIME))), "assertThread");
+		t.start();
+		try {
+			waitForThreadToWait(t, softly);
+			d.resolve(value);
+		} finally {
+			t.join(TIMEOUT_MS);
+		}
+		softly.assertThat(pa.get())
+			.as("expectedAssertion")
+			.isNotNull();
+		if (softly.wasSuccess()) {
+			pa.get()
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("foo")
+				.hasMessageContaining("not")
+				.hasMessageContaining("resolved");
+		}
+	}
+
+	@Test
+	void testPromise_thatIsExpectedNotToResolveInTheFuture_butDoes() throws InterruptedException {
+		final String value = new String("value");
+		final Deferred<String> d = new Deferred<>();
+		final Promise<String> p = d.getPromise();
+
+		AtomicReference<AbstractThrowableAssert<?, ?>> pa = new AtomicReference<>();
+		Thread t = new Thread(() -> pa.set(assertThatCode(() -> assertThat(p).as("foo")
+			.resolvesWithin(WAIT_TIME))), "assertThread");
+		t.start();
+		try {
+			waitForThreadToWait(t, softly);
+			d.resolve(value);
+		} finally {
+			t.join(TIMEOUT_MS);
+		}
+		softly.assertThat(pa.get())
+			.as("expectedAssertion")
+			.isNotNull();
+		if (softly.wasSuccess()) {
+			pa.get()
+				.doesNotThrowAnyException();
+		}
+	}
+
+	@Test
+	void hasValueThat_withFailedPromise() throws Exception {
+		final String value = new String("value");
+		final Deferred<String> d = new Deferred<>();
+		final Promise<String> p = mock(Promise.class);
+
+		final String eMsg = "customMessage";
+		Exception e = new Exception(eMsg);
+		InvocationTargetException ite = new InvocationTargetException(e);
+		// Have to actually break the contract of Promise to exercise this
+		// code path - a Promise shouldn't return true for isDone(), null for
+		// getFailure()
+		// *and* have getValue() return an InvocationTargetException all at
+		// once.
+		when(p.getValue()).thenThrow(ite);
+		when(p.isDone()).thenReturn(true);
+		when(p.getFailure()).thenReturn(null);
+
+		softly.assertThatCode(() -> assertThat(p).as("foo")
+			.hasValueThat())
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining(eMsg);
+	}
+
+	@Test
+	void testUnresolvedPromise() throws Exception {
 		final String value = new String("value");
 		final Deferred<String> d = new Deferred<>();
 		final Promise<String> p = d.getPromise();
@@ -106,7 +199,7 @@ public class PromiseAssertTest {
 	}
 
 	@Test
-	public void testResolvedPromise(PromiseSoftAssertions softly) throws Exception {
+	void testResolvedPromise() throws Exception {
 		final String value = new String("value");
 		final Promise<String> p = Promises.resolved(value);
 
