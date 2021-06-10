@@ -31,7 +31,7 @@ public class ProxyableDictionaryAssert<KEY, VALUE>
 	extends AbstractDictionaryAssert<ProxyableDictionaryAssert<KEY, VALUE>, Map<KEY, VALUE>, KEY, VALUE> {
 
 	public ProxyableDictionaryAssert(Dictionary<KEY, VALUE> actual) {
-		this(Dictionaries.asMap(actual));
+		this((actual != null) ? Dictionaries.asMap(actual) : null);
 	}
 
 	protected ProxyableDictionaryAssert(Map<KEY, VALUE> actual) {

@@ -36,7 +36,7 @@ public class DictionaryAssert<KEY, VALUE>
 	extends AbstractDictionaryAssert<DictionaryAssert<KEY, VALUE>, Map<KEY, VALUE>, KEY, VALUE> {
 
 	public DictionaryAssert(Dictionary<KEY, VALUE> actual) {
-		this(Dictionaries.asMap(actual));
+		this((actual != null) ? Dictionaries.asMap(actual) : null);
 	}
 
 	protected DictionaryAssert(Map<KEY, VALUE> actual) {
