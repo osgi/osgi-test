@@ -221,6 +221,24 @@ public class DictionaryAssertTest {
 			.isInstanceOf(AssertionError.class);
 	}
 
+	@Test
+	public void null_actual(DictionarySoftAssertions softly) throws Exception {
+		final Dictionary<?, ?> nullDictionary = null;
+		softly.assertThatCode(() -> {
+			DictionaryAssert.assertThat(nullDictionary)
+				.isNull();
+		})
+			.doesNotThrowAnyException();
+		softly.assertThatCode(() -> {
+			DictionaryAssert.assertThat(nullDictionary)
+				.isNotNull();
+		})
+			.isInstanceOf(AssertionError.class);
+
+		softly.assertThat(nullDictionary)
+			.isNull();
+	}
+
 	public static class TestDictionary<K, V> extends Dictionary<K, V> {
 		private final Map<K, V> map;
 
