@@ -195,6 +195,9 @@ using your real name. Sorry, no pseudonyms or anonymous contributions.
 Many Git UI tools have support for adding the `Signed-off-by` line to the end of your commit
 message. This line can be automatically added by the `git commit` command by using the `-s` option.
 
+It is important that you read and understand the legal considerations found
+below when signing off or contributing any commit.
+
 ### Merge approval
 
 The maintainers will review your pull request and, if approved, will merge into
@@ -213,3 +216,59 @@ Don't forget: being a maintainer is a time investment. Make sure you will have t
 to make yourself available. You don't have to be a maintainer to make a difference
 on the project!
 
+## Legal considerations
+
+Please read the [Eclipse Foundation policy on accepting contributions via Git](http://wiki.eclipse.org/Development_Resources/Contributing_via_Git).
+
+Your contribution cannot be accepted unless you have a signed [ECA - Eclipse Foundation Contributor Agreement](http://www.eclipse.org/legal/ECA.php) in place.
+
+Here is the checklist for contributions to be _acceptable_:
+
+1. [Create an account at Eclipse](https://dev.eclipse.org/site_login/createaccount.php).
+2. Add your GitHub user name in your account settings.
+3. [Log into the project's portal](https://projects.eclipse.org/) and sign the ["Eclipse ECA"](https://projects.eclipse.org/user/sign/cla).
+4. Ensure that you [_sign-off_](https://wiki.eclipse.org/Development_Resources/Contributing_via_Git#Signing_off_on_a_commit) your Git commits.
+5. Ensure that you use the _same_ email address as your Eclipse account in commits.
+6. Include the appropriate copyright notice and license at the top of each file.
+
+Your signing of the ECA will be verified by a webservice called 'ip-validation'
+that checks the email address that signed-off on your commits has signed the
+ECA. **Note**: This service is case-sensitive, so ensure the email that signed
+the ECA and that signed-off on your commits is the same, down to the case.
+
+### Copyright Notice and Licensing Requirements
+
+**It is the responsibility of each contributor to obtain legal advice, and
+to ensure that their contributions fulfill the legal requirements of their
+organization. This document is not legal advice.**
+
+This project is licensed under the Apache
+License v2.0. Any previously unlicensed contribution should be released under
+the same license.
+
+- If you wish to contribute code under a different license, you must consult
+with a committer before contributing.
+- For any scenario not covered by this document, please discuss the copyright
+notice and licensing requirements with a committer before contributing.
+
+The template for the copyright notice and license is as follows:
+
+```java
+/*******************************************************************************
+ * Copyright (c) Contributors to the Eclipse Foundation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *******************************************************************************/
+```
