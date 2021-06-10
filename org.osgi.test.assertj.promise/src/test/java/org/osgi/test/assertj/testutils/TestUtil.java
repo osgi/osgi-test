@@ -18,17 +18,19 @@
 
 package org.osgi.test.assertj.testutils;
 
+import java.util.concurrent.TimeUnit;
+
 import org.assertj.core.api.StandardSoftAssertionsProvider;
 import org.osgi.test.common.exceptions.Exceptions;
 
 public class TestUtil {
 	private TestUtil() {}
 
-	static final long TIMEOUT_MS = 10000;
+	static final long TIMEOUT_NS = TimeUnit.SECONDS.toNanos(10L);
 
 	public static void waitForThreadToWait(Thread thread, StandardSoftAssertionsProvider softly) {
-		final long waitTime = TIMEOUT_MS;
-		final long endTime = System.currentTimeMillis() + waitTime;
+		final long waitTime = TIMEOUT_NS;
+		final long startTime = System.nanoTime();
 		int waitCount = 0;
 		try {
 			OUTER: while (true) {
@@ -49,8 +51,10 @@ public class TestUtil {
 						waitCount = 0;
 						break;
 				}
-				if (System.currentTimeMillis() > endTime) {
-					throw new InterruptedException("Thread still hasn't entered wait state after " + waitTime + "ms");
+				final long elapsed = System.nanoTime() - startTime;
+				if (elapsed > waitTime) {
+					throw new InterruptedException("Thread still hasn't entered wait state after "
+						+ TimeUnit.NANOSECONDS.toMillis(waitTime) + "ms");
 				}
 			}
 		} catch (InterruptedException e) {
