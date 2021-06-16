@@ -21,7 +21,7 @@ package org.osgi.test.assertj.versionrange;
 import org.osgi.framework.Version;
 import org.osgi.test.assertj.version.AbstractVersionAssert;
 
-public class AbstractVersionBoundAssert<SELF extends AbstractVersionBoundAssert<SELF, ACTUAL>, ACTUAL extends Version>
+public abstract class AbstractVersionBoundAssert<SELF extends AbstractVersionBoundAssert<SELF, ACTUAL>, ACTUAL extends Version>
 	extends AbstractVersionAssert<SELF, ACTUAL> {
 
 	final boolean isOpen;

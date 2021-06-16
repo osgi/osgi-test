@@ -32,7 +32,7 @@ import org.assertj.core.api.AbstractAssert;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 
-public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<SELF, ACTUAL>, ACTUAL extends VersionRange>
+public abstract class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<SELF, ACTUAL>, ACTUAL extends VersionRange>
 	extends AbstractAssert<SELF, ACTUAL> {
 
 	protected AbstractVersionRangeAssert(ACTUAL actual, Class<?> selfType) {
