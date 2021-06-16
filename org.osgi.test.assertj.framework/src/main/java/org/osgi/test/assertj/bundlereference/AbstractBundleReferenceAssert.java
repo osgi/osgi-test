@@ -25,7 +25,7 @@ import java.util.Objects;
 import org.assertj.core.api.AbstractAssert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
-import org.osgi.test.assertj.bundle.AbstractBundleAssert;
+import org.osgi.test.assertj.bundle.BundleAssert;
 
 public abstract class AbstractBundleReferenceAssert<SELF extends AbstractBundleReferenceAssert<SELF, ACTUAL>, ACTUAL extends BundleReference>
 	extends AbstractAssert<SELF, ACTUAL> {
@@ -44,7 +44,7 @@ public abstract class AbstractBundleReferenceAssert<SELF extends AbstractBundleR
 		return myself;
 	}
 
-	public AbstractBundleAssert<?, ? extends Bundle> refersToBundleThat() {
+	public BundleAssert refersToBundleThat() {
 		return isNotNull().extracting(BundleReference::getBundle,
 			BUNDLE)
 			.as(actual + ".bundle");

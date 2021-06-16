@@ -25,7 +25,7 @@ import java.util.function.ToIntFunction;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
-import org.osgi.test.assertj.bundle.AbstractBundleAssert;
+import org.osgi.test.assertj.bundle.BundleAssert;
 import org.osgi.test.assertj.event.AbstractBitmappedTypeEventAssert;
 import org.osgi.test.common.bitmaps.BundleEventType;
 
@@ -46,7 +46,7 @@ public abstract class AbstractBundleEventAssert<SELF extends AbstractBundleEvent
 		return myself;
 	}
 
-	public AbstractBundleAssert<?, ? extends Bundle> hasBundleThat() {
+	public BundleAssert hasBundleThat() {
 		return isNotNull().extracting(BundleEvent::getBundle, BUNDLE)
 			.as(actual + ".bundle");
 	}
@@ -61,7 +61,7 @@ public abstract class AbstractBundleEventAssert<SELF extends AbstractBundleEvent
 		return myself;
 	}
 
-	public AbstractBundleAssert<?, ? extends Bundle> hasOriginThat() {
+	public BundleAssert hasOriginThat() {
 		return isNotNull().extracting(BundleEvent::getOrigin, BUNDLE)
 			.as(actual + ".origin");
 	}
