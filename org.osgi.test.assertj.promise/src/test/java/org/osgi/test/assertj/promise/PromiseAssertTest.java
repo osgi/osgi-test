@@ -107,7 +107,11 @@ public class PromiseAssertTest {
 	void hasValueThat_withFailedPromise() throws Exception {
 		final String value = new String("value");
 		final Deferred<String> d = new Deferred<>();
-		final Promise<String> p = mock(Promise.class);
+		@SuppressWarnings({
+			"rawtypes", "unchecked"
+		})
+		Class<Promise<String>> type = (Class) Promise.class;
+		final Promise<String> p = mock(type);
 
 		final String eMsg = "customMessage";
 		Exception e = new Exception(eMsg);
