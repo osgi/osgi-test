@@ -38,7 +38,7 @@ public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<S
 	}
 
 	public IntegerAssert hasMajorThat() {
-		return (IntegerAssert) isNotNull().extracting(Version::getMajor, INTEGER);
+		return isNotNull().extracting(Version::getMajor, INTEGER);
 	}
 
 	public SELF hasMajor(int expected) {
@@ -52,7 +52,7 @@ public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<S
 	}
 
 	public IntegerAssert hasMinorThat() {
-		return (IntegerAssert) isNotNull().extracting(Version::getMinor, INTEGER);
+		return isNotNull().extracting(Version::getMinor, INTEGER);
 	}
 
 	public SELF hasMinor(int expected) {
@@ -66,7 +66,7 @@ public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<S
 	}
 
 	public IntegerAssert hasMicroThat() {
-		return (IntegerAssert) isNotNull().extracting(Version::getMicro, INTEGER);
+		return isNotNull().extracting(Version::getMicro, INTEGER);
 	}
 
 	public SELF hasMicro(int expected) {
@@ -80,7 +80,7 @@ public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<S
 	}
 
 	public StringAssert hasQualifierThat() {
-		return (StringAssert) isNotNull().extracting(Version::getQualifier, STRING);
+		return isNotNull().extracting(Version::getQualifier, STRING);
 	}
 
 	public SELF hasQualifier(String expected) {

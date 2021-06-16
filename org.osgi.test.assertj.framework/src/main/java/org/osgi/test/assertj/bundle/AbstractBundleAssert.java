@@ -93,7 +93,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	}
 
 	public StringAssert hasSymbolicNameThat() {
-		return (StringAssert) isNotNull().extracting(Bundle::getSymbolicName, STRING)
+		return isNotNull().extracting(Bundle::getSymbolicName, STRING)
 			.as(actual + ".symbolicName");
 	}
 
@@ -108,7 +108,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	}
 
 	public StringAssert hasLocationThat() {
-		return (StringAssert) isNotNull().extracting(Bundle::getLocation, STRING)
+		return isNotNull().extracting(Bundle::getLocation, STRING)
 			.as(actual + ".location");
 	}
 
@@ -199,12 +199,12 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	}
 
 	public LongAssert hasLastModifiedLongThat() {
-		return (LongAssert) isNotNull().extracting(Bundle::getLastModified, LONG)
+		return isNotNull().extracting(Bundle::getLastModified, LONG)
 			.as(actual + ".lastModified");
 	}
 
 	static final InstanceOfAssertFactory<Long, DateAssert> LONG_AS_DATE = new InstanceOfAssertFactory<>(Long.class,
-		date -> (DateAssert) Assertions.assertThat(new Date(date)));
+		date -> Assertions.assertThat(new Date(date)));
 
 	public DateAssert hasLastModifiedDateThat() {
 		return isNotNull().extracting(Bundle::getLastModified, LONG_AS_DATE)
