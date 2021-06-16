@@ -49,7 +49,7 @@ public abstract class AbstractBundleContextAssert<SELF extends AbstractBundleCon
 	}
 
 	public StringAssert hasPropertyWithKeyThat(String key) {
-		return (StringAssert) isNotNull().extracting(bundleContext -> bundleContext.getProperty(key),
+		return isNotNull().extracting(bundleContext -> bundleContext.getProperty(key),
 			STRING)
 			.as(actual + ".property(" + key + ")");
 	}

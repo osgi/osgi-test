@@ -124,7 +124,7 @@ public interface AssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL> {
 	}
 
 	default <T> ThrowableAssert assertFailing(String msg, Function<T, SELF> assertion, T failing) {
-		return (ThrowableAssert) softly().assertThatThrownBy(() -> assertion.apply(failing))
+		return softly().assertThatThrownBy(() -> assertion.apply(failing))
 			.as(msg == null ? "failing" : msg + ":failing")
 			.isInstanceOf(AssertionError.class)
 			.hasMessageContaining(actual().toString());

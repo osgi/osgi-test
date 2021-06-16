@@ -205,7 +205,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 *             resolved successfully.
 	 */
 	public ThrowableAssert hasFailedWithThrowableThat() {
-		return (ThrowableAssert) hasFailed().extracting(this::getFailure, InstanceOfAssertFactories.THROWABLE);
+		return hasFailed().extracting(this::getFailure, InstanceOfAssertFactories.THROWABLE);
 	}
 
 	void assertNotFailed() {
