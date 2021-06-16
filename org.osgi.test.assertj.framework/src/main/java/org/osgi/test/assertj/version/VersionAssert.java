@@ -24,7 +24,7 @@ import org.osgi.framework.Version;
 public class VersionAssert extends AbstractVersionAssert<VersionAssert, Version> {
 
 	public static final InstanceOfAssertFactory<Version, VersionAssert> VERSION = new InstanceOfAssertFactory<>(
-		Version.class, VersionAssert::new);
+		Version.class, VersionAssert::assertThat);
 
 	public VersionAssert(Version actual) {
 		super(actual, VersionAssert.class);

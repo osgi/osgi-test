@@ -24,7 +24,7 @@ import org.osgi.framework.FrameworkEvent;
 public class FrameworkEventAssert extends AbstractFrameworkEventAssert<FrameworkEventAssert, FrameworkEvent> {
 
 	public static final InstanceOfAssertFactory<FrameworkEvent, FrameworkEventAssert> FRAMEWORK_EVENT = new InstanceOfAssertFactory<>(
-		FrameworkEvent.class, FrameworkEventAssert::new);
+		FrameworkEvent.class, FrameworkEventAssert::assertThat);
 
 	public FrameworkEventAssert(FrameworkEvent actual) {
 		super(actual, FrameworkEventAssert.class, FrameworkEvent::getType);
