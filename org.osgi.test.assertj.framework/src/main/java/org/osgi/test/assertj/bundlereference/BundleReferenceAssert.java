@@ -24,7 +24,7 @@ import org.osgi.framework.BundleReference;
 public class BundleReferenceAssert extends AbstractBundleReferenceAssert<BundleReferenceAssert, BundleReference> {
 
 	public static final InstanceOfAssertFactory<BundleReference, BundleReferenceAssert> BUNDLE_REFERENCE = new InstanceOfAssertFactory<>(
-		BundleReference.class, BundleReferenceAssert::new);
+		BundleReference.class, BundleReferenceAssert::assertThat);
 
 	public BundleReferenceAssert(BundleReference actual) {
 		super(actual, BundleReferenceAssert.class);
