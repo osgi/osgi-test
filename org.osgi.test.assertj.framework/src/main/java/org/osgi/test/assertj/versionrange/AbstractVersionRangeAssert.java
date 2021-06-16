@@ -32,14 +32,14 @@ import org.assertj.core.api.AbstractAssert;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 
-public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<SELF, ACTUAL>, ACTUAL extends VersionRange>
+public abstract class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<SELF, ACTUAL>, ACTUAL extends VersionRange>
 	extends AbstractAssert<SELF, ACTUAL> {
 
 	protected AbstractVersionRangeAssert(ACTUAL actual, Class<?> selfType) {
 		super(actual, selfType);
 	}
 
-	public AbstractVersionBoundAssert<?, ?> hasLeftThat() {
+	public VersionBoundAssert hasLeftThat() {
 		return isNotNull().extracting(VersionRange::getLeft,
 			versionBoundAssertFactory(actual.getLeftType() == LEFT_OPEN));
 	}
@@ -75,7 +75,7 @@ public class AbstractVersionRangeAssert<SELF extends AbstractVersionRangeAssert<
 		return myself;
 	}
 
-	public AbstractVersionBoundAssert<?, ?> hasRightThat() {
+	public VersionBoundAssert hasRightThat() {
 		return isNotNull().extracting(VersionRange::getRight,
 			versionBoundAssertFactory(actual.getRightType() == RIGHT_OPEN));
 	}

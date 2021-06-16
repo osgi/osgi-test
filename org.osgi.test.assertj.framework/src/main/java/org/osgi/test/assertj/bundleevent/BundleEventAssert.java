@@ -24,7 +24,7 @@ import org.osgi.framework.BundleEvent;
 public class BundleEventAssert extends AbstractBundleEventAssert<BundleEventAssert, BundleEvent> {
 
 	public static final InstanceOfAssertFactory<BundleEvent, BundleEventAssert> BUNDLE_EVENT = new InstanceOfAssertFactory<>(
-		BundleEvent.class, BundleEventAssert::new);
+		BundleEvent.class, BundleEventAssert::assertThat);
 
 	public BundleEventAssert(BundleEvent actual) {
 		super(actual, BundleEventAssert.class, BundleEvent::getType);

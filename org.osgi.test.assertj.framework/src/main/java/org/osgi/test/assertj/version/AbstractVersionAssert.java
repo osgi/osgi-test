@@ -24,21 +24,21 @@ import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import java.util.Objects;
 
 import org.assertj.core.api.AbstractComparableAssert;
-import org.assertj.core.api.AbstractIntegerAssert;
-import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.ComparableAssert;
+import org.assertj.core.api.IntegerAssert;
+import org.assertj.core.api.StringAssert;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 
-public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTUAL>, ACTUAL extends Version>
+public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTUAL>, ACTUAL extends Version>
 	extends AbstractComparableAssert<SELF, ACTUAL> implements ComparableAssert<SELF, ACTUAL> {
 
 	protected AbstractVersionAssert(ACTUAL actual, Class<?> selfType) {
 		super(actual, selfType);
 	}
 
-	public AbstractIntegerAssert<?> hasMajorThat() {
-		return isNotNull().extracting(Version::getMajor, INTEGER);
+	public IntegerAssert hasMajorThat() {
+		return (IntegerAssert) isNotNull().extracting(Version::getMajor, INTEGER);
 	}
 
 	public SELF hasMajor(int expected) {
@@ -51,8 +51,8 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		return myself;
 	}
 
-	public AbstractIntegerAssert<?> hasMinorThat() {
-		return isNotNull().extracting(Version::getMinor, INTEGER);
+	public IntegerAssert hasMinorThat() {
+		return (IntegerAssert) isNotNull().extracting(Version::getMinor, INTEGER);
 	}
 
 	public SELF hasMinor(int expected) {
@@ -65,8 +65,8 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		return myself;
 	}
 
-	public AbstractIntegerAssert<?> hasMicroThat() {
-		return isNotNull().extracting(Version::getMicro, INTEGER);
+	public IntegerAssert hasMicroThat() {
+		return (IntegerAssert) isNotNull().extracting(Version::getMicro, INTEGER);
 	}
 
 	public SELF hasMicro(int expected) {
@@ -79,8 +79,8 @@ public class AbstractVersionAssert<SELF extends AbstractVersionAssert<SELF, ACTU
 		return myself;
 	}
 
-	public AbstractStringAssert<?> hasQualifierThat() {
-		return isNotNull().extracting(Version::getQualifier, STRING);
+	public StringAssert hasQualifierThat() {
+		return (StringAssert) isNotNull().extracting(Version::getQualifier, STRING);
 	}
 
 	public SELF hasQualifier(String expected) {

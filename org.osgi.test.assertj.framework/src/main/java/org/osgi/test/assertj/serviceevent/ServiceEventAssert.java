@@ -24,7 +24,7 @@ import org.osgi.framework.ServiceEvent;
 public class ServiceEventAssert extends AbstractServiceEventAssert<ServiceEventAssert, ServiceEvent> {
 
 	public static final InstanceOfAssertFactory<ServiceEvent, ServiceEventAssert> SERVICE_EVENT = new InstanceOfAssertFactory<>(
-		ServiceEvent.class, ServiceEventAssert::new);
+		ServiceEvent.class, ServiceEventAssert::assertThat);
 
 	public ServiceEventAssert(ServiceEvent actual) {
 		super(actual, ServiceEventAssert.class, ServiceEvent::getType);

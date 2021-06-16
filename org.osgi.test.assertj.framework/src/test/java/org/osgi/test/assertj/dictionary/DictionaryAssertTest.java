@@ -65,7 +65,7 @@ public class DictionaryAssertTest {
 			public <SELF extends Assert<? extends SELF, ? extends ACTUAL>, ACTUAL> SELF proxy(Class<SELF> assertClass,
 				Class<ACTUAL> actualClass, ACTUAL actual) {
 				actualRef.set(actual);
-				retvalRef.set(new ProxyableDictionaryAssert((Dictionary) actual));
+				retvalRef.set(new DictionaryAssert((Dictionary) actual));
 				return (SELF) retvalRef.get();
 			}
 
