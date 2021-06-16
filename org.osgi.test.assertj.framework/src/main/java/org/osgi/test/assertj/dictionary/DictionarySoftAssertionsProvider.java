@@ -31,9 +31,9 @@ public interface DictionarySoftAssertionsProvider extends SoftAssertionsProvider
 	 * @param <V> the type of the values used in the dictionary
 	 * @return the created assertion object.
 	 */
-	default <K, V> ProxyableDictionaryAssert<K, V> assertThat(Dictionary<K, V> actual) {
+	default <K, V> DictionaryAssert<K, V> assertThat(Dictionary<K, V> actual) {
 		@SuppressWarnings("unchecked")
-		ProxyableDictionaryAssert<K, V> softly = proxy(ProxyableDictionaryAssert.class, Dictionary.class, actual);
+		DictionaryAssert<K, V> softly = proxy(DictionaryAssert.class, Dictionary.class, actual);
 		return softly;
 	}
 }
