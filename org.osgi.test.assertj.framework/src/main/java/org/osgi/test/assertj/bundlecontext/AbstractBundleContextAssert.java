@@ -24,10 +24,10 @@ import static org.osgi.test.assertj.bundle.BundleAssert.BUNDLE;
 import java.util.Arrays;
 import java.util.List;
 
+import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.ListAssert;
-import org.assertj.core.api.StringAssert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.assertj.bundle.BundleAssert;
@@ -48,7 +48,7 @@ public abstract class AbstractBundleContextAssert<SELF extends AbstractBundleCon
 		return myself;
 	}
 
-	public StringAssert hasPropertyWithKeyThat(String key) {
+	public AbstractStringAssert<?> hasPropertyWithKeyThat(String key) {
 		return isNotNull().extracting(bundleContext -> bundleContext.getProperty(key),
 			STRING)
 			.as(actual + ".property(" + key + ")");

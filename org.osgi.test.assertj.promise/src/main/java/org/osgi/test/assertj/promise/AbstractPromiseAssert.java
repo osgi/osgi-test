@@ -27,12 +27,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractObjectAssert;
+import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
-import org.assertj.core.api.ObjectAssert;
-import org.assertj.core.api.ThrowableAssert;
 import org.osgi.test.common.exceptions.Exceptions;
 import org.osgi.util.promise.Promise;
 
@@ -199,12 +199,12 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 * Verifies that the {@link Promise} is resolved with a failure and returns
 	 * an assertion on the failure.
 	 *
-	 * @return A {@link ThrowableAssert} holding the failure of the
+	 * @return A {@link AbstractThrowableAssert} holding the failure of the
 	 *         {@link Promise}.
 	 * @throws AssertionError If the {@link Promise} is unresolved or is
 	 *             resolved successfully.
 	 */
-	public ThrowableAssert hasFailedWithThrowableThat() {
+	public AbstractThrowableAssert<?, ? extends Throwable> hasFailedWithThrowableThat() {
 		return hasFailed().extracting(this::getFailure, InstanceOfAssertFactories.THROWABLE);
 	}
 
@@ -259,11 +259,12 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 * Verifies that the {@link Promise} is resolved successfully and returns an
 	 * assertion on the value of the {@link Promise}.
 	 *
-	 * @return An {@link ObjectAssert} holding the value of the {@link Promise}.
+	 * @return An {@link AbstractObjectAssert} holding the value of the
+	 *         {@link Promise}.
 	 * @throws AssertionError If the {@link Promise} is unresolved or is
 	 *             resolved with a failure.
 	 */
-	public ObjectAssert<RESULT> hasValueThat() {
+	public AbstractObjectAssert<?, RESULT> hasValueThat() {
 		return isSuccessful().extracting(this::getValue, Assertions::<RESULT> assertThat);
 	}
 
