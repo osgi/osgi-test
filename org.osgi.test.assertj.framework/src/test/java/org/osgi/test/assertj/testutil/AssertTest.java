@@ -24,9 +24,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assert;
 import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.ThrowableAssert;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.test.common.exceptions.Exceptions;
 
@@ -51,7 +51,7 @@ public interface AssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL> {
 	 */
 	SoftAssertions softly();
 
-	default <T> ThrowableAssert assertEqualityAssertion(String field, Function<T, SELF> assertion,
+	default <T> AbstractThrowableAssert<?, ?> assertEqualityAssertion(String field, Function<T, SELF> assertion,
 		T actual, T failing) {
 		return assertEqualityAssertion(null, field, assertion, actual, failing);
 	}
@@ -61,8 +61,8 @@ public interface AssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL> {
 	 * behavior. This function calls {@link #assertPassing assertPassing()} and
 	 * {@link #assertFailing assertFailing()}. It also asserts that the failure
 	 * message matches the general pattern "expected <%s>, but was <%s>". It
-	 * returns the {@link ThrowableAssert} instance so that you can perform
-	 * further assertions on the exception.
+	 * returns the {@link AbstractThrowableAssert} instance so that you can
+	 * perform further assertions on the exception.
 	 *
 	 * @param <T> the type of the arguments accepted by the assertion method
 	 *            under test.
@@ -75,10 +75,10 @@ public interface AssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL> {
 	 * @return The {@code AbstractThrowableAssert} instance used for chaining
 	 *         further assertions.
 	 */
-	default <T> ThrowableAssert assertEqualityAssertion(String msg, String field,
+	default <T> AbstractThrowableAssert<?, ?> assertEqualityAssertion(String msg, String field,
 		Function<T, SELF> assertion, T actual, T failing) {
 		assertPassing(msg, assertion, actual);
-		ThrowableAssert retval = assertFailing(msg, assertion, failing)
+		AbstractThrowableAssert<?, ?> retval = assertFailing(msg, assertion, failing)
 			.hasMessageMatching("(?si).*expecting.*" + field + ".*" + failing + ".*but.*was.*" + actual + ".*")
 			.isInstanceOf(AssertionFailedError.class);
 		try {
@@ -119,11 +119,11 @@ public interface AssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL> {
 		}
 	}
 
-	default <T> ThrowableAssert assertFailing(Function<T, SELF> assertion, T failing) {
+	default <T> AbstractThrowableAssert<?, ?> assertFailing(Function<T, SELF> assertion, T failing) {
 		return assertFailing(null, assertion, failing);
 	}
 
-	default <T> ThrowableAssert assertFailing(String msg, Function<T, SELF> assertion, T failing) {
+	default <T> AbstractThrowableAssert<?, ?> assertFailing(String msg, Function<T, SELF> assertion, T failing) {
 		return softly().assertThatThrownBy(() -> assertion.apply(failing))
 			.as(msg == null ? "failing" : msg + ":failing")
 			.isInstanceOf(AssertionError.class)

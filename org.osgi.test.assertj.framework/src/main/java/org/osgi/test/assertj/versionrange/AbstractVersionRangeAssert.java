@@ -39,7 +39,7 @@ public abstract class AbstractVersionRangeAssert<SELF extends AbstractVersionRan
 		super(actual, selfType);
 	}
 
-	public VersionBoundAssert hasLeftThat() {
+	public AbstractVersionBoundAssert<?, ?> hasLeftThat() {
 		return isNotNull().extracting(VersionRange::getLeft,
 			versionBoundAssertFactory(actual.getLeftType() == LEFT_OPEN));
 	}
@@ -75,7 +75,7 @@ public abstract class AbstractVersionRangeAssert<SELF extends AbstractVersionRan
 		return myself;
 	}
 
-	public VersionBoundAssert hasRightThat() {
+	public AbstractVersionBoundAssert<?, ?> hasRightThat() {
 		return isNotNull().extracting(VersionRange::getRight,
 			versionBoundAssertFactory(actual.getRightType() == RIGHT_OPEN));
 	}

@@ -24,9 +24,9 @@ import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import java.util.Objects;
 
 import org.assertj.core.api.AbstractComparableAssert;
+import org.assertj.core.api.AbstractIntegerAssert;
+import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.ComparableAssert;
-import org.assertj.core.api.IntegerAssert;
-import org.assertj.core.api.StringAssert;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
 
@@ -37,7 +37,7 @@ public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<S
 		super(actual, selfType);
 	}
 
-	public IntegerAssert hasMajorThat() {
+	public AbstractIntegerAssert<?> hasMajorThat() {
 		return isNotNull().extracting(Version::getMajor, INTEGER);
 	}
 
@@ -51,7 +51,7 @@ public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<S
 		return myself;
 	}
 
-	public IntegerAssert hasMinorThat() {
+	public AbstractIntegerAssert<?> hasMinorThat() {
 		return isNotNull().extracting(Version::getMinor, INTEGER);
 	}
 
@@ -65,7 +65,7 @@ public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<S
 		return myself;
 	}
 
-	public IntegerAssert hasMicroThat() {
+	public AbstractIntegerAssert<?> hasMicroThat() {
 		return isNotNull().extracting(Version::getMicro, INTEGER);
 	}
 
@@ -79,7 +79,7 @@ public abstract class AbstractVersionAssert<SELF extends AbstractVersionAssert<S
 		return myself;
 	}
 
-	public StringAssert hasQualifierThat() {
+	public AbstractStringAssert<?> hasQualifierThat() {
 		return isNotNull().extracting(Version::getQualifier, STRING);
 	}
 
