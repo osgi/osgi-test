@@ -31,10 +31,11 @@ import java.util.Objects;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AbstractDateAssert;
+import org.assertj.core.api.AbstractLongAssert;
+import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.DateAssert;
 import org.assertj.core.api.InstanceOfAssertFactory;
-import org.assertj.core.api.LongAssert;
-import org.assertj.core.api.StringAssert;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
@@ -92,8 +93,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		return myself;
 	}
 
-	public StringAssert hasSymbolicNameThat() {
-		return (StringAssert) isNotNull().extracting(Bundle::getSymbolicName, STRING)
+	public AbstractStringAssert<?> hasSymbolicNameThat() {
+		return isNotNull().extracting(Bundle::getSymbolicName, STRING)
 			.as(actual + ".symbolicName");
 	}
 
@@ -107,8 +108,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		return myself;
 	}
 
-	public StringAssert hasLocationThat() {
-		return (StringAssert) isNotNull().extracting(Bundle::getLocation, STRING)
+	public AbstractStringAssert<?> hasLocationThat() {
+		return isNotNull().extracting(Bundle::getLocation, STRING)
 			.as(actual + ".location");
 	}
 
@@ -198,15 +199,15 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 		return myself;
 	}
 
-	public LongAssert hasLastModifiedLongThat() {
-		return (LongAssert) isNotNull().extracting(Bundle::getLastModified, LONG)
+	public AbstractLongAssert<?> hasLastModifiedLongThat() {
+		return isNotNull().extracting(Bundle::getLastModified, LONG)
 			.as(actual + ".lastModified");
 	}
 
 	static final InstanceOfAssertFactory<Long, DateAssert> LONG_AS_DATE = new InstanceOfAssertFactory<>(Long.class,
 		date -> (DateAssert) Assertions.assertThat(new Date(date)));
 
-	public DateAssert hasLastModifiedDateThat() {
+	public AbstractDateAssert<?> hasLastModifiedDateThat() {
 		return isNotNull().extracting(Bundle::getLastModified, LONG_AS_DATE)
 			.as(actual + ".lastModified");
 	}
