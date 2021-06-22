@@ -30,11 +30,10 @@ import java.util.Date;
 import java.util.Objects;
 
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.Assertions;
 import org.assertj.core.api.AbstractDateAssert;
 import org.assertj.core.api.AbstractLongAssert;
 import org.assertj.core.api.AbstractStringAssert;
-import org.assertj.core.api.DateAssert;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
@@ -204,8 +203,8 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 			.as(actual + ".lastModified");
 	}
 
-	static final InstanceOfAssertFactory<Long, DateAssert> LONG_AS_DATE = new InstanceOfAssertFactory<>(Long.class,
-		date -> (DateAssert) Assertions.assertThat(new Date(date)));
+	static final InstanceOfAssertFactory<Long, AbstractDateAssert<?>> LONG_AS_DATE = new InstanceOfAssertFactory<>(
+		Long.class, date -> Assertions.assertThat(new Date(date)));
 
 	public AbstractDateAssert<?> hasLastModifiedDateThat() {
 		return isNotNull().extracting(Bundle::getLastModified, LONG_AS_DATE)
