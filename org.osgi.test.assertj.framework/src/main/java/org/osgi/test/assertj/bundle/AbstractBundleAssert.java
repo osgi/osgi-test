@@ -204,8 +204,7 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 	}
 
 	static final InstanceOfAssertFactory<Long, AbstractDateAssert<?>> LONG_AS_DATE = new InstanceOfAssertFactory<>(
-		Long.class,
-		date -> Assertions.assertThat(new Date(date)));
+		Long.class, date -> Assertions.assertThat(new Date(date)));
 
 	public AbstractDateAssert<?> hasLastModifiedDateThat() {
 		return isNotNull().extracting(Bundle::getLastModified, LONG_AS_DATE)
