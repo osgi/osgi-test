@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.InstanceOfAssertFactories;
-import org.assertj.core.api.StandardSoftAssertionsProvider;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
@@ -45,10 +44,8 @@ public class PromiseAssertTest {
 
 	static final long				TIMEOUT_MS	= 10000;
 
-	static class OurSoftAssertions extends PromiseSoftAssertions implements StandardSoftAssertionsProvider {}
-
 	@InjectSoftAssertions
-	OurSoftAssertions softly;
+	PromiseSoftAssertions softly;
 
 	@Test
 	void testPromise_thatIsExpectedToResolveInTheFuture_butDoesnt() throws InterruptedException {
@@ -104,7 +101,7 @@ public class PromiseAssertTest {
 	}
 
 	@Test
-	void hasValueThat_withFailedPromise() throws Exception {
+	void hasValueThat_withInvalidPromise() throws Exception {
 		final String value = new String("value");
 		final Deferred<String> d = new Deferred<>();
 		@SuppressWarnings({
@@ -286,7 +283,7 @@ public class PromiseAssertTest {
 	}
 
 	@Test
-	public void testFailedPromise(PromiseSoftAssertions softly) throws Exception {
+	public void testFailedPromise() throws Exception {
 		final Throwable cause = new NullPointerException("cause");
 		final Throwable failed = new TestException("failed").initCause(cause);
 		final Promise<String> p = Promises.failed(failed);
@@ -340,7 +337,7 @@ public class PromiseAssertTest {
 	}
 
 	@Test
-	public void testInstanceFactories(PromiseSoftAssertions softly) throws Exception {
+	public void testInstanceFactories() throws Exception {
 		final String value = new String("value");
 		final Promise<String> p = Promises.resolved(value);
 
