@@ -565,7 +565,7 @@
 		<profile>
 			<id>bnd-next</id>
 			<properties>
-				<bnd.version>5.2.0-SNAPSHOT</bnd.version>
+				<bnd.version>6.0.0-SNAPSHOT</bnd.version>
 			</properties>
 			<repositories>
 				<repository>
