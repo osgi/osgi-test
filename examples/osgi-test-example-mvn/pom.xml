@@ -41,7 +41,7 @@
 		<junit-jupiter.version>5.7.2</junit-jupiter.version>
 		<junit-platform.version>1.7.2</junit-platform.version>
 		<assertj.version>3.19.0</assertj.version>
-		<osgi-test.version>0.10.0</osgi-test.version>
+		<osgi-test.version>1.0.0</osgi-test.version>
 	</properties>
 
 	<modules>
@@ -508,21 +508,10 @@
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.test.common</artifactId>
+				<artifactId>org.osgi.test.bom</artifactId>
 				<version>${osgi-test.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.test.assertj.framework</artifactId>
-				<version>${osgi-test.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.test.junit5</artifactId>
-				<version>${osgi-test.version}</version>
-				<scope>test</scope>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.platform</groupId>
