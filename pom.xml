@@ -147,7 +147,7 @@
 								<goal>bnd-process-tests</goal>
 							</goals>
 							<configuration>
-								<artifactFragment>true</artifactFragment>
+								<artifactFragment>false</artifactFragment>
 							</configuration>
 						</execution>
 					</executions>

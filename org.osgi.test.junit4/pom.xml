@@ -82,11 +82,10 @@
 							<goal>bnd-process-tests</goal>
 						</goals>
 						<configuration>
-							<artifactFragment>true</artifactFragment>
+							<artifactFragment>false</artifactFragment>
 							<bnd><![CDATA[
-								p = ${project.artifactId}
+								p = ${project.artifactId}.test
 								Export-Package: !${p}.tb*,${p}.*;-split-package:=first
-								-fixupmessages: "Export-Package duplicate package name..."
 								-make: (*).(jar); type=bnd; recipe="${.}/bnd/$1.bnd"
 								-includeresource:\
 									tb1.jar,\
