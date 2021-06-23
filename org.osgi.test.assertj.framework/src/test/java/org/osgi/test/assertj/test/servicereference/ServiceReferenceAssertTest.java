@@ -16,6 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.assertj.test.servicereference;
+
+import org.osgi.test.assertj.servicereference.ServiceReferenceAssert;
+
+public class ServiceReferenceAssertTest extends AbstractServiceReferenceAssertTest<ServiceReferenceAssert> {
+	public ServiceReferenceAssertTest() {
+		super(ServiceReferenceAssert::assertThat);
+	}
+}

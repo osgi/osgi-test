@@ -16,6 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit5.test.context;
+
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestInstancePreDestroyCallback;
+
+public class PreDestroyCallback implements TestInstancePreDestroyCallback {
+	@Override
+	public void preDestroyTestInstance(ExtensionContext context) throws Exception {
+		MultiLevelCleanupTest instance = (MultiLevelCleanupTest) context.getRequiredTestInstances()
+			.getAllInstances()
+			.get(0);
+		instance.afterAfterEach();
+	}
+}

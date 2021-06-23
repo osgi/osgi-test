@@ -16,6 +16,27 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit4.test.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.osgi.service.log.LoggerFactory;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.junit4.service.ServiceRule;
+
+public class ServiceRuleLoggerFactoryTest {
+
+	@Rule
+	public ServiceRule	serviceUseRule	= new ServiceRule();
+
+	@InjectService
+	LoggerFactory				loggerFactory;
+
+	@Test
+	public void test() throws Exception {
+		assertThat(loggerFactory).isInstanceOf(LoggerFactory.class);
+	}
+
+}

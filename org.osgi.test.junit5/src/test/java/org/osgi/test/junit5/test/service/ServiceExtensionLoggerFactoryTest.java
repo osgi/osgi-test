@@ -16,6 +16,22 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit5.test.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.service.log.LoggerFactory;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.junit5.service.ServiceExtension;
+
+@ExtendWith(ServiceExtension.class)
+public class ServiceExtensionLoggerFactoryTest {
+
+	@Test
+	public void test(@InjectService LoggerFactory loggerFactory) throws Exception {
+		assertThat(loggerFactory).isInstanceOf(LoggerFactory.class);
+	}
+
+}

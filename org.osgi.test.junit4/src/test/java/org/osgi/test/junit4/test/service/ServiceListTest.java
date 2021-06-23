@@ -16,6 +16,30 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit4.test.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.osgi.service.log.LogService;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.junit4.service.ServiceRule;
+
+public class ServiceListTest {
+
+	@Rule
+	public ServiceRule	sur	= new ServiceRule();
+
+	@InjectService
+	List<LogService>				logServices;
+
+	@Test
+	public void testField() throws Exception {
+		assertThat(logServices).size()
+			.isEqualTo(1);
+	}
+
+}

@@ -16,6 +16,28 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit4.test.service;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.service.ServiceAware;
+import org.osgi.test.junit4.service.ServiceRule;
+import org.osgi.test.junit4.test.types.Foo;
+
+public class ServiceRuleExampleTest {
+
+	@Rule
+	public ServiceRule	serviceUseRule	= new ServiceRule();
+
+	@InjectService(cardinality = 0)
+	ServiceAware<Foo>		fServiceAware;
+
+	@Test
+	public void test() throws Exception {
+		assertThat(fServiceAware.getService()).isNull();
+	}
+
+}

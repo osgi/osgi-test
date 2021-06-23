@@ -16,6 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.assertj.test.version;
+
+import org.osgi.test.assertj.version.VersionAssert;
+
+public class VersionAssertTest extends AbstractVersionAssertTest<VersionAssert> {
+	public VersionAssertTest() {
+		super(VersionAssert::assertThat);
+	}
+}

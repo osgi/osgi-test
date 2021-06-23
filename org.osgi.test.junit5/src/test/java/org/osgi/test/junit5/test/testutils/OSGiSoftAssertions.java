@@ -16,6 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit5.test.testutils;
+
+import org.assertj.core.api.SoftAssertions;
+import org.osgi.test.assertj.bundle.BundleSoftAssertionsProvider;
+import org.osgi.test.assertj.bundlecontext.BundleContextSoftAssertionsProvider;
+import org.osgi.test.assertj.bundleevent.BundleEventSoftAssertionsProvider;
+import org.osgi.test.assertj.frameworkevent.FrameworkEventSoftAssertionsProvider;
+import org.osgi.test.assertj.serviceevent.ServiceEventSoftAssertionsProvider;
+
+public class OSGiSoftAssertions extends SoftAssertions
+	implements BundleSoftAssertionsProvider,
+	BundleEventSoftAssertionsProvider, BundleContextSoftAssertionsProvider, ServiceEventSoftAssertionsProvider,
+	FrameworkEventSoftAssertionsProvider {}

@@ -16,6 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.assertj.test.bundlereference;
+
+import org.osgi.framework.BundleReference;
+import org.osgi.test.assertj.bundlereference.BundleReferenceAssert;
+
+class BundleReferenceAssertTest extends AbstractBundleReferenceAssertTest<BundleReferenceAssert, BundleReference> {
+
+	BundleReferenceAssertTest() {
+		super(BundleReferenceAssert::assertThat, BundleReference.class);
+	}
+}

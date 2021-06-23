@@ -16,6 +16,21 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit4.test.context;
+
+import org.osgi.test.junit4.context.BundleContextRule;
+
+public class WithContextRule implements AutoCloseable {
+	final BundleContextRule rule;
+
+	public WithContextRule(Object testInstance) {
+		this.rule = new BundleContextRule();
+		this.rule.init(testInstance);
+	}
+
+	@Override
+	public void close() throws Exception {
+		rule.close();
+	}
+
+}

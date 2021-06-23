@@ -16,6 +16,20 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit5.test.context;
+
+import java.util.Map;
+
+import org.osgi.framework.BundleContext;
+import org.osgi.test.junit5.test.context.MultiLevelCleanupTest.CallbackPoint;
+
+abstract class BundleContextResourceChecker<RESOURCE> extends AbstractResourceChecker<RESOURCE> {
+
+	final BundleContext bc;
+
+	BundleContextResourceChecker(BundleContext bc, Map<CallbackPoint, RESOURCE> scopedResourcesMap) {
+		super(scopedResourcesMap);
+		this.bc = bc;
+	}
+
+}

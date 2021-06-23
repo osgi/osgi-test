@@ -16,6 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.versionrange;
+package org.osgi.test.junit4.test;
+
+import java.io.InputStream;
+
+public class TestUtil {
+	private TestUtil() {}
+
+	public static InputStream getBundle(String name) {
+		return TestUtil.class.getClassLoader()
+			.getResourceAsStream(name);
+	}
+
+}
