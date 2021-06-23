@@ -517,9 +517,7 @@
 						<goals>
 							<goal>baseline</goal>
 						</goals>
-						<!-- Disable baseline validation until we are at version > 1.0.0.
-							Then change inherited to false. -->
-						<inherited>true</inherited>
+						<inherited>false</inherited>
 						<configuration>
 							<skip>true</skip>
 						</configuration>
