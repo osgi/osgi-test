@@ -23,16 +23,20 @@ import org.osgi.framework.Version;
 
 public class VersionBoundAssert extends AbstractVersionBoundAssert<VersionBoundAssert, Version> {
 	public static final InstanceOfAssertFactory<Version, VersionBoundAssert>	OPEN_VERSION	= new InstanceOfAssertFactory<>(
-		Version.class, actual -> new VersionBoundAssert(actual, true));
+		Version.class, actual -> VersionBoundAssert.assertThat(actual, true));
 
 	public static final InstanceOfAssertFactory<Version, VersionBoundAssert>	CLOSED_VERSION	= new InstanceOfAssertFactory<>(
-		Version.class, actual -> new VersionBoundAssert(actual, false));
+		Version.class, actual -> VersionBoundAssert.assertThat(actual, false));
 
 	public static InstanceOfAssertFactory<Version, VersionBoundAssert> versionBoundAssertFactory(boolean open) {
 		return open ? OPEN_VERSION : CLOSED_VERSION;
 	}
 
-	VersionBoundAssert(Version actual, boolean open) {
+	public VersionBoundAssert(Version actual, boolean open) {
 		super(actual, open, VersionBoundAssert.class);
+	}
+
+	public static VersionBoundAssert assertThat(Version actual, boolean open) {
+		return new VersionBoundAssert(actual, open);
 	}
 }
