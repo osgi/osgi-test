@@ -126,4 +126,8 @@ public class Bitmap {
 		}
 		return mask + ":" + bits.collect(Collectors.joining(" | "));
 	}
+
+	public static boolean typeMatchesMask(int type, int mask) {
+		return (type & mask) != 0;
+	}
 }
