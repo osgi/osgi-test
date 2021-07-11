@@ -16,6 +16,24 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.bundleevent;
+package org.osgi.test.assertj.test.testutil;
+
+public enum ConditionMethod {
+
+	Has("to have"),
+	DoesNotHas("not to have"),
+	Is("to be"),
+	IsNot("not to be");
+
+	private String text;
+
+	ConditionMethod(String text) {
+		this.text = text;
+	}
+
+	@Override
+	public String toString() {
+
+		return text;
+	}
+}
