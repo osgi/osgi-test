@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: Apache-2.0 
+# SPDX-License-Identifier: Apache-2.0
 #*******************************************************************************
 
 name: Examples Build
@@ -52,6 +52,8 @@ jobs:
     steps:
     - name: Git Checkout
       uses: actions/checkout@v2
+    - name: Gradle Wrapper Validation
+      uses: gradle/wrapper-validation-action@v1
     - name: Set up Java ${{ matrix.java }}
       uses: actions/setup-java@v2
       with:
@@ -60,4 +62,5 @@ jobs:
     - name: Build
       id: build
       run: |
-        ./.github/scripts/examples-build.sh
+        ./.github/scripts/example-mvn-build.sh
+        ./.github/scripts/example-gradle-build.sh

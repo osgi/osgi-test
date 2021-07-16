@@ -1,0 +1,14 @@
+plugins {
+    id("groovy-gradle-plugin")
+}
+
+repositories {
+    gradlePluginPortal()
+	maven {
+		url = uri(bnd_snapshots)
+	}
+}
+
+dependencies {
+	implementation("biz.aQute.bnd:biz.aQute.bnd.gradle:${bnd_version}")
+}
