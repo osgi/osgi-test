@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.osgi.test.common.annotation.InjectService.DEFAULT_TIMEOUT;
 import static org.osgi.test.junit5.test.testutils.TestKitUtils.assertThatTest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -147,14 +148,17 @@ public class ServiceExtensionTest extends AbstractServiceExtensionTest {
 		@InjectService(cardinality = 2)
 		List<Foo> foos;
 
+		List<Foo>	foosCopy	= new ArrayList<>();
 		@Override
 		List<Foo> getServices() {
-			return foos;
+			return foosCopy;
 		}
 
 		@Override
 		@Test
-		void test() throws Exception {}
+		void test() throws Exception {
+			foos.forEach(e -> foosCopy.add(e));
+		}
 	}
 
 	@Test
