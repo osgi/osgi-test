@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #*******************************************************************************
 # Copyright (c) Contributors to the Eclipse Foundation
 #
@@ -15,32 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #*******************************************************************************
-
-# GitHub Dependabot configuration file
-
-version: 2
-updates:
-
-  # Maintain dependencies for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "daily"
-
-  # Maintain dependencies for maven
-  - package-ecosystem: "maven"
-    directory: "/"
-    schedule:
-      interval: "daily"
-
-  # Maintain dependencies for maven
-  - package-ecosystem: "maven"
-    directory: "/examples/osgi-test-example-mvn"
-    schedule:
-      interval: "weekly"
-
-  # Maintain dependencies for gradle
-  - package-ecosystem: "gradle"
-    directory: "/examples/osgi-test-example-gradle"
-    schedule:
-      interval: "weekly"
+cd examples/osgi-test-example-gradle
+./gradlew --version
+./gradlew build
+cd ../..

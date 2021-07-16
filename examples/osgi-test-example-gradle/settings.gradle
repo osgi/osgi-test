@@ -1,0 +1,4 @@
+rootProject.name = 'org.osgi.test.example.parent'
+include(':org.osgi.test.example.api')
+include(':org.osgi.test.example.player.impl')
+include(':org.osgi.test.example.player.test')

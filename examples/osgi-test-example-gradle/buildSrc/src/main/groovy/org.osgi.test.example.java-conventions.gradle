@@ -1,0 +1,59 @@
+plugins {
+	id("biz.aQute.bnd.builder")
+    id("maven-publish")
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+    compileOnly("org.osgi:osgi.annotation:8.0.0")
+}
+
+group = "org.osgi.test.example"
+version = "0.1.0-SNAPSHOT"
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+tasks.named("jar") {
+	bundle {
+		bnd("""
+Bundle-Description: ${project.description}
+Bundle-DocURL: https://www.osgi.org
+Bundle-License: "Apache-2.0";link="https://opensource.org/licenses/Apache-2.0";description="Apache License, Version 2.0"
+Bundle-Name: ${project.group}:${project.name}
+Bundle-Vendor: OSGi Working Group
+-noextraheaders: true
+-noimportjava: true
+-fixupmessages: The JAR is empty:
+""")
+	}
+}
+
+tasks.withType(Test) {
+	useJUnitPlatform()
+	testLogging {
+		setExceptionFormat("full")
+		info {
+			events("STANDARD_OUT", "STANDARD_ERROR", "STARTED", "FAILED", "PASSED", "SKIPPED")
+		}
+	}
+}
