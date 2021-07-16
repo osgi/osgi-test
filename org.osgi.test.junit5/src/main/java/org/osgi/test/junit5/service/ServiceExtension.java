@@ -43,6 +43,7 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.inject.TargetType;
+import org.osgi.test.common.list.ListSupplierDelegate;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.common.service.ServiceConfiguration;
 import org.osgi.test.common.service.ServiceConfigurationKey;
@@ -189,7 +190,7 @@ public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, 
 			injectService.filterArguments(), injectService.cardinality(), injectService.timeout(), extensionContext);
 
 		if (targetType.matches(List.class) && targetType.hasParameterizedTypes()) {
-			return configuration.getServices();
+			return new ListSupplierDelegate<>(configuration::getServices);
 		} else if (targetType.matches(ServiceAware.class) && targetType.hasParameterizedTypes()) {
 			return configuration;
 		}
