@@ -52,7 +52,7 @@
 
 	<url>https://www.osgi.org</url>
 	<organization>
-		<name>OSGi Alliance</name>
+		<name>OSGi Working Group</name>
 		<url>https://www.osgi.org</url>
 	</organization>
 	<licenses>
@@ -64,9 +64,9 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>https://github.com/rotty3000/osgi-test-example-mvn</url>
-		<connection>scm:git:https://github.com/rotty3000/osgi-test-example-mvn.git</connection>
-		<developerConnection>scm:git:git@github.com:rotty3000/osgi-test-example-mvn.git</developerConnection>
+		<url>https://github.com/osgi/osgi-test</url>
+		<connection>scm:git:https://github.com/osgi/osgi-test.git</connection>
+		<developerConnection>scm:git:git@github.com:osgi/osgi-test.git</developerConnection>
 	</scm>
 	<developers>
 		<developer>
@@ -102,7 +102,7 @@
 	</developers>
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/rotty3000/osgi-test-example-mvn</url>
+		<url>https://github.com/osgi/osgi-test</url>
 	</issueManagement>
 
 	<build>
@@ -336,7 +336,7 @@
 						</execution>
 					</executions>
 				</plugin>
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
