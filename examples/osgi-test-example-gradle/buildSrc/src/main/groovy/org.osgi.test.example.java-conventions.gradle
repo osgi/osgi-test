@@ -88,7 +88,6 @@ Bundle-Name: ${project.group}:${project.name}
 Bundle-Vendor: OSGi Working Group
 -noextraheaders: true
 -noimportjava: true
--fixupmessages: The JAR is empty:
 """)
 	}
 }
