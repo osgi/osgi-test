@@ -1,0 +1,52 @@
+import aQute.bnd.gradle.Resolve
+import aQute.bnd.gradle.TestOSGi
+
+plugins {
+	id("org.osgi.test.example.java-conventions")
+}
+
+dependencies {
+	implementation(project(":org.osgi.test.example.api"))
+	implementation("org.osgi:osgi.core:8.0.0")
+	implementation("org.osgi:org.osgi.namespace.service:1.0.0")
+	implementation(platform("org.junit:junit-bom:${junit_jupiter_version}"))
+	implementation("org.junit.jupiter:junit-jupiter")
+	implementation("org.assertj:assertj-core:${assertj_version}")
+	implementation("org.mockito:mockito-core:${mockito_version}")
+	implementation(platform("org.osgi:org.osgi.test.bom:${osgi_test_version}"))
+	implementation("org.osgi:org.osgi.test.junit5")
+	implementation("org.osgi:org.osgi.test.assertj.framework")
+	// Dependencies for the Resolve and TestOSGi tasks
+	runtimeOnly(project(":org.osgi.test.example.player.impl"))
+	runtimeOnly("org.junit.platform:junit-platform-launcher")
+	runtimeOnly("org.apache.felix:org.apache.felix.scr:2.1.28")
+	runtimeOnly("org.apache.felix:org.apache.felix.logback:1.0.2")
+	runtimeOnly("org.eclipse.platform:org.eclipse.osgi:3.16.300")
+	runtimeOnly("org.osgi:org.osgi.util.function:1.1.0")
+	runtimeOnly("org.osgi:org.osgi.util.promise:1.1.0")
+}
+
+description = "OSGi Testing Example Player Test"
+
+tasks.named("jar") {
+	bundle {
+		bnd("Test-Cases: \${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE}")
+	}
+}
+
+def resolveTask = tasks.register("resolve", Resolve) {
+	description = "Resolve test.bndrun"
+	group = "test"
+	bndrun = file("test.bndrun")
+	outputBndrun = layout.buildDirectory.file("test.bndrun")
+}
+
+def testosgiTask = tasks.register("testosgi", TestOSGi) {
+	description = "OSGi Test test.bndrun"
+	group = "test"
+	bndrun = resolveTask.flatMap { it.outputBndrun }
+}
+
+tasks.named("check") {
+	dependsOn(testosgiTask)
+}

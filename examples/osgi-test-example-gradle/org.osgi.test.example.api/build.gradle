@@ -1,5 +1,10 @@
 plugins {
-    id("org.osgi.test.example.java-conventions")
+	id("org.osgi.test.example.java-conventions")
 }
 
 description = "OSGi Testing Example API"
+
+// Run baseline task after the jar task to baseline the API
+tasks.named("jar") {
+	finalizedBy(tasks.named("baseline"))
+}
