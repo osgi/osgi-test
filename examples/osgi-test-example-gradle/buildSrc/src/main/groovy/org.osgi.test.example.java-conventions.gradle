@@ -1,6 +1,6 @@
 plugins {
 	id("biz.aQute.bnd.builder")
-    id("maven-publish")
+	id("maven-publish")
 }
 
 repositories {
@@ -8,32 +8,77 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.osgi:osgi.annotation:8.0.0")
+	compileOnly("org.osgi:osgi.annotation:8.0.0")
 }
 
 group = "org.osgi.test.example"
 version = "0.1.0-SNAPSHOT"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-    withJavadocJar()
-    withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+	withJavadocJar()
+	withSourcesJar()
 }
 
 publishing {
-    publications {
-        maven(MavenPublication) {
-            from(components.java)
-        }
-    }
+	publications {
+		maven(MavenPublication) {
+			from(components.java)
+			// Configure pom metadata
+			pom {
+				name.set("${groupId}:${artifactId}")
+				url.set("https://www.osgi.org")
+				organization {
+					name.set("OSGi Working Group")
+					url.set("https://www.osgi.org")
+				}
+				licenses {
+					license {
+						name.set("Apache-2.0")
+						url.set("https://opensource.org/licenses/Apache-2.0")
+						distribution.set("repo")
+						comments.set("This program and the accompanying materials are made available under the terms of the Apache License, Version 2.0.")
+					}
+				}
+				scm {
+					url.set("https://github.com/osgi/osgi-test")
+					connection.set("scm:git:https://github.com/osgi/osgi-test.git")
+					developerConnection.set("scm:git:git@github.com:osgi/osgi-test.git")
+				}
+				developers {
+					developer {
+						id.set("bjhargrave")
+						name.set("BJ Hargrave")
+						email.set("hargrave@us.ibm.com")
+						url.set("https://github.com/bjhargrave")
+						organization.set("IBM")
+						organizationUrl.set("https://developer.ibm.com")
+						roles.set(["developer"])
+						timezone.set("America/New_York")
+					}
+				}
+			}
+		}
+	}
+}
+
+// Disable gradle module metadata
+tasks.withType(GenerateModuleMetadata) {
+	enabled = false
 }
 
 tasks.withType(JavaCompile) {
-    options.encoding = "UTF-8"
+	options.encoding = "UTF-8"
 }
 
 tasks.named("jar") {
+	// Include generated pom file
+	into("META-INF/maven/${project.group}/${project.name}") {
+		from(tasks.named("generatePomFileForMavenPublication"))
+		rename(".*", "pom.xml")
+	}
+	// Common Bnd configuration
 	bundle {
 		bnd("""
 Bundle-Description: ${project.description}

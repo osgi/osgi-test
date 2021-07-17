@@ -3,12 +3,12 @@ plugins {
 }
 
 dependencies {
-    compileOnly("org.osgi:org.osgi.service.component.annotations:1.4.0")
-    implementation(project(":org.osgi.test.example.api"))
-	testImplementation(platform("org.junit:junit-bom:5.7.2"))
+	compileOnly("org.osgi:org.osgi.service.component.annotations:1.4.0")
+	implementation(project(":org.osgi.test.example.api"))
+	testImplementation(platform("org.junit:junit-bom:${junit_jupiter_version}"))
 	testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("org.assertj:assertj-core:3.20.2")
-    testImplementation("org.mockito:mockito-core:3.11.2")
+	testImplementation("org.assertj:assertj-core:${assertj_version}")
+	testImplementation("org.mockito:mockito-core:${mockito_version}")
 }
 
 description = "OSGi Testing Example Player Implementation"

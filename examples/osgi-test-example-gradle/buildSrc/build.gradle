@@ -1,9 +1,9 @@
 plugins {
-    id("groovy-gradle-plugin")
+	id("groovy-gradle-plugin")
 }
 
 repositories {
-    gradlePluginPortal()
+	gradlePluginPortal()
 	maven {
 		url = uri(bnd_snapshots)
 	}
