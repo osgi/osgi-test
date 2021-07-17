@@ -41,12 +41,12 @@ def resolveTask = tasks.register("resolve", Resolve) {
 	outputBndrun = layout.buildDirectory.file("test.bndrun")
 }
 
-def testosgiTask = tasks.register("testosgi", TestOSGi) {
+def testOSGiTask = tasks.register("testOSGi", TestOSGi) {
 	description = "OSGi Test test.bndrun"
 	group = "test"
 	bndrun = resolveTask.flatMap { it.outputBndrun }
 }
 
 tasks.named("check") {
-	dependsOn(testosgiTask)
+	dependsOn(testOSGiTask)
 }
