@@ -6,9 +6,9 @@ plugins {
 }
 
 dependencies {
+	compileOnly("org.osgi:osgi.core:8.0.0")
+	compileOnly("org.osgi:org.osgi.namespace.service:1.0.0")
 	implementation(project(":org.osgi.test.example.api"))
-	implementation("org.osgi:osgi.core:8.0.0")
-	implementation("org.osgi:org.osgi.namespace.service:1.0.0")
 	implementation(platform("org.junit:junit-bom:${junit_jupiter_version}"))
 	implementation("org.junit.jupiter:junit-jupiter")
 	implementation("org.assertj:assertj-core:${assertj_version}")
@@ -41,12 +41,12 @@ def resolveTask = tasks.register("resolve", Resolve) {
 	outputBndrun = layout.buildDirectory.file("test.bndrun")
 }
 
-def testosgiTask = tasks.register("testosgi", TestOSGi) {
+def testOSGiTask = tasks.register("testOSGi", TestOSGi) {
 	description = "OSGi Test test.bndrun"
 	group = "test"
 	bndrun = resolveTask.flatMap { it.outputBndrun }
 }
 
 tasks.named("check") {
-	dependsOn(testosgiTask)
+	dependsOn(testOSGiTask)
 }

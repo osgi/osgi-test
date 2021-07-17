@@ -19,4 +19,3 @@
 cd examples/osgi-test-example-gradle
 ./gradlew --version
 ./gradlew build
-cd ../..
