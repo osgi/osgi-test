@@ -1,0 +1,17 @@
+pluginManagement {
+  plugins {
+	id "biz.aQute.bnd.workspace" version bnd_version
+  }
+  repositories {
+	maven {
+	  url = uri(bnd_snapshots)
+	}
+	mavenCentral()
+	gradlePluginPortal()
+  }
+}
+plugins {
+  id "biz.aQute.bnd.workspace"
+}
+
+rootProject.name = "osgi-test-example-bndworkspace"
