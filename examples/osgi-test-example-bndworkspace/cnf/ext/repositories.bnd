@@ -1,0 +1,18 @@
+
+mavencentral: https://repo.maven.apache.org/maven2
+ossrh: https://oss.sonatype.org/content/repositories/snapshots
+
+-plugin.1.MavenCentral:\
+	aQute.bnd.repository.maven.provider.MavenBndRepository;\
+		name="Maven Central";\
+		releaseUrl="${mavencentral}";\
+		snapshotUrl="${ossrh}";\
+		index="${.}/central.mvn";\
+		readOnly=true
+
+-plugin.2.Local:\
+	aQute.bnd.repository.maven.provider.MavenBndRepository;\
+		name="Local";\
+		noupdateOnRelease=true
+
+-buildrepo: Local

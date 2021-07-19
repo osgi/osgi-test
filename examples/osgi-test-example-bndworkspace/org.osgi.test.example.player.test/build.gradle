@@ -1,0 +1,7 @@
+def resolveTask = tasks.named("resolve.test") {
+	outputBndrun = layout.buildDirectory.file("test.bndrun")
+}
+
+tasks.named("testOSGi") {
+	bndrun = resolveTask.flatMap { it.outputBndrun }
+}

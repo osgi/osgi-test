@@ -1,0 +1,20 @@
+# Maven info. The maven artifactId defaults to Bundle-SymbolicName
+-groupid: org.osgi.test.example
+-pom: version=${versionmask;===s;${@version}}
+
+# Uncomment the following line to build the non-snapshot version.
+#-snapshot:
+Bundle-Version: 0.1.0-SNAPSHOT
+# Don't baseline Bundle-Version
+-diffignore:            Bundle-Version
+
+Bundle-DocURL: https://www.osgi.org
+Bundle-License: "Apache-2.0";link="https://opensource.org/licenses/Apache-2.0";description="Apache License, Version 2.0"
+Bundle-Name: ${-groupid}:${project.name}
+Bundle-Vendor: OSGi Working Group
+
+-reproducible: true
+-noextraheaders: true
+-noimportjava: true
+
+-buildpath.annotation: osgi.annotation;version=latest;maven-scope=provided

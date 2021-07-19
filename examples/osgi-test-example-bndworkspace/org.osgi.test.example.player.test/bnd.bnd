@@ -1,0 +1,17 @@
+# Set javac settings from JDT prefs
+-include: ${workspace}/cnf/includes/jdt.bnd
+
+Bundle-Description: OSGi Testing Example Player Test
+
+Test-Cases: ${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE}
+
+-dependson: \
+	org.osgi.test.example.player.impl
+
+-buildpath: \
+	osgi.core;version=8.0.0;maven-scope=provided,\
+	org.osgi.namespace.service;version=1.0.0;maven-scope=provided,\
+	org.osgi.test.example.api;version=snapshot,\
+	${junit},\
+	${mockito},\
+	${osgitest}

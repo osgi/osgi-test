@@ -1,0 +1,11 @@
+subprojects {
+	tasks.withType(Test) {
+		useJUnitPlatform()
+		testLogging {
+			setExceptionFormat("full")
+			info {
+				events("STANDARD_OUT", "STANDARD_ERROR", "STARTED", "FAILED", "PASSED", "SKIPPED")
+			}
+		}
+	}
+}

@@ -49,7 +49,7 @@ jobs:
       matrix:
         java: [ '8', '11', '16' ]
         os: [ 'ubuntu-latest' ]
-        example: [ 'mvn', 'gradle' ]
+        example: [ 'mvn', 'gradle', 'bndworkspace' ]
     name: example-${{ matrix.example }} JDK${{ matrix.java }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
