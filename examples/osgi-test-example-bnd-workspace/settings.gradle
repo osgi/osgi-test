@@ -1,0 +1,13 @@
+pluginManagement {
+  plugins {
+    id 'biz.aQute.bnd.workspace' version bnd_version
+  }
+  repositories {
+    maven { url bnd_snapshots }
+    mavenCentral()
+    gradlePluginPortal()
+  }
+}
+plugins {
+  id 'biz.aQute.bnd.workspace'
+}

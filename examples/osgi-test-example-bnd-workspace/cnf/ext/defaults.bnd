@@ -1,0 +1,39 @@
+java: java
+javac: javac
+javac.source: 11
+javac.target: 11
+
+
+
+# This is the version of osgi-test that will be used at build time and runtime
+osgitest: org.osgi.test.junit5;version=latest,\
+	org.osgi.test.junit5.cm;version=latest,\
+	org.osgi.test.common;version=latest,\
+	org.osgi.test.assertj.framework;version=latest
+
+# This is the version of JUnit that will be used at build time and runtime
+junit: junit-jupiter-api;version=latest,\
+	junit-jupiter-engine;version=latest,\
+	junit-jupiter-params;version=latest,\
+	junit-platform-runner;version=latest,\
+	junit-platform-commons;version=latest,\
+	junit-platform-engine;version=latest,\
+	junit-platform-launcher;version=latest,\
+	junit-platform-testkit;version=latest,\
+	assertj-core;version=latest,\
+	org.opentest4j;version=latest
+
+# This is the version of Mockito that will be used at build time and run time
+mockito: org.mockito.mockito-core;version=latest,\
+	org.objenesis;version=latest,\
+	net.bytebuddy.byte-buddy;version=latest,\
+	net.bytebuddy.byte-buddy-agent;version=latest
+	
+# Needed for Mockito's mocking to work
+-runsystempackages.objenesis: sun.misc,sun.reflect
+
+Test-Cases: ${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE}
+
+-tester: biz.aQute.tester.junit-platform
+
+-resolve.effective: active

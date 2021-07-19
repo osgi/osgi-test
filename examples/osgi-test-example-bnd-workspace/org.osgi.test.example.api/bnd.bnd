@@ -1,0 +1,6 @@
+-include: ${workspace}/cnf/eclipse/jdt.bnd
+
+# Build dependencies 
+-buildpath: osgi.annotation;version=latest
+
+Bundle-Version: 0.0.0.${tstamp}

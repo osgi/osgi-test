@@ -1,0 +1,7 @@
+# Configure Repositories
+-plugin.Central: \
+	aQute.bnd.repository.maven.provider.MavenBndRepository; \
+		releaseUrl	= https://repo.maven.apache.org/maven2/; \
+		index		= ${build}/ext/central.maven; \
+		readOnly	= true; \
+		name		= "Maven Central"

@@ -1,0 +1,13 @@
+-include: ${workspace}/cnf/eclipse/jdt.bnd
+
+# Build dependencies 
+-buildpath: \
+	osgi.annotation;version=latest,\
+	org.osgi.test.example.api;version=latest,\
+	org.osgi.service.component.annotations;version=latest
+	
+-testpath: \
+	${junit},\
+	${mockito}
+
+Bundle-Version: 0.0.0.${tstamp}
