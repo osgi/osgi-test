@@ -16,6 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.common.dictionary;
+package org.osgi.test.assertj.monitoring;
+
+public interface MonitoringAssertionTimeoutStep {
+
+	/**
+	 * Assert with timeout that.
+	 *
+	 * @param timeout - the maximal time in that actions will be observed
+	 * @return RuntimeMonitoringResultAssert - to do the assertions
+	 */
+	public MonitoringAssertionResult assertWithTimeoutThat(int timeout) ;
+	
+
+}

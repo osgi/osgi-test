@@ -16,6 +16,19 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.common.dictionary;
+package org.osgi.test.assertj.monitoring.internal;
+
+import org.osgi.test.assertj.monitoring.MonitoringAssertionResult;
+
+class MonitoringResultAssertionImpl extends AbstractMonitoringAssertion<MonitoringResultAssertionImpl, EventRecording>
+		implements MonitoringAssertionResult {
+
+	public MonitoringResultAssertionImpl(EventRecording actual, Class<MonitoringResultAssertionImpl> selfType) {
+		super(actual, selfType);
+	}
+
+	public static MonitoringResultAssertionImpl assertThat(EventRecording actual) {
+		return new MonitoringResultAssertionImpl(actual, MonitoringResultAssertionImpl.class);
+	}
+
+}

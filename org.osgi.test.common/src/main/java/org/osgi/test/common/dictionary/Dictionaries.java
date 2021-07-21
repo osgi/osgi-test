@@ -524,4 +524,37 @@ public class Dictionaries {
 	public static <K, V> Dictionary<String, Object> asDictionary(ServiceReference<?> serviceReference) {
 		return new ServiceReferenceAsDictionary(serviceReference);
 	}
+
+	/**
+	 * Return a human readable String with the content of the Dictionary
+	 *
+	 * @param dict The Dictionary to transform.
+	 * @return A a human readable String with the content of the Dictionary
+	 */
+	public static String toString(Dictionary<?, ?> dict) {
+
+		StringBuilder mapAsString = new StringBuilder("{");
+
+		Enumeration<?> keys = dict.keys();
+		while (keys.hasMoreElements()) {
+			Object key = keys.nextElement();
+			Object value = dict.get(key);
+			mapAsString.append(key + "=" + objectToString(value) + ", ");
+		}
+		mapAsString.delete(mapAsString.length() - 2, mapAsString.length())
+			.append("}");
+
+		return mapAsString.toString();
+
+	}
+
+	private static String objectToString(Object obj) {
+
+		if (obj == null) {
+			return "<null>";
+		} else if (obj instanceof Object[]) {
+			return Arrays.toString((Object[]) obj);
+		}
+		return obj.toString();
+	}
 }

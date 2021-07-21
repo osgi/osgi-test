@@ -97,6 +97,12 @@ jobs:
       with:
         file: ./org.osgi.test.assertj.framework/target/site/jacoco-it/jacoco.xml
         name: assertj.framework
+    - name: Upload "assertj.monitoring" coverage to Codecov
+      if: ${{ matrix.codecov }}
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./org.osgi.test.assertj.monitoring/target/site/jacoco-it/jacoco.xml
+        name: assertj.monitoring
     - name: Upload "assertj.promise" coverage to Codecov
       if: ${{ matrix.codecov }}
       uses: codecov/codecov-action@v1

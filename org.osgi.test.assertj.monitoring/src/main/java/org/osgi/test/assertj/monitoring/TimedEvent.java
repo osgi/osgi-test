@@ -16,6 +16,24 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.common.dictionary;
+package org.osgi.test.assertj.monitoring;
+
+import java.time.Instant;
+
+public interface TimedEvent<T> {
+
+	/**
+	 * Gets the event.
+	 *
+	 * @return the event
+	 */
+	T getEvent();
+
+	/**
+	 * Gets the instant. Time where the event is fired.
+	 *
+	 * @return the instant
+	 */
+	Instant getInstant();
+
+}
