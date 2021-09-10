@@ -64,11 +64,11 @@ publishing {
 }
 
 // Disable gradle module metadata
-tasks.withType(GenerateModuleMetadata) {
+tasks.withType(GenerateModuleMetadata).configureEach {
 	enabled = false
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
 
@@ -92,7 +92,7 @@ Bundle-Vendor: OSGi Working Group
 	}
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
 	useJUnitPlatform()
 	testLogging {
 		setExceptionFormat("full")
