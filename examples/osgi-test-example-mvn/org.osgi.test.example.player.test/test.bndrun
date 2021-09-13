@@ -31,23 +31,23 @@
 # The following is calculated by the bnd-resolver-maven-plugin
 -runbundles: \
 	assertj-core;version='[3.20.2,3.20.3)',\
-	junit-jupiter-api;version='[5.7.2,5.7.3)',\
-	junit-jupiter-engine;version='[5.7.2,5.7.3)',\
-	junit-jupiter-params;version='[5.7.2,5.7.3)',\
-	junit-platform-commons;version='[1.7.2,1.7.3)',\
-	junit-platform-engine;version='[1.7.2,1.7.3)',\
-	junit-platform-launcher;version='[1.7.2,1.7.3)',\
-	net.bytebuddy.byte-buddy;version='[1.11.3,1.11.4)',\
-	net.bytebuddy.byte-buddy-agent;version='[1.11.3,1.11.4)',\
+	junit-jupiter-api;version='[5.8.0,5.8.1)',\
+	junit-jupiter-engine;version='[5.8.0,5.8.1)',\
+	junit-jupiter-params;version='[5.8.0,5.8.1)',\
+	junit-platform-commons;version='[1.8.0,1.8.1)',\
+	junit-platform-engine;version='[1.8.0,1.8.1)',\
+	junit-platform-launcher;version='[1.8.0,1.8.1)',\
+	net.bytebuddy.byte-buddy;version='[1.11.13,1.11.14)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.11.13,1.11.14)',\
 	org.apache.felix.scr;version='[2.1.28,2.1.29)',\
-	org.mockito.mockito-core;version='[3.11.2,3.11.3)',\
+	org.mockito.mockito-core;version='[3.12.4,3.12.5)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
-	org.osgi.test.assertj.framework;version='[1.0.0,1.0.1)',\
-	org.osgi.test.common;version='[1.0.0,1.0.1)',\
+	org.osgi.test.assertj.framework;version='[1.0.1,1.0.2)',\
+	org.osgi.test.common;version='[1.0.1,1.0.2)',\
 	org.osgi.test.example.api;version='[0.1.0,0.1.1)',\
 	org.osgi.test.example.player.impl;version='[0.1.0,0.1.1)',\
 	org.osgi.test.example.player.test-tests;version='[0.1.0,0.1.1)',\
-	org.osgi.test.junit5;version='[1.0.0,1.0.1)',\
+	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\
 	org.osgi.util.function;version='[1.1.0,1.1.1)',\
 	org.osgi.util.promise;version='[1.1.1,1.1.2)'
