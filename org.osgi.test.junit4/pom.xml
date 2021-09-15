@@ -111,7 +111,7 @@
 								<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
 							</archive>
 							<excludes>
-								<exclude>org/osgi/test/junit4/tb*/**</exclude>
+								<exclude>**/test/tb*/**</exclude>
 							</excludes>
 						</configuration>
 					</execution>
