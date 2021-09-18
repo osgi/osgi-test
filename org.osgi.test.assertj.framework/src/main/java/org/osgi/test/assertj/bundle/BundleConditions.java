@@ -25,13 +25,12 @@ import org.assertj.core.api.ListAssert;
 import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.condition.VerboseCondition;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.ServiceReference;
 
 /**
- * A Utility-Class thats Provides static methods to create {@link Condition}s
- * for an {@link Bundle}
+ * A Utility-Class thats Provides public static methods to create
+ * {@link Condition}s for an {@link Bundle}
  */
-public interface BundleConditions {
+public final class BundleConditions {
 	/**
 	 * Creates a {@link Condition} to be met by an {@link Bundle}. Checking if a
 	 * {@link Bundle} is <b>equal</b> an other Bundle.
@@ -41,7 +40,7 @@ public interface BundleConditions {
 	 * <pre>
 	 * List<Bundle> bundles = null;
 	 *
-	 * static void sameAs(Bundle bundle) {
+	 * public static void sameAs(Bundle bundle) {
 	 *
 	 * 	assertThat(bundles)// created an {@link ListAssert}
 	 * 		.have(sameAs(bundle))
@@ -51,11 +50,11 @@ public interface BundleConditions {
 	 * }
 	 * </pre>
 	 *
-	 * @param serviceReferences - the expected serviceReferences that would be
-	 *            checked against other {@link ServiceReference}s
+	 * @param bundle - the expected bundle that would be checked against other
+	 *            {@link Bundle}
 	 * @return the Condition<br>
 	 */
-	static Condition<Bundle> sameAs(Bundle bundle) {
+	public static Condition<Bundle> sameAs(Bundle bundle) {
 		Condition<Bundle> c = VerboseCondition.verboseCondition((b) -> Objects.equals(b, bundle), "bundle equals",
 			(b) -> " was <" + b.toString() + ">");
 		return c;

@@ -16,14 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-package org.osgi.test.assertj.test.dictionary;
+package org.osgi.test.assertj.test.servicereference;
 
 import org.junit.jupiter.api.Test;
-import org.osgi.test.assertj.dictionary.DictionaryConditions;
+import org.osgi.test.assertj.servicereference.ServicePropertiesConditions;
 import org.osgi.test.assertj.test.testutil.ConditionAssert;
 import org.osgi.test.common.dictionary.Dictionaries;
 
-class DictionaryConditionsTest implements ConditionAssert {
+class ServicePropertiesConditionsTest implements ConditionAssert {
 	String	k1	= "k1";
 	String	k2	= "k2";
 	String	v1	= "v1";
@@ -31,28 +31,28 @@ class DictionaryConditionsTest implements ConditionAssert {
 
 	@Test
 	void serviceProperties() throws Exception {
-		passingHas(DictionaryConditions.servicePropertiesContains(Dictionaries.dictionaryOf(k1, v1)),
+		passingHas(ServicePropertiesConditions.servicePropertiesContains(Dictionaries.dictionaryOf(k1, v1)),
 			Dictionaries.dictionaryOf(k1, v1));
 		passingHas(
-			DictionaryConditions.servicePropertiesContains(Dictionaries.asMap(Dictionaries.dictionaryOf(k1, v1))),
+			ServicePropertiesConditions.servicePropertiesContains(Dictionaries.asMap(Dictionaries.dictionaryOf(k1, v1))),
 			Dictionaries.dictionaryOf(k1, v1));
 
 
 
-		failingHas(DictionaryConditions.servicePropertiesContains(Dictionaries.dictionaryOf(k2, v2)),
-			Dictionaries.dictionaryOf(k1, v1));
-		failingHas(
-			DictionaryConditions.servicePropertiesContains(Dictionaries.asMap(Dictionaries.dictionaryOf(k2, v2))),
+		failingHas(ServicePropertiesConditions.servicePropertiesContains(Dictionaries.dictionaryOf(k2, v2)),
 			Dictionaries.dictionaryOf(k1, v1));
 		failingHas(
-			DictionaryConditions.servicePropertiesContains(Dictionaries.asMap(Dictionaries.dictionaryOf(k2, v2))),
+			ServicePropertiesConditions.servicePropertiesContains(Dictionaries.asMap(Dictionaries.dictionaryOf(k2, v2))),
+			Dictionaries.dictionaryOf(k1, v1));
+		failingHas(
+			ServicePropertiesConditions.servicePropertiesContains(Dictionaries.asMap(Dictionaries.dictionaryOf(k2, v2))),
 			Dictionaries.dictionaryOf(k1, "z"));
 
-		passingHas(DictionaryConditions.servicePropertyContains(k1, v1), Dictionaries.dictionaryOf(k1, v1));
-		failingHas(DictionaryConditions.servicePropertyContains(k1, "Z"), Dictionaries.dictionaryOf(k1, v1));
+		passingHas(ServicePropertiesConditions.servicePropertyContains(k1, v1), Dictionaries.dictionaryOf(k1, v1));
+		failingHas(ServicePropertiesConditions.servicePropertyContains(k1, "Z"), Dictionaries.dictionaryOf(k1, v1));
 
-		passingHas(DictionaryConditions.servicePropertiesMatch("(k1=v1)"), Dictionaries.dictionaryOf(k1, v1));
-		failingHas(DictionaryConditions.servicePropertiesMatch("(k1=v1)"), Dictionaries.dictionaryOf(k1, v2));
+		passingHas(ServicePropertiesConditions.servicePropertiesMatch("(k1=v1)"), Dictionaries.dictionaryOf(k1, v1));
+		failingHas(ServicePropertiesConditions.servicePropertiesMatch("(k1=v1)"), Dictionaries.dictionaryOf(k1, v2));
 	}
 
 }

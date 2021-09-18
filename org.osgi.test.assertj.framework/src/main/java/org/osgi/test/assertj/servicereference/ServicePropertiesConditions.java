@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-package org.osgi.test.assertj.dictionary;
+package org.osgi.test.assertj.servicereference;
 
 import java.util.Collections;
 import java.util.Dictionary;
@@ -32,15 +32,17 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.common.dictionary.Dictionaries;
 
 /**
- * A Utility-Class thats Provides static methods to create {@link Condition}s
- * for an {@link Dictionary}
+ * A Utility-Class thats Provides public static methods to create
+ * {@link Condition}s for ServiceProperties
  */
-public interface DictionaryConditions {
-	static Condition<Dictionary<String, Object>> servicePropertiesContains(Dictionary<String, Object> dictionary) {
+public final class ServicePropertiesConditions {
+	public static Condition<Dictionary<String, Object>> servicePropertiesContains(
+		Dictionary<String, Object> dictionary) {
 		return servicePropertiesContains(Dictionaries.asMap(dictionary));
 	}
 
-	static Condition<Dictionary<String, Object>> servicePropertiesMatch(String filter) throws InvalidSyntaxException {
+	public static Condition<Dictionary<String, Object>> servicePropertiesMatch(String filter)
+		throws InvalidSyntaxException {
 		Filter f = FrameworkUtil.createFilter(filter);
 
 		return new Condition<Dictionary<String, Object>>(d -> {
@@ -49,7 +51,7 @@ public interface DictionaryConditions {
 
 	}
 
-	static Condition<Dictionary<String, Object>> servicePropertiesContains(Map<String, Object> map) {
+	public static Condition<Dictionary<String, Object>> servicePropertiesContains(Map<String, Object> map) {
 		return new Condition<Dictionary<String, Object>>(d -> {
 			List<String> keys = Collections.list(d.keys());
 			for (Entry<String, Object> entry : map.entrySet()) {
@@ -64,7 +66,7 @@ public interface DictionaryConditions {
 		}, "contains ServiceProperties %s", map);
 	}
 
-	static Condition<Dictionary<String, Object>> servicePropertyContains(final String key, Object value) {
+	public static Condition<Dictionary<String, Object>> servicePropertyContains(final String key, Object value) {
 		return servicePropertiesContains(Dictionaries.dictionaryOf(key, value));
 	}
 }

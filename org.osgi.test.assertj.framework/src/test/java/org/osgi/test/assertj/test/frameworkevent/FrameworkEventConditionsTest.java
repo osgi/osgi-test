@@ -121,20 +121,6 @@ class FrameworkEventConditionsTest implements ConditionAssert {
 		failingHas(FrameworkEventConditions.typeAndBundle(FrameworkEvent.INFO, bundle), frameworkEvent);
 		failingHas(FrameworkEventConditions.typeAndBundle(FrameworkEvent.ERROR, otherbundle), frameworkEvent);
 
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.ERROR);
-		passingHas(FrameworkEventConditions.typeErrorAndThrowableOfClass(NullPointerException.class), frameworkEvent);
-		failingHas(FrameworkEventConditions.typeErrorAndThrowableOfClass(IllegalArgumentException.class),
-			frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.INFO);
-		passingHas(FrameworkEventConditions.typeInfoAndThrowableOfClass(NullPointerException.class), frameworkEvent);
-		failingHas(FrameworkEventConditions.typeInfoAndThrowableOfClass(IllegalArgumentException.class),
-			frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.WARNING);
-		passingHas(FrameworkEventConditions.typeWarningAndThrowableOfClass(NullPointerException.class), frameworkEvent);
-		failingHas(FrameworkEventConditions.typeWarningAndThrowableOfClass(IllegalArgumentException.class),
-			frameworkEvent);
 	}
 
 	@Test
@@ -149,53 +135,8 @@ class FrameworkEventConditionsTest implements ConditionAssert {
 
 	@Test
 	void type() throws Exception {
+
 		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.ERROR);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.ERROR), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeError(), frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.INFO);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.INFO), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeInfo(), frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.PACKAGES_REFRESHED);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.PACKAGES_REFRESHED), frameworkEvent);
-		passingHas(FrameworkEventConditions.typePackagesRefreshed(), frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.STARTED);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.STARTED), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeStarted(), frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.STARTLEVEL_CHANGED);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.STARTLEVEL_CHANGED), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeStartLevelChanged(), frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.STOPPED);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.STOPPED), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeStopped(), frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeStopped_BootClasspathModified(), frameworkEvent);
-
-		// TODO: R7
-		// when(frameworkEvent.getType()).thenReturn(FrameworkEvent.STOPPED_SYSTEM_REFRESHED);
-		// passingHas(FrameworkEventConditions.type(FrameworkEvent.STOPPED_SYSTEM_REFRESHED),
-		// frameworkEvent);
-		// passingHas(FrameworkEventConditions.typeStoppedSystemRefreshes(),
-		// frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.STOPPED_UPDATE);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.STOPPED_UPDATE), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeStoppedUpdate(), frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.WAIT_TIMEDOUT);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.WAIT_TIMEDOUT), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeWaitTimeout(), frameworkEvent);
-
-		when(frameworkEvent.getType()).thenReturn(FrameworkEvent.WARNING);
-		passingHas(FrameworkEventConditions.type(FrameworkEvent.WARNING), frameworkEvent);
-		passingHas(FrameworkEventConditions.typeWarning(), frameworkEvent);
-
 		failingHas(FrameworkEventConditions.type(FrameworkEvent.INFO), frameworkEvent, "type matches mask <%s>",
 			FrameworkEventType.BITMAP.maskToString(FrameworkEvent.INFO));
 	}

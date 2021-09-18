@@ -35,10 +35,10 @@ import org.osgi.test.common.bitmaps.Bitmap;
 import org.osgi.test.common.bitmaps.FrameworkEventType;
 
 /**
- * A Utility-Class thats Provides static methods to create
+ * A Utility-Class thats Provides public static methods to create
  * {@link FrameworkEventConditions} for an {@link FrameworkEvent}
  */
-public interface FrameworkEventConditions {
+public final class FrameworkEventConditions {
 
 	/**
 	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
@@ -50,7 +50,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_bundleEquals(Bundle bundle) {
+	 * public static void example_bundleEquals(Bundle bundle) {
 	 *
 	 * 	assertThat(bundleEvents)// created an {@link ListAssert}
 	 * 		.have(bundleEquals(bundle))
@@ -64,7 +64,7 @@ public interface FrameworkEventConditions {
 	 *            the {@link FrameworkEvent}
 	 * @return the Condition<br>
 	 */
-	static Condition<FrameworkEvent> bundleEquals(Bundle bundle) {
+	public static Condition<FrameworkEvent> bundleEquals(Bundle bundle) {
 
 		return MappedCondition.mappedCondition(FrameworkEvent::getBundle, BundleConditions.sameAs(bundle),
 			"FrameworkEvent::getBundle");
@@ -79,7 +79,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_bundleIsNotNull() {
+	 * public static void example_bundleIsNotNull() {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(bundleIsNotNull())
@@ -91,7 +91,7 @@ public interface FrameworkEventConditions {
 	 *
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> bundleIsNotNull() {
+	public static Condition<FrameworkEvent> bundleIsNotNull() {
 		return not(bundleIsNull());
 	}
 
@@ -103,7 +103,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_bundleIsNull() {
+	 * public static void example_bundleIsNull() {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(bundleIsNull())
@@ -115,7 +115,7 @@ public interface FrameworkEventConditions {
 	 *
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> bundleIsNull() {
+	public static Condition<FrameworkEvent> bundleIsNull() {
 		return VerboseCondition.verboseCondition((fe) -> fe.getBundle() == null, "bundle is <null>",
 			(fe) -> " was <" + fe.getBundle() + ">".toString());
 	}
@@ -129,7 +129,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_matches(int typeMask, Bundle bundle, Class<? extends Throwable> throwableClass) {
+	 * public static void example_matches(int typeMask, Bundle bundle, Class<? extends Throwable> throwableClass) {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(matches(typeMask, bundle, throwableClass))
@@ -140,15 +140,15 @@ public interface FrameworkEventConditions {
 	 * }
 	 * </pre>
 	 *
-	 * @param typeMask - the typeMask that would be checked against the bundle
-	 *            type of the {@link FrameworkEvent}
+	 * @param eventTypeMask - the typeMask that would be checked against the
+	 *            bundle type of the {@link FrameworkEvent}
 	 * @param bundle - the bundle that would be checked against the bundle of
 	 *            the {@link FrameworkEvent}
 	 * @param throwableClass - the Class that would be checked against the
 	 *            throwable of the {@link FrameworkEvent}
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> matches(final int eventTypeMask, Bundle bundle,
+	public static Condition<FrameworkEvent> matches(final int eventTypeMask, Bundle bundle,
 		final Class<? extends Throwable> throwableClass) {
 		return Assertions.allOf(type(eventTypeMask), bundleEquals(bundle), throwableOfClass(throwableClass));
 	}
@@ -161,7 +161,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_matches(int typeMask, Class<? extends Throwable> throwableClass) {
+	 * public static void example_matches(int typeMask, Class<? extends Throwable> throwableClass) {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(matches(typeMask, throwableClass))
@@ -174,13 +174,13 @@ public interface FrameworkEventConditions {
 	 * }
 	 * </pre>
 	 *
-	 * @param typeMask - the typeMask that would be checked against the bundle
-	 *            type of the {@link FrameworkEvent}
+	 * @param eventTypeMask - the typeMask that would be checked against the
+	 *            bundle type of the {@link FrameworkEvent}
 	 * @param throwableClass - the Class that would be checked against the
 	 *            throwable of the {@link FrameworkEvent}
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> matches(final int eventTypeMask, final Class<? extends Throwable> throwableClass) {
+	public static Condition<FrameworkEvent> matches(final int eventTypeMask, final Class<? extends Throwable> throwableClass) {
 		return Assertions.allOf(type(eventTypeMask), throwableOfClass(throwableClass));
 	}
 
@@ -191,7 +191,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_throwableIsNotNull() {
+	 * public static void example_throwableIsNotNull() {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(throwableIsNotNull())
@@ -204,7 +204,7 @@ public interface FrameworkEventConditions {
 	 *
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> throwableIsNotNull() {
+	public static Condition<FrameworkEvent> throwableIsNotNull() {
 		return not(throwableIsNull());
 	}
 
@@ -215,7 +215,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_throwableIsNull() {
+	 * public static void example_throwableIsNull() {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(throwableIsNull())
@@ -228,7 +228,7 @@ public interface FrameworkEventConditions {
 	 *
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> throwableIsNull() {
+	public static Condition<FrameworkEvent> throwableIsNull() {
 		return VerboseCondition.verboseCondition((fe) -> fe.getThrowable() == null, "throwable is <null>",
 			(fe) -> fe.getThrowable()
 				.toString());
@@ -241,7 +241,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_throwableOfClass(Class<? extends Throwable> throwableClass) {
+	 * public static void example_throwableOfClass(Class<? extends Throwable> throwableClass) {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(throwableOfClass(throwableClass))
@@ -258,7 +258,7 @@ public interface FrameworkEventConditions {
 	 *            throwable of the {@link FrameworkEvent}
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> throwableOfClass(final Class<? extends Throwable> throwableClass) {
+	public static Condition<FrameworkEvent> throwableOfClass(final Class<? extends Throwable> throwableClass) {
 
 		Condition<FrameworkEvent> cond = VerboseCondition.verboseCondition((fe) -> fe.getThrowable()
 			.getClass()
@@ -277,7 +277,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_type(int typeMask) {
+	 * public static void example_type(int typeMask) {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(type(type))
@@ -288,11 +288,11 @@ public interface FrameworkEventConditions {
 	 * }
 	 * </pre>
 	 *
-	 * @param typeMask - the typeMask that would be checked against the bundle
-	 *            type of the {@link FrameworkEvent}
+	 * @param eventTypeMask - the typeMask that would be checked against the
+	 *            bundle type of the {@link FrameworkEvent}
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> type(final int eventTypeMask) {
+	public static Condition<FrameworkEvent> type(final int eventTypeMask) {
 
 		return VerboseCondition.verboseCondition(
 			(FrameworkEvent fe) -> Bitmap.typeMatchesMask(fe.getType(), eventTypeMask),
@@ -309,7 +309,7 @@ public interface FrameworkEventConditions {
 	 * <pre>
 	 * List<FrameworkEvent> frameworkEvents = null;
 	 *
-	 * static void example_typeAndBundle(int typeMask, Bundle bundle) {
+	 * public static void example_typeAndBundle(int typeMask, Bundle bundle) {
 	 *
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(typeAndBundle(typeMask, bundles))
@@ -322,387 +322,14 @@ public interface FrameworkEventConditions {
 	 * }
 	 * </pre>
 	 *
-	 * @param typeMask - the typeMask that would be checked against the bundle
-	 *            type of the {@link FrameworkEvent}
+	 * @param eventTypeMask - the typeMask that would be checked against the
+	 *            bundle type of the {@link FrameworkEvent}
 	 * @param bundle - the bundle that would be checked against the bundle of
 	 *            the {@link FrameworkEvent}
 	 * @return the Condition
 	 */
-	static Condition<FrameworkEvent> typeAndBundle(final int eventTypeMask, Bundle bundle) {
+	public static Condition<FrameworkEvent> typeAndBundle(final int eventTypeMask, Bundle bundle) {
 		return Assertions.allOf(type(eventTypeMask), bundleEquals(bundle));
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.ERROR</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeError() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeError())
-	 * 		.filteredOn(typeError())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeError());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-	static Condition<FrameworkEvent> typeError() {
-		return type(FrameworkEvent.ERROR);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.ERROR</b> and the throwable of the
-	 * {@link FrameworkEvent} is an instance of the given Class.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeErrorAndThrowableOfClass(Class<? extends Throwable> throwableClass) {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeErrorAndThrowableOfClass(throwableClass))
-	 * 		.filteredOn(typeErrorAndThrowableOfClass(throwableClass))
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeErrorAndThrowableOfClass(throwableClass));// used on
-	 * 															// {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @param throwableClass - the Class that would be checked against the
-	 *            throwable of the {@link FrameworkEvent}
-	 * @return the Condition
-	 */
-	static Condition<FrameworkEvent> typeErrorAndThrowableOfClass(final Class<? extends Throwable> throwableClass) {
-		return Assertions.allOf(typeError(), throwableOfClass(throwableClass));
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.INFO</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeInfo() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeInfo())
-	 * 		.filteredOn(typeInfo())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeInfo());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-
-	static Condition<FrameworkEvent> typeInfo() {
-		return type(FrameworkEvent.INFO);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.INFO</b> and the throwable of the
-	 * {@link FrameworkEvent} is an instance of the given Class.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeInfoAndThrowableOfClass(Class<? extends Throwable> throwableClass) {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeInfoAndThrowableOfClass(throwableClass))
-	 * 		.filteredOn(typeInfoAndThrowableOfClass(throwableClass))
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeInfoAndThrowableOfClass(throwableClass));// used on
-	 * 															// {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @param throwableClass - the Class that would be checked against the
-	 *            throwable of the {@link FrameworkEvent}
-	 * @return the Condition
-	 */
-	static Condition<FrameworkEvent> typeInfoAndThrowableOfClass(final Class<? extends Throwable> throwableClass) {
-		return Assertions.allOf(typeInfo(), throwableOfClass(throwableClass));
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.PACKAGES_REFRESHED</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typePackagesRefreshed() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typePackagesRefreshed())
-	 * 		.filteredOn(typePackagesRefreshed())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typePackagesRefreshed());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-
-	static Condition<FrameworkEvent> typePackagesRefreshed() {
-		return type(FrameworkEvent.PACKAGES_REFRESHED);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.STARTED</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeStarted() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeStarted())
-	 * 		.filteredOn(typeStarted())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeStarted());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-
-	static Condition<FrameworkEvent> typeStarted() {
-		return type(FrameworkEvent.STARTED);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.STARTLEVEL_CHANGED</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeStartLevelChanged() {
-	 *
-	 * 	assertThat(typeStartLevelChanged)// created an {@link ListAssert}
-	 * 		.have(typeError())
-	 * 		.filteredOn(typeStartLevelChanged())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeStartLevelChanged());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-
-	static Condition<FrameworkEvent> typeStartLevelChanged() {
-		return type(FrameworkEvent.STARTLEVEL_CHANGED);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.STOPPED</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeStopped() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeStopped())
-	 * 		.filteredOn(typeStopped())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeStopped());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-
-	static Condition<FrameworkEvent> typeStopped() {
-		return type(FrameworkEvent.STOPPED);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeStopped_BootClasspathModified() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeStopped_BootClasspathModified())
-	 * 		.filteredOn(typeStopped_BootClasspathModified())
-	 * 		.first()// map
-	 * 				// to
-	 * 				// {@link
-	 * 				// ObjectAssert}
-	 * 		.has(typeStopped_BootClasspathModified());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-
-	static Condition<FrameworkEvent> typeStopped_BootClasspathModified() {
-		return type(FrameworkEvent.STOPPED_BOOTCLASSPATH_MODIFIED);
-	}
-
-	// /**
-	// * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	// * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	// * <b>FrameworkEvent.STOPPED_SYSTEM_REFRESHED</b>.
-	// *
-	// * <pre>
-	// * List<FrameworkEvent> frameworkEvents = null;
-	// *
-	// * static void example_typeStoppedSystemRefreshes() {
-	// *
-	// * assertThat(frameworkEvents)// created an {@link ListAssert}
-	// * .have(typeStoppedSystemRefreshes())
-	// * .filteredOn(typeStoppedSystemRefreshes())
-	// * .first()// map to {@link ObjectAssert}
-	// * .has(typeStoppedSystemRefreshes());// used on {@link
-	// * // ObjectAssert}
-	// * }
-	// * </pre>
-	// *
-	// * @return the Condition
-	// */
-	//
-	// static Condition<FrameworkEvent> typeStoppedSystemRefreshes() {
-	// return type(FrameworkEvent.STOPPED_SYSTEM_REFRESHED);
-	// }
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.STOPPED_UPDATE</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeUpdate() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeUpdate())
-	 * 		.filteredOn(typeUpdate())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeUpdate());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-	static Condition<FrameworkEvent> typeStoppedUpdate() {
-		return type(FrameworkEvent.STOPPED_UPDATE);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.WAIT_TIMEDOUT</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeWaitTimeout() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeWaitTimeout())
-	 * 		.filteredOn(typeWaitTimeout())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeWaitTimeout());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-
-	static Condition<FrameworkEvent> typeWaitTimeout() {
-		return type(FrameworkEvent.WAIT_TIMEDOUT);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.WARNING</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeWarning() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeWarning())
-	 * 		.filteredOn(typeWarning())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeWarning());// used on {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-	static Condition<FrameworkEvent> typeWarning() {
-		return type(FrameworkEvent.WARNING);
-	}
-
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if type of {@link FrameworkEvent} <b>matches</b>
-	 * <b>FrameworkEvent.WARNING</b> and the throwable of the
-	 * {@link FrameworkEvent} is an instance of the given Class.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * static void example_typeInfoAndThrowableOfClass(Class<? extends Throwable> throwableClass) {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(typeInfoAndThrowableOfClass(throwableClass))
-	 * 		.filteredOn(typeInfoAndThrowableOfClass(throwableClass))
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(typeInfoAndThrowableOfClass(throwableClass));// used on
-	 * 															// {@link
-	 * 	// ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @param throwableClass - the Class that would be checked against the
-	 *            throwable of the {@link FrameworkEvent}
-	 * @return the Condition
-	 */
-	static Condition<FrameworkEvent> typeWarningAndThrowableOfClass(final Class<? extends Throwable> throwableClass) {
-		return Assertions.allOf(typeWarning(), throwableOfClass(throwableClass));
 	}
 
 }

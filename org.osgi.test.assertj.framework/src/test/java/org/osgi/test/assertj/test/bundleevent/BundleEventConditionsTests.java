@@ -126,66 +126,7 @@ class BundleEventConditionsTests implements ConditionAssert {
 			BundleEventType.BITMAP.maskToString(BundleEvent.INSTALLED));
 
 		when(bundleEvent.getType()).thenReturn(BundleEvent.INSTALLED);
-		passingHas(BundleEventConditions.typeInstalled(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.LAZY_ACTIVATION);
-		passingHas(BundleEventConditions.typeLazyActivation(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.RESOLVED);
-		passingHas(BundleEventConditions.typeResolved(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.STARTED);
-		passingHas(BundleEventConditions.typeStarted(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.STARTING);
-		passingHas(BundleEventConditions.typeStarting(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.STOPPED);
-		passingHas(BundleEventConditions.typeStopped(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.STOPPING);
-		passingHas(BundleEventConditions.typeStopping(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.UNINSTALLED);
-		passingHas(BundleEventConditions.typeUninstalled(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.UNRESOLVED);
-		passingHas(BundleEventConditions.typeUnresolved(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.UPDATED);
-		passingHas(BundleEventConditions.typeUpdated(), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.INSTALLED);
 		passingHas(BundleEventConditions.typeAndBundle(BundleEvent.INSTALLED, bundle), bundleEvent);
-
-		passingHas(BundleEventConditions.typeInstalledAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.LAZY_ACTIVATION);
-		passingHas(BundleEventConditions.typeLazyActivationAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.RESOLVED);
-		passingHas(BundleEventConditions.typeResolvedAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.STARTED);
-		passingHas(BundleEventConditions.typeStartedAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.STARTING);
-		passingHas(BundleEventConditions.typeStartingAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.STOPPED);
-		passingHas(BundleEventConditions.typeStoppedAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.STOPPING);
-		passingHas(BundleEventConditions.typeStoppingAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.UNINSTALLED);
-		passingHas(BundleEventConditions.typeUninstalledAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.UNRESOLVED);
-		passingHas(BundleEventConditions.typeUnresolvedAndBundleEquals(bundle), bundleEvent);
-
-		when(bundleEvent.getType()).thenReturn(BundleEvent.UPDATED);
-		passingHas(BundleEventConditions.typeUpdatedAndBundleEquals(bundle), bundleEvent);
 
 	}
 }

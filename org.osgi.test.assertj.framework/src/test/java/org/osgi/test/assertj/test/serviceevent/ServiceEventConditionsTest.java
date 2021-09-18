@@ -132,34 +132,6 @@ class ServiceEventConditionsTest implements ConditionAssert {
 		failingHas(ServiceEventConditions.type(ServiceEvent.MODIFIED), serviceEvent, "type matches mask <%s>",
 			ServiceEventType.BITMAP.maskToString(ServiceEvent.MODIFIED));
 
-		when(serviceEvent.getType()).thenReturn(ServiceEvent.MODIFIED);
-		passingHas(ServiceEventConditions.typeModified(), serviceEvent);
-		failingHas(ServiceEventConditions.typeModifiedEndmatch(), serviceEvent, "type matches mask <%s>",
-			ServiceEventType.BITMAP.maskToString(ServiceEvent.MODIFIED_ENDMATCH));
-		passingHas(ServiceEventConditions.typeModifiedAndObjectClass(A.class), serviceEvent);
-		failingHas(ServiceEventConditions.typeModifiedAndObjectClass(B.class), serviceEvent);
-
-		when(serviceEvent.getType()).thenReturn(ServiceEvent.MODIFIED_ENDMATCH);
-		passingHas(ServiceEventConditions.typeModifiedEndmatch(), serviceEvent);
-		failingHas(ServiceEventConditions.typeModified(), serviceEvent, "type matches mask <%s>",
-			ServiceEventType.BITMAP.maskToString(ServiceEvent.MODIFIED));
-
-
-		when(serviceEvent.getType()).thenReturn(ServiceEvent.REGISTERED);
-		passingHas(ServiceEventConditions.typeRegistered(), serviceEvent);
-		failingHas(ServiceEventConditions.typeUnregistering(), serviceEvent, "type matches mask <%s>",
-			ServiceEventType.BITMAP.maskToString(ServiceEvent.UNREGISTERING));
-		passingHas(ServiceEventConditions.typeRegisteredAndObjectClass(A.class), serviceEvent);
-		failingHas(ServiceEventConditions.typeRegisteredAndObjectClass(B.class), serviceEvent);
-
-		when(serviceEvent.getType()).thenReturn(ServiceEvent.UNREGISTERING);
-		passingHas(ServiceEventConditions.typeUnregistering(), serviceEvent);
-		failingHas(ServiceEventConditions.typeRegistered(), serviceEvent, "type matches mask <%s>",
-			ServiceEventType.BITMAP.maskToString(ServiceEvent.REGISTERED));
-		passingHas(ServiceEventConditions.typeUnregisteringAndObjectClass(A.class), serviceEvent);
-		failingHas(ServiceEventConditions.typeUnregisteringAndObjectClass(B.class), serviceEvent);
-
-
 	}
 
 	class A {
