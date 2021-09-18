@@ -48,16 +48,6 @@ public class ServiceEventPredicates {
 	}
 
 	/**
-	 * Returns a predicate that tests if the object matches the given predicate.
-	 *
-	 * @param predicate the predicate
-	 * @return the predicate
-	 */
-	public static Predicate<Object> serviceEventAnd(Predicate<ServiceEvent> predicate) {
-		return e -> serviceEvent().test(e) && predicate.test((ServiceEvent) e);
-	}
-
-	/**
 	 * Returns a predicate that tests if the event-type matches the
 	 * eventTypeMask.
 	 *
@@ -69,41 +59,6 @@ public class ServiceEventPredicates {
 		return e -> (e.getType() & eventTypeMask) != 0;
 	}
 
-	/**
-	 * Returns a predicate that tests if the event-type is registered.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeRegistered() {
-		return e -> type(ServiceEvent.REGISTERED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is modified.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeModified() {
-		return e -> type(ServiceEvent.MODIFIED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is modified-endmatch.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeModifiedEndmatch() {
-		return e -> type(ServiceEvent.MODIFIED_ENDMATCH).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is unregistering.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeUnregistering() {
-		return e -> type(ServiceEvent.UNREGISTERING).test(e);
-	}
 
 	/**
 	 * Returns a predicate that tests if the Service of the event matches the
@@ -214,74 +169,5 @@ public class ServiceEventPredicates {
 	public static Predicate<ServiceEvent> matches(int eventTypeMask, final Class<?> objectClass,
 		Dictionary<String, ?> properties) {
 		return e -> matches(eventTypeMask, objectClass, Dictionaries.asMap(properties)).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is registered and
-	 * matches the given objectClass.
-	 *
-	 * @param objectClass the objectClass
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeRegistered(final Class<?> objectClass) {
-		return matches(ServiceEvent.REGISTERED, objectClass);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is registered with the
-	 * given objectClass and properties.
-	 *
-	 * @param objectClass the objectClass
-	 * @param properties the properties
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeRegisteredWith(final Class<?> objectClass, Map<String, ?> properties) {
-		return matches(ServiceEvent.REGISTERED, objectClass, properties);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is registered with the
-	 * given objectClass and properties.
-	 *
-	 * @param objectClass the objectClass
-	 * @param dictionary the dictionary
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeRegisteredWith(final Class<?> objectClass,
-		Dictionary<String, ?> dictionary) {
-		return matches(ServiceEvent.REGISTERED, objectClass, dictionary);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is unregistering and
-	 * matches the given objectClass.
-	 *
-	 * @param objectClass the objectClass
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeUnregistering(final Class<?> objectClass) {
-		return matches(ServiceEvent.UNREGISTERING, objectClass);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is modified and matches
-	 * the given objectClass.
-	 *
-	 * @param objectClass the objectClass
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeModified(final Class<?> objectClass) {
-		return matches(ServiceEvent.MODIFIED, objectClass);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is modified endmatch and
-	 * matches the given objectClass.
-	 *
-	 * @param objectClass the objectClass
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> typeModifiedEndmatch(final Class<?> objectClass) {
-		return matches(ServiceEvent.MODIFIED_ENDMATCH, objectClass);
 	}
 }

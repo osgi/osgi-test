@@ -38,17 +38,6 @@ public class FrameworkEventPredicates {
 	}
 
 	/**
-	 * Returns a predicate that tests if the object is a framework event and the
-	 * given predicate also matches.
-	 *
-	 * @param predicate the predicate
-	 * @return the predicate
-	 */
-	public static Predicate<Object> frameworkEventAnd(Predicate<FrameworkEvent> predicate) {
-		return e -> frameworkEvent().test(e) && predicate.test((FrameworkEvent) e);
-	}
-
-	/**
 	 * Returns a predicate that tests if the event-type matches the
 	 * eventTypeMask.
 	 *
@@ -59,84 +48,4 @@ public class FrameworkEventPredicates {
 		return e -> (e.getType() & eventTypeMask) != 0;
 	}
 
-	/**
-	 * Returns a predicate that tests if the event-type is error.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typeError() {
-		return e -> type(FrameworkEvent.ERROR).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is info.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typeInfo() {
-		return e -> type(FrameworkEvent.INFO).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is packages refreshed.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typePackagesRefreshed() {
-		return e -> type(FrameworkEvent.PACKAGES_REFRESHED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is started.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typeStarted() {
-		return e -> type(FrameworkEvent.STARTED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is startlevel changed.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typeStartlevelChanged() {
-		return e -> type(FrameworkEvent.STARTLEVEL_CHANGED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is stopped.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typeStopped() {
-		return e -> type(FrameworkEvent.STOPPED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is stopped update.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typeStoppedUpdate() {
-		return e -> type(FrameworkEvent.STOPPED_UPDATE).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is wait-timeout.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typeWaitTimeout() {
-		return e -> type(FrameworkEvent.WAIT_TIMEDOUT).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is warning.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<FrameworkEvent> typeWarning() {
-		return e -> type(FrameworkEvent.WARNING).test(e);
-	}
 }

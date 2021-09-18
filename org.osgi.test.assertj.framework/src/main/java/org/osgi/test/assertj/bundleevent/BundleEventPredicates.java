@@ -41,17 +41,6 @@ public class BundleEventPredicates {
 	}
 
 	/**
-	 * Returns a predicate that tests if the object Bundle event and matches the
-	 * given eventTypeMask.
-	 *
-	 * @param predicate the predicate
-	 * @return the predicate
-	 */
-	public static Predicate<Object> bundleEventAnd(Predicate<BundleEvent> predicate) {
-		return e -> bundleEvent().test(e) && predicate.test((BundleEvent) e);
-	}
-
-	/**
 	 * Returns a predicate that tests if the event-type matches the given
 	 * eventTypeMask.
 	 *
@@ -60,96 +49,5 @@ public class BundleEventPredicates {
 	 */
 	public static Predicate<BundleEvent> type(final int eventTypeMask) {
 		return e -> (e.getType() & eventTypeMask) != 0;
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is installed.
-	 *
-	 * @return the predicate
-	 */
-	// BundleEvents - by type
-	public static Predicate<BundleEvent> typeInstalled() {
-		return e -> type(BundleEvent.INSTALLED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is lazy activation.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeLazyActivation() {
-		return e -> type(BundleEvent.LAZY_ACTIVATION).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is resolved.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeResolved() {
-		return e -> type(BundleEvent.RESOLVED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is started.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeStarted() {
-		return e -> type(BundleEvent.STARTED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is starting.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeStarting() {
-		return e -> type(BundleEvent.STARTING).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is stopped.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeStopped() {
-		return e -> type(BundleEvent.STOPPED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is stopping.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeStopping() {
-		return e -> type(BundleEvent.STOPPING).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is uninstalled.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeUninstalled() {
-		return e -> type(BundleEvent.UNINSTALLED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is unresolved.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeUnresolved() {
-		return e -> type(BundleEvent.UNRESOLVED).test(e);
-	}
-
-	/**
-	 * Returns a predicate that tests if the event-type is updated.
-	 *
-	 * @return the predicate
-	 */
-	public static Predicate<BundleEvent> typeUpdated() {
-		return e -> type(BundleEvent.UPDATED).test(e);
 	}
 }

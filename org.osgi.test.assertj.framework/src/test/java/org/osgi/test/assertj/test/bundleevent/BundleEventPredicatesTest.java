@@ -20,9 +20,6 @@ package org.osgi.test.assertj.test.bundleevent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
-
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -50,86 +47,6 @@ public class BundleEventPredicatesTest {
 			.test(new BundleEvent(BundleEvent.UNINSTALLED, bundle)))
 			.isFalse();
 
-		softly.assertThat(BundleEventPredicates.typeInstalled()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeInstalled()
-			.test(new BundleEvent(BundleEvent.UNINSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeLazyActivation()
-			.test(new BundleEvent(BundleEvent.LAZY_ACTIVATION, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeLazyActivation()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeResolved()
-			.test(new BundleEvent(BundleEvent.RESOLVED, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeResolved()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeStarted()
-			.test(new BundleEvent(BundleEvent.STARTED, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeStarted()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeStarting()
-			.test(new BundleEvent(BundleEvent.STARTING, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeStarting()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeStopped()
-			.test(new BundleEvent(BundleEvent.STOPPED, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeStopped()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeStopping()
-			.test(new BundleEvent(BundleEvent.STOPPING, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeStopping()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeUnresolved()
-			.test(new BundleEvent(BundleEvent.UNRESOLVED, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeUnresolved()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeUninstalled()
-			.test(new BundleEvent(BundleEvent.UNINSTALLED, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeUninstalled()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
-		softly.assertThat(BundleEventPredicates.typeUpdated()
-			.test(new BundleEvent(BundleEvent.UPDATED, bundle)))
-			.isTrue();
-
-		softly.assertThat(BundleEventPredicates.typeUpdated()
-			.test(new BundleEvent(BundleEvent.INSTALLED, bundle)))
-			.isFalse();
-
 		softly.assertThat(BundleEventPredicates.bundleEvent()
 			.test(new BundleEvent(BundleEvent.UPDATED, bundle)))
 			.isTrue();
@@ -149,26 +66,6 @@ public class BundleEventPredicatesTest {
 		assertThat(BundleEventPredicates.bundleEvent()
 			.test("")).isFalse();
 
-	}
-
-	@Test
-	void test_bundleEventAnd() throws Exception {
-
-		AtomicBoolean flag = new AtomicBoolean(false);
-
-		Predicate<BundleEvent> p = new Predicate<BundleEvent>() {
-
-			@Override
-			public boolean test(BundleEvent t) {
-				flag.set(true);
-				return true;
-			}
-		};
-
-		assertThat(BundleEventPredicates.bundleEventAnd(p)
-			.test(new BundleEvent(BundleEvent.UPDATED, bundle))).isTrue();
-
-		assertThat(flag.get()).isTrue();
 	}
 
 }

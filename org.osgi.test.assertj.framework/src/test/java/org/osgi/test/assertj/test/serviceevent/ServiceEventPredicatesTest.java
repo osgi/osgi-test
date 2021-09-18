@@ -22,8 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
@@ -74,38 +72,6 @@ public class ServiceEventPredicatesTest {
 		softly.assertThat(ServiceEventPredicates.type(ServiceEvent.MODIFIED_ENDMATCH)
 			.test(event))
 			.isFalse();
-		//
-		softly.assertThat(ServiceEventPredicates.typeModified()
-			.test(new ServiceEvent(ServiceEvent.MODIFIED, sr)))
-			.isTrue();
-
-		softly.assertThat(ServiceEventPredicates.typeModified()
-			.test(new ServiceEvent(ServiceEvent.REGISTERED, sr)))
-			.isFalse();
-		//
-		softly.assertThat(ServiceEventPredicates.typeModifiedEndmatch()
-			.test(new ServiceEvent(ServiceEvent.MODIFIED_ENDMATCH, sr)))
-			.isTrue();
-
-		softly.assertThat(ServiceEventPredicates.typeModifiedEndmatch()
-			.test(new ServiceEvent(ServiceEvent.REGISTERED, sr)))
-			.isFalse(); //
-		softly.assertThat(ServiceEventPredicates.typeRegistered()
-			.test(new ServiceEvent(ServiceEvent.REGISTERED, sr)))
-			.isTrue();
-
-		softly.assertThat(ServiceEventPredicates.typeRegistered()
-			.test(new ServiceEvent(ServiceEvent.UNREGISTERING, sr)))
-			.isFalse();
-
-		//
-		softly.assertThat(ServiceEventPredicates.typeUnregistering()
-			.test(new ServiceEvent(ServiceEvent.UNREGISTERING, sr)))
-			.isTrue();
-
-		softly.assertThat(ServiceEventPredicates.typeUnregistering()
-			.test(new ServiceEvent(ServiceEvent.REGISTERED, sr)))
-			.isFalse();
 
 		softly.assertThat(ServiceEventPredicates.containsServiceProperties(dict)
 			.test(event))
@@ -127,17 +93,9 @@ public class ServiceEventPredicatesTest {
 			.test(event))
 			.isFalse();
 
-		softly.assertThat(ServiceEventPredicates.typeRegistered(A.class)
-			.test(event))
-			.isTrue();
-
 		softly.assertThat(ServiceEventPredicates.objectClass(A.class)
 			.test(event))
 			.isTrue();
-
-		softly.assertThat(ServiceEventPredicates.typeModified(A.class)
-			.test(event))
-			.isFalse();
 
 		softly.assertThat(ServiceEventPredicates.matches(ServiceEvent.REGISTERED, A.class, dict)
 			.test(event))
@@ -160,26 +118,6 @@ public class ServiceEventPredicatesTest {
 		assertThat(ServiceEventPredicates.serviceEvent()
 			.test("")).isFalse();
 
-	}
-
-	@Test
-	void test_serviceEventAnd() throws Exception {
-
-		AtomicBoolean flag = new AtomicBoolean(false);
-
-		Predicate<ServiceEvent> p = new Predicate<ServiceEvent>() {
-
-			@Override
-			public boolean test(ServiceEvent t) {
-				flag.set(true);
-				return true;
-			}
-		};
-
-		assertThat(ServiceEventPredicates.serviceEventAnd(p)
-			.test(new ServiceEvent(ServiceEvent.MODIFIED, sr))).isTrue();
-
-		assertThat(flag.get()).isTrue();
 	}
 
 }
