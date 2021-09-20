@@ -44,9 +44,7 @@ on your local machine.
 
 ## Code Quality
 
-We use CodeQL to analyse the code and look for potential bugs. The results are visible on [LGTM.com](https://lgtm.com/projects/g/osgi/osgi-test/?mode=list).
-
-[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/osgi/osgi-test.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/osgi/osgi-test/context:java)
+We use [CodeQL](https://github.com/osgi/osgi-test/security/code-scanning?query=tool%3ACodeQL) for continuous security analysis.
 
 ## Repository
 
