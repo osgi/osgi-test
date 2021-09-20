@@ -39,7 +39,7 @@
     order=sortbynameversion,\
     begin=-1
 -runbundles: \
-	assertj-core;version='[3.20.2,3.20.3)',\
+	assertj-core;version='[3.21.0,3.21.1)',\
 	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
 	org.osgi.test.common;version='[1.1.0,1.1.1)',\
 	org.osgi.test.junit4;version='[1.1.0,1.1.1)',\

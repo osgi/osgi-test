@@ -1,21 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) Contributors to the Eclipse Foundation
-   
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
-   
-        http://www.apache.org/licenses/LICENSE-2.0
-   
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
-   
-    SPDX-License-Identifier: Apache-2.0
- -->
+	Copyright (c) Contributors to the Eclipse Foundation
+
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
+
+	SPDX-License-Identifier: Apache-2.0
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
@@ -41,7 +41,7 @@
 		<junit-platform.compile.version>1.6.0</junit-platform.compile.version>
 		<junit-jupiter.version>5.8.0</junit-jupiter.version>
 		<junit-platform.version>1.8.0</junit-platform.version>
-		<assertj.version>3.20.2</assertj.version>
+		<assertj.version>3.21.0</assertj.version>
 	</properties>
 
 	<modules>
@@ -683,9 +683,17 @@
 		<profile>
 			<id>bnd-next</id>
 			<properties>
-				<bnd.version>6.0.0-SNAPSHOT</bnd.version>
+				<bnd.version>6.0.0-RC2</bnd.version>
 			</properties>
 			<repositories>
+				<repository>
+					<id>bnd-releases</id>
+					<url>https://bndtools.jfrog.io/bndtools/libs-release/</url>
+					<layout>default</layout>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
 				<repository>
 					<id>bnd-snapshots</id>
 					<url>https://bndtools.jfrog.io/bndtools/libs-snapshot/</url>
@@ -696,6 +704,14 @@
 				</repository>
 			</repositories>
 			<pluginRepositories>
+				<pluginRepository>
+					<id>bnd-releases</id>
+					<url>https://bndtools.jfrog.io/bndtools/libs-release/</url>
+					<layout>default</layout>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
 				<pluginRepository>
 					<id>bnd-snapshots</id>
 					<url>https://bndtools.jfrog.io/bndtools/libs-snapshot/</url>
