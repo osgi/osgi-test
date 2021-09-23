@@ -30,16 +30,16 @@
     begin=-1
 # The following is calculated by the bnd-resolver-maven-plugin
 -runbundles: \
-	assertj-core;version='[3.20.2,3.20.3)',\
-	junit-jupiter-api;version='[5.8.0,5.8.1)',\
-	junit-jupiter-engine;version='[5.8.0,5.8.1)',\
-	junit-jupiter-params;version='[5.8.0,5.8.1)',\
-	junit-platform-commons;version='[1.8.0,1.8.1)',\
-	junit-platform-engine;version='[1.8.0,1.8.1)',\
-	junit-platform-launcher;version='[1.8.0,1.8.1)',\
+	assertj-core;version='[3.21.0,3.21.1)',\
+	junit-jupiter-api;version='[5.8.1,5.8.2)',\
+	junit-jupiter-engine;version='[5.8.1,5.8.2)',\
+	junit-jupiter-params;version='[5.8.1,5.8.2)',\
+	junit-platform-commons;version='[1.8.1,1.8.2)',\
+	junit-platform-engine;version='[1.8.1,1.8.2)',\
+	junit-platform-launcher;version='[1.8.1,1.8.2)',\
 	net.bytebuddy.byte-buddy;version='[1.11.13,1.11.14)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.11.13,1.11.14)',\
-	org.apache.felix.scr;version='[2.1.28,2.1.29)',\
+	org.apache.felix.scr;version='[2.1.30,2.1.31)',\
 	org.mockito.mockito-core;version='[3.12.4,3.12.5)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
