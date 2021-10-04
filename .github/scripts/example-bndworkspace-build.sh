@@ -16,6 +16,8 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #*******************************************************************************
+set -ev
+
 cd examples/osgi-test-example-bndworkspace
 ./gradlew --version
 ./gradlew build
