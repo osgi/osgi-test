@@ -35,13 +35,6 @@ You can use your system `mvn` but we require a recent version.
 
 [![Build Status](https://github.com/osgi/osgi-test/workflows/CI%20Build/badge.svg)](https://github.com/osgi/osgi-test/actions?query=workflow%3A%22CI%20Build%22)
 
-## Code Coverage
-
-We use JaCoCo to collect code coverage statistics. Thes are uploaded to [Codecov](https://codecov.io/github/osgi/osgi-test) or you can view the results by running `mvnw verify`
-on your local machine.
-
-[![Coverage Status](https://img.shields.io/codecov/c/github/osgi/osgi-test.svg)](https://codecov.io/github/osgi/osgi-test)
-
 ## Code Quality
 
 We use [CodeQL](https://github.com/osgi/osgi-test/security/code-scanning?query=tool%3ACodeQL) for continuous security analysis.
