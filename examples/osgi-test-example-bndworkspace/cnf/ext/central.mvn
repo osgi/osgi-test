@@ -12,8 +12,8 @@ org.apiguardian:apiguardian-api:1.1.0
 org.opentest4j:opentest4j:1.2.0
 org.assertj:assertj-core:${assertj_version}
 org.mockito:mockito-core:${mockito_version}
-net.bytebuddy:byte-buddy:1.11.3
-net.bytebuddy:byte-buddy-agent:1.11.3
+net.bytebuddy:byte-buddy:${bytebuddy_version}
+net.bytebuddy:byte-buddy-agent:${bytebuddy_version}
 org.objenesis:objenesis:3.2
 org.osgi:org.osgi.test.common:${osgi_test_version}
 org.osgi:org.osgi.test.junit5:${osgi_test_version}
