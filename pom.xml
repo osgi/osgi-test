@@ -47,6 +47,7 @@
 	<modules>
 		<module>org.osgi.test.common</module>
 		<module>org.osgi.test.assertj.framework</module>
+		<module>org.osgi.test.assertj.log</module>
 		<module>org.osgi.test.assertj.promise</module>
 		<module>org.osgi.test.junit4</module>
 		<module>org.osgi.test.junit5</module>
