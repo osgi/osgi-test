@@ -21,20 +21,18 @@ package org.osgi.test.assertj.bundle;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.STRING;
 import static org.osgi.framework.Bundle.ACTIVE;
+import static org.osgi.test.assertj.date.Dates.LONG_AS_DATE;
+import static org.osgi.test.assertj.date.Dates.getTime;
 import static org.osgi.test.assertj.version.VersionAssert.VERSION;
 import static org.osgi.test.common.bitmaps.BundleState.BITMAP;
 
 import java.net.URL;
-import java.time.Instant;
-import java.util.Date;
 import java.util.Objects;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractDateAssert;
 import org.assertj.core.api.AbstractLongAssert;
 import org.assertj.core.api.AbstractStringAssert;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.InstanceOfAssertFactory;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
@@ -203,26 +201,9 @@ public abstract class AbstractBundleAssert<SELF extends AbstractBundleAssert<SEL
 			.as(actual + ".lastModified");
 	}
 
-	static final InstanceOfAssertFactory<Long, AbstractDateAssert<?>> LONG_AS_DATE = new InstanceOfAssertFactory<>(
-		Long.class, date -> Assertions.assertThat(new Date(date)));
-
 	public AbstractDateAssert<?> hasLastModifiedDateThat() {
 		return isNotNull().extracting(Bundle::getLastModified, LONG_AS_DATE)
 			.as(actual + ".lastModified");
-	}
-
-	private static long getTime(Object expected) {
-		if (expected == null) {
-			throw new IllegalArgumentException("expected cannot be null");
-		} else if (expected instanceof Long) {
-			return (Long) expected;
-		} else if (expected instanceof Date) {
-			return ((Date) expected).getTime();
-		} else if (expected instanceof Instant) {
-			return ((Instant) expected).toEpochMilli();
-		} else {
-			throw new IllegalArgumentException("Expected must be a long, Date or Instant");
-		}
 	}
 
 	public SELF isInState(int expected) {
