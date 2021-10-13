@@ -18,20 +18,24 @@
 
 package org.osgi.test.assertj.serviceregistration;
 
-import org.assertj.core.api.AbstractObjectAssert;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.test.assertj.servicereference.ServiceReferenceAssert;
+import static org.osgi.test.assertj.servicereference.ServiceReferenceAssert.SERVICE_REFERENCE;
 
-public abstract class AbstractServiceRegistrationAssert<SELF extends AbstractServiceRegistrationAssert<SELF, ACTUAL>, ACTUAL extends ServiceRegistration<?>>
+import org.assertj.core.api.AbstractObjectAssert;
+import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.test.assertj.servicereference.AbstractServiceReferenceAssert;
+
+public abstract class AbstractServiceRegistrationAssert<SELF extends AbstractServiceRegistrationAssert<SELF, ACTUAL, SERVICE>, ACTUAL extends ServiceRegistration<? extends SERVICE>, SERVICE>
 	extends AbstractObjectAssert<SELF, ACTUAL> {
 
 	protected AbstractServiceRegistrationAssert(ACTUAL actual, Class<?> selfType) {
 		super(actual, selfType);
 	}
 
-	public ServiceReferenceAssert hasServiceReferenceThat() {
-		isNotNull();
-		return ServiceReferenceAssert.assertThat(actual.getReference())
-			.as(actual + ".reference");
+	@SuppressWarnings("unchecked")
+	public AbstractServiceReferenceAssert<?, ? extends ServiceReference<? extends SERVICE>, SERVICE> hasServiceReferenceThat() {
+		return (AbstractServiceReferenceAssert<?, ? extends ServiceReference<? extends SERVICE>, SERVICE>) isNotNull()
+			.extracting(ServiceRegistration::getReference, SERVICE_REFERENCE)
+			.as(actual + ".serviceReference");
 	}
 }

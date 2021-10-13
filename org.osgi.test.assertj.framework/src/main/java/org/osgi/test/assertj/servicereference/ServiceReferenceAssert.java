@@ -18,16 +18,21 @@
 
 package org.osgi.test.assertj.servicereference;
 
+import static java.util.Objects.requireNonNull;
+import static org.assertj.core.error.ShouldNotBeNull.shouldNotBeNull;
+
+import org.assertj.core.api.InstanceOfAssertFactory;
 import org.osgi.framework.ServiceReference;
 
-public class ServiceReferenceAssert
-	extends AbstractServiceReferenceAssert<ServiceReferenceAssert, ServiceReference<?>> {
+public class ServiceReferenceAssert<SERVICE> extends
+	AbstractServiceReferenceAssert<ServiceReferenceAssert<SERVICE>, ServiceReference<? extends SERVICE>, SERVICE> {
+
 	/**
 	 * Create assertion for {@link org.osgi.framework.ServiceReference}.
 	 *
 	 * @param actual the actual value.
 	 */
-	public ServiceReferenceAssert(ServiceReference<?> actual) {
+	public ServiceReferenceAssert(ServiceReference<? extends SERVICE> actual) {
 		super(actual, ServiceReferenceAssert.class);
 	}
 
@@ -37,7 +42,39 @@ public class ServiceReferenceAssert
 	 * @param actual the actual value.
 	 * @return the created assertion object.
 	 */
-	public static ServiceReferenceAssert assertThat(ServiceReference<?> actual) {
-		return new ServiceReferenceAssert(actual);
+	public static <SERVICE> ServiceReferenceAssert<SERVICE> assertThat(ServiceReference<? extends SERVICE> actual) {
+		return new ServiceReferenceAssert<SERVICE>(actual);
 	}
+
+	/**
+	 * {@link InstanceOfAssertFactory} for a {@link ServiceReferenceAssert}.
+	 *
+	 * @param <ACTUAL> The actual type of the {@code ServiceReference}.
+	 * @param <SERVICE> The type of the service that the
+	 *            {@code ServiceReference} refers to.
+	 * @param serviceType The service type class.
+	 * @return The factory instance.
+	 * @see #SERVICE_REFERENCE
+	 * @since 1.1
+	 */
+	public static <ACTUAL extends ServiceReference<? extends SERVICE>, SERVICE> InstanceOfAssertFactory<ACTUAL, ServiceReferenceAssert<SERVICE>> serviceReference(
+		Class<SERVICE> serviceType) {
+		requireNonNull(serviceType, shouldNotBeNull("serviceType").create());
+		@SuppressWarnings({
+			"rawtypes", "unchecked"
+		})
+		Class<ACTUAL> type = (Class) ServiceReference.class;
+		return new InstanceOfAssertFactory<>(type, ServiceReferenceAssert::<SERVICE> assertThat);
+	}
+
+	/**
+	 * {@link InstanceOfAssertFactory} for a {@link ServiceReferenceAssert}
+	 * using {@code Object} as the result type.
+	 *
+	 * @see #serviceReference(Class)
+	 * @since 1.1
+	 */
+	public static final InstanceOfAssertFactory<ServiceReference<?>, ServiceReferenceAssert<Object>> SERVICE_REFERENCE = serviceReference(
+		Object.class);
+
 }

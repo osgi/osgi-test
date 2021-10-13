@@ -36,7 +36,7 @@ import org.osgi.test.assertj.bundle.BundleAssert;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
 import org.osgi.test.common.dictionary.Dictionaries;
 
-public abstract class AbstractServiceReferenceAssert<SELF extends AbstractServiceReferenceAssert<SELF, ACTUAL>, ACTUAL extends ServiceReference<?>>
+public abstract class AbstractServiceReferenceAssert<SELF extends AbstractServiceReferenceAssert<SELF, ACTUAL, SERVICE>, ACTUAL extends ServiceReference<? extends SERVICE>, SERVICE>
 	extends AbstractComparableAssert<SELF, ACTUAL> {
 
 	protected AbstractServiceReferenceAssert(ACTUAL actual, Class<?> selfType) {

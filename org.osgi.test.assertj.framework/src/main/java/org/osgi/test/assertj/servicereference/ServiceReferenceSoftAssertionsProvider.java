@@ -28,7 +28,8 @@ public interface ServiceReferenceSoftAssertionsProvider extends SoftAssertionsPr
 	 * @param actual the actual value.
 	 * @return the created assertion object.
 	 */
-	default ServiceReferenceAssert assertThat(ServiceReference<?> actual) {
+	@SuppressWarnings("unchecked")
+	default <SERVICE> ServiceReferenceAssert<SERVICE> assertThat(ServiceReference<? extends SERVICE> actual) {
 		return proxy(ServiceReferenceAssert.class, ServiceReference.class, actual);
 	}
 }
