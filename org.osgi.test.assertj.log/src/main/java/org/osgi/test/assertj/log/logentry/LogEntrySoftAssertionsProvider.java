@@ -16,6 +16,19 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.servicereference;
+package org.osgi.test.assertj.log.logentry;
+
+import org.assertj.core.api.SoftAssertionsProvider;
+import org.osgi.service.log.LogEntry;
+
+public interface LogEntrySoftAssertionsProvider extends SoftAssertionsProvider {
+	/**
+	 * Create soft assertion for {@link org.osgi.service.log.LogEntry}.
+	 *
+	 * @param actual the actual value.
+	 * @return the created assertion object.
+	 */
+	default LogEntryAssert assertThat(LogEntry actual) {
+		return proxy(LogEntryAssert.class, LogEntry.class, actual);
+	}
+}

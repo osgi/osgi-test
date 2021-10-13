@@ -30,7 +30,8 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.assertj.serviceregistration.ServiceRegistrationAssert;
 import org.osgi.test.assertj.test.testutil.AbstractAssertTest;
 
-class ServiceRegistrationAssertTest extends AbstractAssertTest<ServiceRegistrationAssert, ServiceRegistration<?>> {
+class ServiceRegistrationAssertTest
+	extends AbstractAssertTest<ServiceRegistrationAssert<Object>, ServiceRegistration<?>> {
 
 	public ServiceRegistrationAssertTest() {
 		super(ServiceRegistrationAssert::assertThat);
@@ -49,9 +50,7 @@ class ServiceRegistrationAssertTest extends AbstractAssertTest<ServiceRegistrati
 
 	@Test
 	void hasServiceReference() {
-		ServiceRegistration<?> serviceRegistration = mock(ServiceRegistration.class);
-
-		assertNotNull(ServiceRegistrationAssert.assertThat(serviceRegistration)
+		assertNotNull(ServiceRegistrationAssert.assertThat(actual)
 			.hasServiceReferenceThat());
 
 		assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> ServiceRegistrationAssert.assertThat(null)

@@ -28,7 +28,8 @@ public interface ServiceRegistrationSoftAssertionsProvider extends SoftAssertion
 	 * @param actual the actual value.
 	 * @return the created assertion object.
 	 */
-	default ServiceRegistrationAssert assertThat(ServiceRegistration<?> actual) {
+	@SuppressWarnings("unchecked")
+	default <SERVICE> ServiceRegistrationAssert<SERVICE> assertThat(ServiceRegistration<? extends SERVICE> actual) {
 		return proxy(ServiceRegistrationAssert.class, ServiceRegistration.class, actual);
 	}
 }

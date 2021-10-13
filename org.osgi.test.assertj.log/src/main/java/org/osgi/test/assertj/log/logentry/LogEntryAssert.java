@@ -16,6 +16,21 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.servicereference;
+package org.osgi.test.assertj.log.logentry;
+
+import org.assertj.core.api.InstanceOfAssertFactory;
+import org.osgi.service.log.LogEntry;
+
+public class LogEntryAssert extends AbstractLogEntryAssert<LogEntryAssert, LogEntry> {
+
+	public static final InstanceOfAssertFactory<LogEntry, LogEntryAssert> LOG_ENTRY = new InstanceOfAssertFactory<>(
+		LogEntry.class, LogEntryAssert::assertThat);
+
+	public LogEntryAssert(LogEntry actual) {
+		super(actual, LogEntryAssert.class);
+	}
+
+	public static LogEntryAssert assertThat(LogEntry actual) {
+		return new LogEntryAssert(actual);
+	}
+}
