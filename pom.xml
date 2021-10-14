@@ -45,7 +45,7 @@
 		<osgi.annotation.version>8.0.1</osgi.annotation.version>
 		<osgi.core.version>6.0.0</osgi.core.version>
 		<osgi.log.version>1.4.0</osgi.log.version>
-		<osgi.cm.version>1.6.0</osgi.cm.version>
+		<osgi.cm.version>1.6.1</osgi.cm.version>
 		<osgi.function.version>1.0.0</osgi.function.version>
 		<osgi.promise.version>1.0.0</osgi.promise.version>
 		<osgi.function.test.version>1.2.0</osgi.function.test.version>
