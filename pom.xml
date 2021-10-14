@@ -61,6 +61,7 @@
 		<module>org.osgi.test.junit4</module>
 		<module>org.osgi.test.junit5</module>
 		<module>org.osgi.test.junit5.cm</module>
+		<module>org.osgi.test.junit5.listeners.log.osgi</module>
 		<module>org.osgi.test.bom</module>
 	</modules>
 
@@ -586,6 +587,12 @@
 				<artifactId>org.osgi.service.cm</artifactId>
 				<version>${osgi.cm.version}</version>
 				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.namespace.service</artifactId>
+				<version>1.0.0</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>

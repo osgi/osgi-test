@@ -1,0 +1,63 @@
+# Copyright (c) Contributors to the Eclipse Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+-tester: biz.aQute.tester.junit-platform
+
+-runvm: ${def;argLine}
+
+-runfw: org.eclipse.osgi
+-resolve.effective: active
+-runproperties: \
+	logback.configurationFile=${fileuri;${.}/logback.xml},\
+	org.osgi.framework.bootdelegation=sun.reflect,\
+	osgi.console=
+
+-runsystempackages: \
+	org.slf4j;version=1.7.25,\
+	org.slf4j.helpers;version=1.7.25,\
+	org.slf4j.spi;version=1.7.25
+-runpath: \
+	ch.qos.logback.classic,\
+	ch.qos.logback.core,\
+	org.apache.felix.logback,\
+	slf4j.api
+-runrequires: \
+	bnd.identity;id='${project.artifactId}-tests',\
+	bnd.identity;id=org.osgi.test.junit5,\
+	bnd.identity;id=junit-jupiter-engine,\
+	bnd.identity;id=junit-platform-launcher
+# This will help us keep -runbundles sorted
+-runstartlevel: \
+    order=sortbynameversion,\
+    begin=-1
+-runbundles: \
+	assertj-core;version='[3.21.0,3.21.1)',\
+	junit-jupiter-api;version='[5.8.1,5.8.2)',\
+	junit-jupiter-engine;version='[5.8.1,5.8.2)',\
+	junit-jupiter-params;version='[5.8.1,5.8.2)',\
+	junit-platform-commons;version='[1.8.1,1.8.2)',\
+	junit-platform-engine;version='[1.8.1,1.8.2)',\
+	junit-platform-launcher;version='[1.8.1,1.8.2)',\
+	net.bytebuddy.byte-buddy;version='[1.11.19,1.11.20)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.11.19,1.11.20)',\
+	org.mockito.mockito-core;version='[4.0.0,4.0.1)',\
+	org.objenesis;version='[3.2.0,3.2.1)',\
+	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.osgi.test.assertj.framework;version='[1.1.0,1.1.1)',\
+	org.osgi.test.assertj.log;version='[1.1.0,1.1.1)',\
+	org.osgi.test.common;version='[1.1.0,1.1.1)',\
+	org.osgi.test.junit5;version='[1.1.0,1.1.1)',\
+	org.osgi.test.junit5.listeners.log.osgi-tests;version='[1.1.0,1.1.1)'
