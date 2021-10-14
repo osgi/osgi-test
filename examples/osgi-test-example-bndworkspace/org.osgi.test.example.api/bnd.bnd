@@ -2,3 +2,5 @@
 -include: ${workspace}/cnf/includes/jdt.bnd
 
 Bundle-Description: OSGi Testing Example API
+
+-buildpath.annotation: osgi.annotation;version=latest;maven-scope=compile
