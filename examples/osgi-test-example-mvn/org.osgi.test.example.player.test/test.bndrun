@@ -49,5 +49,5 @@
 	org.osgi.test.example.player.impl;version='[0.1.0,0.1.1)',\
 	org.osgi.test.example.player.test-tests;version='[0.1.0,0.1.1)',\
 	org.osgi.test.junit5;version='[1.0.1,1.0.2)',\
-	org.osgi.util.function;version='[1.1.0,1.1.1)',\
-	org.osgi.util.promise;version='[1.1.1,1.1.2)'
+	org.osgi.util.function;version='[1.2.0,1.2.1)',\
+	org.osgi.util.promise;version='[1.2.0,1.2.1)'

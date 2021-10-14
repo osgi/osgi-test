@@ -42,6 +42,14 @@
 		<junit-jupiter.version>5.8.1</junit-jupiter.version>
 		<junit-platform.version>1.8.1</junit-platform.version>
 		<assertj.version>3.21.0</assertj.version>
+		<osgi.annotation.version>8.0.1</osgi.annotation.version>
+		<osgi.core.version>6.0.0</osgi.core.version>
+		<osgi.log.version>1.4.0</osgi.log.version>
+		<osgi.cm.version>1.6.0</osgi.cm.version>
+		<osgi.function.version>1.0.0</osgi.function.version>
+		<osgi.promise.version>1.0.0</osgi.promise.version>
+		<osgi.function.test.version>1.2.0</osgi.function.test.version>
+		<osgi.promise.test.version>1.2.0</osgi.promise.test.version>
 	</properties>
 
 	<modules>
@@ -557,37 +565,37 @@
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>osgi.annotation</artifactId>
-				<version>8.0.0</version>
+				<version>${osgi.annotation.version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.log</artifactId>
-				<version>1.4.0</version>
+				<version>${osgi.log.version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>osgi.core</artifactId>
-				<version>6.0.0</version>
+				<version>${osgi.core.version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.cm</artifactId>
-				<version>1.6.0</version>
+				<version>${osgi.cm.version}</version>
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.function</artifactId>
-				<version>1.0.0</version>
+				<version>${osgi.function.version}</version>
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.promise</artifactId>
-				<version>1.0.0</version>
+				<version>${osgi.promise.version}</version>
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
