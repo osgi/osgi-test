@@ -26,10 +26,8 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
-import org.osgi.test.junit5.context.BundleContextExtension;
 
 @ExtendWith(PreDestroyCallback.class)
-@ExtendWith(BundleContextExtension.class)
 class BundleContextMultiLevelCleanupTest<RESOURCE> extends MultiLevelCleanupTest {
 	static final Bundle		bundle	= FrameworkUtil.getBundle(BundleContextMultiLevelCleanupTest.class);
 

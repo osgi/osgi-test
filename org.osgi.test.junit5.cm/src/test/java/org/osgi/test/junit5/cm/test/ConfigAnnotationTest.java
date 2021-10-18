@@ -20,7 +20,6 @@ package org.osgi.test.junit5.cm.test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
@@ -30,12 +29,7 @@ import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.test.junit5.cm.ConfigUtil;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
-import org.osgi.test.junit5.service.ServiceExtension;
 
-@ExtendWith({
-	ConfigurationExtension.class, ServiceExtension.class
-})
 @WithConfiguration(pid = ConfigAnnotationTest.NONSTATIC_CONFIGURATION_PID)
 public class ConfigAnnotationTest {
 

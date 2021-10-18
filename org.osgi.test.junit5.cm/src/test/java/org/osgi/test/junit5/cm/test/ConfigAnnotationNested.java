@@ -25,14 +25,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.dictionary.Dictionaries;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
 
-@ExtendWith(ConfigurationExtension.class)
 @WithConfiguration(pid = "class")
 @TestMethodOrder(OrderAnnotation.class)
 public class ConfigAnnotationNested {

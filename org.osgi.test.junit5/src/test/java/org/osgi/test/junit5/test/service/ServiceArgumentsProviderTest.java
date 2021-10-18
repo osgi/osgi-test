@@ -27,18 +27,15 @@ import java.util.Map;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInfo;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.dictionary.Dictionaries;
-import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.service.ServiceSource;
 import org.osgi.test.junit5.test.types.Foo;
 
-@ExtendWith(BundleContextExtension.class)
 public class ServiceArgumentsProviderTest {
 
 	@InjectBundleContext

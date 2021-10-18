@@ -25,16 +25,13 @@ import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.dictionary.Dictionaries;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
 
-@ExtendWith(ConfigurationExtension.class)
 @WithConfiguration(pid = ConfigAnnotationParamVariants.MY_PID, properties = {
 	@Property(key = "a", value = "1")
 })

@@ -19,7 +19,6 @@
 package org.osgi.test.junit5.test.bundle;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.osgi.framework.Bundle;
 import org.osgi.test.assertj.bundle.BundleAssert;
@@ -27,9 +26,7 @@ import org.osgi.test.assertj.dictionary.DictionaryAssert;
 import org.osgi.test.common.annotation.InjectBundleInstaller;
 import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.bundle.BundleSource;
-import org.osgi.test.junit5.context.BundleContextExtension;
 
-@ExtendWith(BundleContextExtension.class)
 public class BundleArgumentsProviderTest {
 
 	static Bundle bundleInstalled;

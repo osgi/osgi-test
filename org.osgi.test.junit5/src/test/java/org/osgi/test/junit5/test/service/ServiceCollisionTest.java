@@ -26,16 +26,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.dictionary.Dictionaries;
-import org.osgi.test.junit5.service.ServiceExtension;
 import org.osgi.test.junit5.test.types.Foo;
 
-@ExtendWith(ServiceExtension.class)
 public class ServiceCollisionTest {
 
 	private static List<ServiceRegistration<?>> registrations = new CopyOnWriteArrayList<>();

@@ -25,40 +25,34 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
-import org.osgi.test.junit5.service.ServiceExtension;
 
 public class ServiceExtension_SanityCheckingTest {
 
 	static class MyService {}
 
-	@ExtendWith(ServiceExtension.class)
 	static class TestBase {
 		@Test
 		void myTest() {}
 	}
 
-	@ExtendWith(ServiceExtension.class)
 	static class NonRawParameterType {
 		@SuppressWarnings("unused")
 		@Test
 		void myParameterTest(@InjectService AtomicReference<?> param) {}
 	}
 
-	@ExtendWith(ServiceExtension.class)
 	static class ListOfNonRawParameterType {
 		@SuppressWarnings("unused")
 		@Test
 		void myParameterTest(@InjectService List<AtomicReference<?>> param) {}
 	}
 
-	@ExtendWith(ServiceExtension.class)
 	static class ServiceAwareOfNonRawParameterType {
 		@SuppressWarnings("unused")
 		@Test

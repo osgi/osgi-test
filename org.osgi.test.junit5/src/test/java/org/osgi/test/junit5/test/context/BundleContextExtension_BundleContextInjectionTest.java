@@ -24,17 +24,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
-import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.test.testutils.OSGiSoftAssertions;
 
-@ExtendWith(BundleContextExtension.class)
 public class BundleContextExtension_BundleContextInjectionTest {
 
 	static final Bundle			bundle	= FrameworkUtil
