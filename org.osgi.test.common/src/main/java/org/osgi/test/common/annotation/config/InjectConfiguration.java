@@ -27,7 +27,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.Property;
+import org.osgi.test.junit5.cm.ConfigurationExtension;
 
 /*
  * Reads existing a Configuration from the Config-Admin and injects it into Field or Parameter
@@ -41,8 +43,8 @@ import org.osgi.test.common.annotation.Property;
 })
 
 @Retention(RUNTIME)
+@ExtendWith(ConfigurationExtension.class)
 @Documented
-
 public @interface InjectConfiguration {
 
 	static long DEFAULT_TIMEOUT = 200l;

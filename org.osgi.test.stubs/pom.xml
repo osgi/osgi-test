@@ -28,8 +28,18 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>org.osgi.test.common</artifactId>
-	<description>OSGi Testing Common Support</description>
+	<properties>
+		<bnd-tests.skip>true</bnd-tests.skip>
+		<bnd.resolve.skip>true</bnd.resolve.skip>
+		<bnd.baseline.skip>true</bnd.baseline.skip>
+		<maven.test.skip>true</maven.test.skip>
+		<maven.source.skip>true</maven.source.skip>
+		<maven.javadoc.skip>true</maven.javadoc.skip>
+		<maven.deploy.skip>true</maven.deploy.skip>
+	</properties>
+
+	<artifactId>org.osgi.test.stubs</artifactId>
+	<description>OSGi Testing Common Stubs</description>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<url>https://www.osgi.org</url>
 	<scm>
@@ -44,63 +54,9 @@
 			<artifactId>osgi.annotation</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>osgi.core</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.test.stubs</artifactId>
-			<version>${revision}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-params</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>bnd-process</id>
-						<phase>process-classes</phase>
-						<goals>
-							<goal>bnd-process</goal>
-						</goals>
-						<configuration>
-							<bnd><![CDATA[
-Import-Package: org.junit.jupiter.*;resolution:=optional,\
- org.osgi.test.junit5.*;resolution:=optional,\
- *
-]]></bnd>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<detectOfflineLinks>false</detectOfflineLinks>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
 </project>

@@ -27,11 +27,15 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.test.junit5.cm.ConfigurationExtension;
+
 @Inherited
 @Target({
 	TYPE, METHOD
 })
 @Retention(RUNTIME)
+@ExtendWith(ConfigurationExtension.class)
 @Documented
 public @interface WithFactoryConfigurations {
 
