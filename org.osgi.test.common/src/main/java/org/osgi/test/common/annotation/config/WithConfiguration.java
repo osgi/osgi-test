@@ -28,7 +28,9 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.annotation.Property;
+import org.osgi.test.junit5.cm.ConfigurationExtension;
 
 /*
  * Configure the Config-Admin using the annotation `@WithConfiguration`
@@ -41,8 +43,8 @@ import org.osgi.test.common.annotation.Property;
 })
 @Repeatable(WithConfigurations.class)
 @Retention(RUNTIME)
+@ExtendWith(ConfigurationExtension.class)
 @Documented
-
 public @interface WithConfiguration {
 
 	/**

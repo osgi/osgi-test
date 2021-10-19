@@ -27,6 +27,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.test.junit5.service.ServiceExtension;
+
 /**
  * Inject OSGi services into test classes and methods.
  * <p>
@@ -55,6 +58,7 @@ import java.lang.annotation.Target;
 	FIELD, PARAMETER
 })
 @Retention(RUNTIME)
+@ExtendWith(ServiceExtension.class)
 @Documented
 public @interface InjectService {
 

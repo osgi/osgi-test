@@ -26,11 +26,9 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectBundleInstaller;
 import org.osgi.test.common.install.BundleInstaller;
-import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.test.context.BundleContextExtension_CleanupTest.BundleChecker;
 
 @ExtendWith(PreDestroyCallback.class)
-@ExtendWith(BundleContextExtension.class)
 class BundleInstallerMultiLevelCleanupTest extends MultiLevelCleanupTest {
 	static final Bundle		bundle	= FrameworkUtil.getBundle(BundleInstallerMultiLevelCleanupTest.class);
 

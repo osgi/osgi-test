@@ -44,7 +44,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.exceptions.Exceptions;
-import org.osgi.test.junit5.service.ServiceExtension;
 import org.osgi.test.junit5.test.ExecutorExtension;
 import org.osgi.test.junit5.test.ExecutorParameter;
 import org.osgi.test.junit5.test.types.Foo;
@@ -52,7 +51,6 @@ import org.osgi.test.junit5.test.types.Foo;
 @ExtendWith(ExecutorExtension.class)
 abstract class AbstractServiceExtensionTest {
 
-	@ExtendWith(ServiceExtension.class)
 	abstract static class TestBase {
 		static AtomicReference<SoftAssertions>		lastSoftAssertions	= new AtomicReference<>();
 		static AtomicReference<Foo>					lastService			= new AtomicReference<>();

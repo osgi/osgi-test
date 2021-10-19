@@ -53,6 +53,7 @@
 	</properties>
 
 	<modules>
+		<module>org.osgi.test.stubs</module>
 		<module>org.osgi.test.common</module>
 		<module>org.osgi.test.assertj.framework</module>
 		<module>org.osgi.test.assertj.log</module>

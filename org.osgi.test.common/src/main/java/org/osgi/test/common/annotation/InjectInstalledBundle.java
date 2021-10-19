@@ -27,6 +27,9 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.test.junit5.context.InstalledBundleExtension;
+
 /**
  * Loads a Bundle from a given location and installs the Bundle.
  *
@@ -40,6 +43,7 @@ import java.lang.annotation.Target;
 	FIELD, PARAMETER
 })
 @Retention(RUNTIME)
+@ExtendWith(InstalledBundleExtension.class)
 @Documented
 public @interface InjectInstalledBundle {
 

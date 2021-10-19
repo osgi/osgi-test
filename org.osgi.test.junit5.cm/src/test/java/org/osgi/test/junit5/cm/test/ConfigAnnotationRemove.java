@@ -22,14 +22,11 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
-import org.osgi.test.junit5.cm.ConfigurationExtension;
 
-@ExtendWith(ConfigurationExtension.class)
 @TestMethodOrder(OrderAnnotation.class)
 @WithFactoryConfiguration(factoryPid = ConfigAnnotationRemove.MY_FACTORY_PID, name = ConfigAnnotationRemove.MY_FACTORY_NAME)
 @WithConfiguration(pid = ConfigAnnotationRemove.MY_PID)

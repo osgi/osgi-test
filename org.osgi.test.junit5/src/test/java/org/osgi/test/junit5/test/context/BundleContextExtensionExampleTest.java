@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.BundleContext;
@@ -36,7 +35,6 @@ import org.osgi.test.junit5.context.BundleContextExtension;
 /**
  * This is how a real test class should use {@link BundleContextExtension}.
  */
-@ExtendWith(BundleContextExtension.class)
 public class BundleContextExtensionExampleTest {
 
 	// BundleContext injection

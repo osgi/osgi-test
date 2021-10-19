@@ -17,6 +17,6 @@
  *******************************************************************************/
 
 @org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.0.0")
+@org.osgi.annotation.versioning.Version("1.1.0")
 
 package org.osgi.test.common.annotation.config;
