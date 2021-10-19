@@ -16,8 +16,6 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-/**
- * Stub package so we can forward-reference types built later in another
- * project.
- */
-package org.osgi.test.junit5.context;
+@org.osgi.annotation.bundle.Export(attribute = "junit=5")
+@org.osgi.annotation.versioning.Version("1.1.0")
+package org.osgi.test.common.annotation;

@@ -16,11 +16,6 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-package org.osgi.test.junit5.context;
-
-import org.junit.jupiter.api.extension.Extension;
-
-/**
- * A stub so we can forward-reference this class built later in another project.
- */
-public class BundleContextExtension implements Extension {}
+@org.osgi.annotation.bundle.Export(attribute = "junit=4")
+@org.osgi.annotation.versioning.Version("1.1.0")
+package org.osgi.test.common.annotation;

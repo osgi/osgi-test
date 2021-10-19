@@ -16,8 +16,51 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-/**
- * Stub package so we can forward-reference types built later in another
- * project.
- */
-package org.osgi.test.junit5.service;
+package org.osgi.test.common.annotation;
+
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+@Inherited
+@Target({
+	ANNOTATION_TYPE
+})
+@Retention(RUNTIME)
+@Documented
+public @interface Property {
+
+	public static final String NOT_SET = "org.osgi.test.common.annotation.notset";
+	public enum Scalar {
+		String,
+		Integer,
+		Long,
+		Float,
+		Double,
+		Byte,
+		Short,
+		Character,
+		Boolean
+	}
+
+	public enum Type {
+		Scalar,
+		Collection,
+		Array,
+
+		PrimitiveArray
+	}
+
+	String key();
+
+	String[] value() default "";
+
+	Scalar scalar() default Scalar.String;
+
+	Type type() default Type.Scalar;
+
+}

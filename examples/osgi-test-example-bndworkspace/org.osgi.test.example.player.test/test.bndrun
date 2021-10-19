@@ -5,10 +5,10 @@
 -runfw: org.eclipse.osgi
 -resolve.effective: active
 -runproperties: \
-	logback.configurationFile=${fileuri;${.}/logback.xml},\
+	logback.configurationFile='${fileuri;${.}/logback.xml}',\
 	org.apache.felix.http.host=localhost,\
 	org.osgi.service.http.port=*,\
-	org.osgi.framework.bootdelegation=sun.reflect,\
+	org.osgi.framework.bootdelegation='sun.misc,sun.reflect',\
 	osgi.console=
 
 -runpath: \

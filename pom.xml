@@ -53,7 +53,6 @@
 	</properties>
 
 	<modules>
-		<module>org.osgi.test.stubs</module>
 		<module>org.osgi.test.common</module>
 		<module>org.osgi.test.assertj.framework</module>
 		<module>org.osgi.test.assertj.log</module>
@@ -177,7 +176,7 @@
 							</goals>
 							<configuration>
 								<bndruns>
-									<bndrun>test.bndrun</bndrun>
+									<include>test*.bndrun</include>
 								</bndruns>
 								<bundles>
 									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
@@ -207,7 +206,7 @@
 							</goals>
 							<configuration>
 								<bndruns>
-									<bndrun>test.bndrun</bndrun>
+									<include>test*.bndrun</include>
 								</bndruns>
 								<bundles>
 									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
@@ -448,7 +447,9 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore>
+											<message></message>
+										</ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -633,6 +634,12 @@
 			<dependency>
 				<groupId>org.junit.jupiter</groupId>
 				<artifactId>junit-jupiter-engine</artifactId>
+				<version>${junit-jupiter.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.junit.vintage</groupId>
+				<artifactId>junit-vintage-engine</artifactId>
 				<version>${junit-jupiter.version}</version>
 				<scope>test</scope>
 			</dependency>
