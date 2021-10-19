@@ -36,7 +36,6 @@
 	slf4j.api
 -runrequires: \
 	bnd.identity;id='${project.artifactId}-tests',\
-	bnd.identity;id=org.osgi.test.junit5,\
 	bnd.identity;id=junit-jupiter-engine,\
 	bnd.identity;id=junit-platform-launcher
 # This will help us keep -runbundles sorted

@@ -35,7 +35,6 @@ import java.util.function.Function;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
-import org.osgi.test.common.annotation.InjectService.AnyService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -58,7 +57,7 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 		format = String.format(requireNonNull(format), (Object[]) requireNonNull(args));
 		if (!format.isEmpty()) {
 
-			if (AnyService.class.equals(serviceType)) {
+			if ("org.osgi.test.common.annotation.InjectService$AnyService".equals(serviceType.getName())) {
 				filter = format(format);
 			} else {
 				filter = format("(&(objectClass=%s)%s)", serviceType.getName(), format);

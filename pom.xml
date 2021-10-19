@@ -53,7 +53,6 @@
 	</properties>
 
 	<modules>
-		<module>org.osgi.test.stubs</module>
 		<module>org.osgi.test.common</module>
 		<module>org.osgi.test.assertj.framework</module>
 		<module>org.osgi.test.assertj.log</module>
@@ -448,7 +447,9 @@
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<ignore></ignore>
+										<ignore>
+											<message></message>
+										</ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
