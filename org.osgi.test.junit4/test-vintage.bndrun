@@ -14,18 +14,19 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
--tester: biz.aQute.tester
+-tester: biz.aQute.tester.junit-platform
 
 -runvm: ${def;argLine}
 
 -runfw: org.eclipse.osgi
 -resolve.effective: active
 -runproperties: \
-	logback.configurationFile=${fileuri;${.}/logback.xml},\
+	logback.configurationFile='${fileuri;${.}/logback.xml}',\
 	org.apache.felix.http.host=localhost,\
 	org.osgi.service.http.port=*,\
-	org.osgi.framework.bootdelegation=sun.reflect,\
+	org.osgi.framework.bootdelegation='sun.misc,sun.reflect',\
 	osgi.console=
+
 -runsystempackages: \
 	org.slf4j;version=1.7.25,\
 	org.slf4j.helpers;version=1.7.25,\
@@ -35,14 +36,22 @@
 	ch.qos.logback.core,\
 	org.apache.felix.logback,\
 	slf4j.api
--runrequires: bnd.identity;id='${project.artifactId}-tests'
+-runrequires: \
+	bnd.identity;id='${project.artifactId}-tests',\
+	bnd.identity;id='junit-vintage-engine',\
+	bnd.identity;id='junit-platform-launcher'
 # This will help us keep -runbundles sorted
 -runstartlevel: \
     order=sortbynameversion,\
     begin=-1
 -runbundles: \
 	assertj-core;version='[3.21.0,3.21.1)',\
+	junit-platform-commons;version='[1.8.1,1.8.2)',\
+	junit-platform-engine;version='[1.8.1,1.8.2)',\
+	junit-platform-launcher;version='[1.8.1,1.8.2)',\
+	junit-vintage-engine;version='[5.8.1,5.8.2)',\
 	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
+	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.test.common;version='[1.1.0,1.1.1)',\
 	org.osgi.test.junit4;version='[1.1.0,1.1.1)',\
 	org.osgi.test.junit4-tests;version='[1.1.0,1.1.1)'
