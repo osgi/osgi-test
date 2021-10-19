@@ -176,7 +176,7 @@
 							</goals>
 							<configuration>
 								<bndruns>
-									<bndrun>test.bndrun</bndrun>
+									<include>test*.bndrun</include>
 								</bndruns>
 								<bundles>
 									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
@@ -206,7 +206,7 @@
 							</goals>
 							<configuration>
 								<bndruns>
-									<bndrun>test.bndrun</bndrun>
+									<include>test*.bndrun</include>
 								</bndruns>
 								<bundles>
 									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
