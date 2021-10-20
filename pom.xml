@@ -46,10 +46,10 @@
 		<osgi.core.version>6.0.0</osgi.core.version>
 		<osgi.log.version>1.4.0</osgi.log.version>
 		<osgi.cm.version>1.6.1</osgi.cm.version>
-		<osgi.function.version>1.0.0</osgi.function.version>
-		<osgi.promise.version>1.0.0</osgi.promise.version>
-		<osgi.function.test.version>1.2.0</osgi.function.test.version>
-		<osgi.promise.test.version>1.2.0</osgi.promise.test.version>
+		<osgi.function.compile.version>1.0.0</osgi.function.compile.version>
+		<osgi.promise.compile.version>1.0.0</osgi.promise.compile.version>
+		<osgi.function.version>1.2.0</osgi.function.version>
+		<osgi.promise.version>1.2.0</osgi.promise.version>
 	</properties>
 
 	<modules>
@@ -593,13 +593,13 @@
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.function</artifactId>
 				<version>${osgi.function.version}</version>
-				<scope>compile</scope>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.promise</artifactId>
 				<version>${osgi.promise.version}</version>
-				<scope>compile</scope>
+				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.assertj</groupId>
