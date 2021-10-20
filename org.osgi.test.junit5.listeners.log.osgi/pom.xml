@@ -99,6 +99,10 @@
 			<artifactId>assertj-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-core</artifactId>
 		</dependency>
@@ -137,62 +141,9 @@
 						<configuration>
 							<artifactFragment>false</artifactFragment>
 							<bnd><![CDATA[
-								p = ${project.artifactId}.test
-								Private-Package: ${p}.*
 								Test-Cases: ${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE;PUBLIC}
 							]]></bnd>
-							<includeClassesDir>false</includeClassesDir>
 							<testCases>useTestCasesHeader</testCases>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>com.coderplus.maven.plugins</groupId>
-				<artifactId>copy-rename-maven-plugin</artifactId>
-				<version>1.0</version>
-				<executions>
-					<execution>
-						<id>copy-file</id>
-						<phase>package</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<sourceFile>${project.build.directory}/${project.artifactId}-${project.version}.jar</sourceFile>
-							<destinationFile>${project.build.testOutputDirectory}/${project.artifactId}.jar</destinationFile>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>main-jar</id>
-						<!-- Must run in phase before the copy-rename-maven-plugin so that the artifact
-							 is available when it is needed.
-						-->
-						<phase>pre-package</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-							</archive>
-						</configuration>
-					</execution>
-					<execution>
-						<id>test-jar</id>
-						<phase>package</phase>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-							</archive>
 						</configuration>
 					</execution>
 				</executions>
