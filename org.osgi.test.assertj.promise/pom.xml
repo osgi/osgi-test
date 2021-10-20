@@ -58,32 +58,16 @@
 			<artifactId>osgi.core</artifactId>
 		</dependency>
 		<dependency>
-			<!-- Maven hack!
-				We add '.' after the groupId to specify a different version of the dependency for test.
-				This must be specified before the compile scope dependency.
-			-->
-			<groupId>org.osgi.</groupId>
-			<artifactId>org.osgi.util.function</artifactId>
-			<version>${osgi.function.test.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<!-- Maven hack!
-				We add '.' after the groupId to specify a different version of the dependency for test.
-				This must be specified before the compile scope dependency.
-			-->
-			<groupId>org.osgi.</groupId>
-			<artifactId>org.osgi.util.promise</artifactId>
-			<version>${osgi.promise.test.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.util.function</artifactId>
+			<version>${osgi.function.compile.version}</version><!--$NO-MVN-MAN-VER$-->
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.util.promise</artifactId>
+			<version>${osgi.promise.compile.version}</version><!--$NO-MVN-MAN-VER$-->
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
