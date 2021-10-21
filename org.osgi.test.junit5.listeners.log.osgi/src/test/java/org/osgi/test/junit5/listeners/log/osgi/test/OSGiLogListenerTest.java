@@ -18,6 +18,8 @@
 
 package org.osgi.test.junit5.listeners.log.osgi.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.engine.TestExecutionResult;
 import org.junit.platform.engine.UniqueId;
 import org.junit.platform.engine.support.descriptor.AbstractTestDescriptor;
@@ -41,8 +44,8 @@ import org.junit.platform.launcher.TestExecutionListener;
 import org.junit.platform.launcher.TestIdentifier;
 import org.junit.platform.launcher.TestPlan;
 import org.opentest4j.TestAbortedException;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.startlevel.FrameworkStartLevel;
 import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogLevel;
 import org.osgi.service.log.LogListener;
@@ -50,7 +53,6 @@ import org.osgi.service.log.LogReaderService;
 import org.osgi.test.assertj.log.logentry.LogEntryAssert;
 import org.osgi.test.assertj.log.logentry.LogEntrySoftAssertionsProvider;
 import org.osgi.test.common.annotation.InjectBundleContext;
-import org.osgi.test.common.annotation.InjectInstalledBundle;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.service.ServiceAware;
 
@@ -88,9 +90,6 @@ public class OSGiLogListenerTest {
 		}
 	}
 
-	@InjectInstalledBundle(value = "org.osgi.test.junit5.listeners.log.osgi.jar", start = true)
-	Bundle								b;
-
 	LogRecorder							recorder;
 	@InjectService(cardinality = 0)
 	ServiceAware<TestExecutionListener>	osgiLogAware;
@@ -105,21 +104,30 @@ public class OSGiLogListenerTest {
 
 	@BeforeEach
 	void beforeEach() throws Exception {
-		osgiLog = osgiLogAware.waitForService(1000);
+		assertThat(osgiLogAware.waitForService(1000L)).as("log.osgi TestExecutionListener")
+			.isNull();
+		// Start bundle(s) under test
+		FrameworkStartLevel frameworkStartLevel = bc.getBundle(0)
+			.adapt(FrameworkStartLevel.class);
+		frameworkStartLevel.setStartLevel(100);
+		// Wait for services from bundle(s)
+		osgiLog = osgiLogAware.waitForService(1000L);
+		assertThat(osgiLog).as("log.osgi TestExecutionListener")
+			.isNotNull();
 		recorder = new LogRecorder();
 		lrs.addLogListener(recorder);
 
 		TestPlan plan;
 
 		UniqueId uid = UniqueId.parse("[engine:jupiter-engine]/[class:MyClass]/[method:myMethod]");
-		AbstractTestDescriptor td = new AbstractTestDescriptor(uid, "My class method") {
+		TestDescriptor td = new AbstractTestDescriptor(uid, "My class method") {
 			@Override
 			public Type getType() {
 				return Type.TEST;
 			}
 		};
 		UniqueId eid = UniqueId.parse("[engine:jupiter-engine]");
-		AbstractTestDescriptor ed = new AbstractTestDescriptor(eid, "Jupiter Test Engine") {
+		TestDescriptor ed = new AbstractTestDescriptor(eid, "Jupiter Test Engine") {
 			@Override
 			public Type getType() {
 				return Type.CONTAINER;
@@ -152,6 +160,12 @@ public class OSGiLogListenerTest {
 			.hasLogLevel(LogLevel.DEBUG)
 			.hasException(null)
 			.hasMessage("Test plan finished");
+		// Stop bundle(s) under test
+		FrameworkStartLevel frameworkStartLevel = bc.getBundle(0)
+			.adapt(FrameworkStartLevel.class);
+		frameworkStartLevel.setStartLevel(1);
+		await("log.osgi TestExecutionListener unregistration")
+			.until(osgiLogAware::isEmpty);
 	}
 
 	@Test

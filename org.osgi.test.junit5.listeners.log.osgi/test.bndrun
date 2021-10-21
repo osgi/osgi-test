@@ -21,6 +21,8 @@
 -runfw: org.eclipse.osgi
 -resolve.effective: active
 -runproperties: \
+	launch.startlevel.default=1,\
+	org.osgi.framework.startlevel.beginning=1,\
 	logback.configurationFile='${fileuri;${.}/logback.xml}',\
 	org.osgi.framework.bootdelegation='sun.misc,sun.reflect',\
 	osgi.console=
@@ -35,9 +37,13 @@
 	org.apache.felix.logback,\
 	slf4j.api
 -runrequires: \
+	bnd.identity;id='${project.artifactId}',\
 	bnd.identity;id='${project.artifactId}-tests',\
 	bnd.identity;id='junit-jupiter-engine',\
 	bnd.identity;id='junit-platform-launcher'
+# Don't start the bundle upon launch. The test case will control this.
+-runbundles+: \
+    ${project.artifactId};startlevel=100
 # This will help us keep -runbundles sorted
 -runstartlevel: \
     order=sortbynameversion,\
@@ -52,6 +58,8 @@
 	junit-platform-launcher;version='[1.8.1,1.8.2)',\
 	net.bytebuddy.byte-buddy;version='[1.11.19,1.11.20)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.11.19,1.11.20)',\
+	org.awaitility;version='[4.1.0,4.1.1)',\
+	org.hamcrest;version='[2.1.0,2.1.1)',\
 	org.mockito.mockito-core;version='[4.0.0,4.0.1)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
@@ -59,4 +67,5 @@
 	org.osgi.test.assertj.log;version='[1.1.0,1.1.1)',\
 	org.osgi.test.common;version='[1.1.0,1.1.1)',\
 	org.osgi.test.junit5;version='[1.1.0,1.1.1)',\
+	org.osgi.test.junit5.listeners.log.osgi;version='[1.1.0,1.1.1)',\
 	org.osgi.test.junit5.listeners.log.osgi-tests;version='[1.1.0,1.1.1)'
