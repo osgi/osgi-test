@@ -58,7 +58,7 @@
 	junit-platform-launcher;version='[1.8.1,1.8.2)',\
 	net.bytebuddy.byte-buddy;version='[1.11.19,1.11.20)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.11.19,1.11.20)',\
-	org.awaitility;version='[4.1.0,4.1.1)',\
+	org.awaitility;version='[4.1.1,4.1.2)',\
 	org.hamcrest;version='[2.1.0,2.1.1)',\
 	org.mockito.mockito-core;version='[4.0.0,4.0.1)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
