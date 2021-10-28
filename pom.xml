@@ -44,7 +44,10 @@
 		<assertj.version>3.21.0</assertj.version>
 		<awaitility.version>4.1.1</awaitility.version>
 		<osgi.annotation.version>8.0.1</osgi.annotation.version>
-		<osgi.core.version>6.0.0</osgi.core.version>
+		<osgi.dto.version>1.0.0</osgi.dto.version>
+		<osgi.resource.version>1.0.0</osgi.resource.version>
+		<osgi.framework.version>1.8.0</osgi.framework.version>
+		<osgi.tracker.version>1.5.4</osgi.tracker.version>
 		<osgi.log.version>1.4.0</osgi.log.version>
 		<osgi.cm.version>1.6.1</osgi.cm.version>
 		<osgi.function.compile.version>1.0.0</osgi.function.compile.version>
@@ -566,8 +569,26 @@
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
-				<artifactId>osgi.core</artifactId>
-				<version>${osgi.core.version}</version>
+				<artifactId>org.osgi.dto</artifactId>
+				<version>${osgi.dto.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.resource</artifactId>
+				<version>${osgi.resource.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.framework</artifactId>
+				<version>${osgi.framework.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.util.tracker</artifactId>
+				<version>${osgi.tracker.version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
