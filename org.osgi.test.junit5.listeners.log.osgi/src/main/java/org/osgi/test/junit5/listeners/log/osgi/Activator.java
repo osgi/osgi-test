@@ -1,6 +1,8 @@
 package org.osgi.test.junit5.listeners.log.osgi;
 
+import static org.osgi.namespace.service.ServiceNamespace.CAPABILITY_OBJECTCLASS_ATTRIBUTE;
 import static org.osgi.namespace.service.ServiceNamespace.SERVICE_NAMESPACE;
+import static org.osgi.resource.Namespace.EFFECTIVE_ACTIVE;
 
 import org.junit.platform.launcher.TestExecutionListener;
 import org.osgi.annotation.bundle.Header;
@@ -14,7 +16,8 @@ import org.osgi.service.log.LoggerFactory;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-@Requirement(namespace = SERVICE_NAMESPACE, filter = "(objectClass=org.osgi.service.log.LoggerFactory)", effective = "active")
+@Requirement(namespace = SERVICE_NAMESPACE, filter = "(" + CAPABILITY_OBJECTCLASS_ATTRIBUTE
+	+ "=org.osgi.service.log.LoggerFactory)", effective = EFFECTIVE_ACTIVE)
 @Header(name = Constants.BUNDLE_ACTIVATOR, value = "${@class}")
 public class Activator
 	implements BundleActivator, ServiceTrackerCustomizer<LoggerFactory, ServiceRegistration<TestExecutionListener>> {
