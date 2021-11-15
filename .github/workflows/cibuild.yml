@@ -49,16 +49,16 @@ jobs:
   build:
     strategy:
       matrix:
-        java: [ '11', '17' ]
+        java: [ '8', '11' ]
         os: [ 'ubuntu-latest' ]
         include:
         - os: 'windows-latest'
           java: '8'
         - os: 'ubuntu-latest'
-          java: '8'
+          java: '17'
           canonical: ${{ (github.repository == 'osgi/osgi-test') && ((github.ref == 'refs/heads/main') || (github.ref == 'refs/heads/release')) && (github.event_name != 'pull_request') }}
         - os: 'ubuntu-latest'
-          java: '8'
+          java: '17'
           experimental: true
           mavenopts: '-Pbnd-next'
     name: JDK${{ matrix.java }} ${{ matrix.os }} ${{ matrix.mavenopts }}
