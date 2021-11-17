@@ -49,8 +49,11 @@ jobs:
   build:
     strategy:
       matrix:
-        java: [ '8', '11' ]
-        os: [ 'ubuntu-latest' ]
+        java:
+        - '8'
+        - '11'
+        os:
+        - 'ubuntu-latest'
         include:
         - os: 'windows-latest'
           java: '8'
@@ -69,20 +72,26 @@ jobs:
     - name: Set up Java ${{ matrix.java }}
       uses: actions/setup-java@v2
       with:
-        distribution: 'zulu'
+        distribution: 'temurin'
+        java-version: ${{ matrix.java }}
+    - name: Build
+      id: build
+      continue-on-error: ${{ matrix.experimental }}
+      run: |
+        ./.github/scripts/build.sh ${{ matrix.mavenopts }}
+    - name: Configure settings.xml for Publish
+      if: ${{ matrix.canonical }}
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'temurin'
         java-version: ${{ matrix.java }}
         server-id: ossrh
         server-username: OSSRH_USERNAME
         server-password: OSSRH_PASSWORD
         gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
         gpg-passphrase: GPG_PASSPHRASE
-    - name: Build
-      id: build
-      continue-on-error: ${{ matrix.experimental }}
-      run: |
-        ./.github/scripts/build.sh ${{ matrix.mavenopts }}
     - name: Publish
-      if: ${{ matrix.canonical && (steps.build.outcome == 'success') }}
+      if: ${{ matrix.canonical }}
       run: |
         ./.github/scripts/publish.sh -Possrh
       env:
