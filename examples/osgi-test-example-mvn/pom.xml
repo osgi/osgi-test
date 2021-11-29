@@ -40,6 +40,7 @@
 		<bnd.version>6.1.0</bnd.version>
 		<junit-jupiter.version>5.8.1</junit-jupiter.version>
 		<assertj.version>3.21.0</assertj.version>
+		<mockito.version>4.1.0</mockito.version>
 		<osgi-test.version>1.0.1</osgi-test.version>
 	</properties>
 
@@ -461,7 +462,7 @@
 			<dependency>
 				<groupId>org.mockito</groupId>
 				<artifactId>mockito-core</artifactId>
-				<version>4.0.0</version>
+				<version>${mockito.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
