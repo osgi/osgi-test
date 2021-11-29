@@ -37,7 +37,7 @@
 		<java.release>8</java.release>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<bnd.version>6.0.0</bnd.version>
+		<bnd.version>6.1.0</bnd.version>
 		<junit-jupiter.version>5.8.1</junit-jupiter.version>
 		<assertj.version>3.21.0</assertj.version>
 		<osgi-test.version>1.0.1</osgi-test.version>
@@ -518,7 +518,7 @@
 		<profile>
 			<id>bnd-next</id>
 			<properties>
-				<bnd.version>6.1.0-SNAPSHOT</bnd.version>
+				<bnd.version>6.2.0-SNAPSHOT</bnd.version>
 			</properties>
 			<repositories>
 				<repository>
