@@ -46,13 +46,13 @@
     begin=-1
 -runbundles: \
 	assertj-core;version='[3.21.0,3.21.1)',\
-	junit-jupiter-api;version='[5.8.1,5.8.2)',\
-	junit-jupiter-engine;version='[5.8.1,5.8.2)',\
-	junit-jupiter-params;version='[5.8.1,5.8.2)',\
-	junit-platform-commons;version='[1.8.1,1.8.2)',\
-	junit-platform-engine;version='[1.8.1,1.8.2)',\
-	junit-platform-launcher;version='[1.8.1,1.8.2)',\
-	junit-platform-testkit;version='[1.8.1,1.8.2)',\
+	junit-jupiter-api;version='[5.8.2,5.8.3)',\
+	junit-jupiter-engine;version='[5.8.2,5.8.3)',\
+	junit-jupiter-params;version='[5.8.2,5.8.3)',\
+	junit-platform-commons;version='[1.8.2,1.8.3)',\
+	junit-platform-engine;version='[1.8.2,1.8.3)',\
+	junit-platform-launcher;version='[1.8.2,1.8.3)',\
+	junit-platform-testkit;version='[1.8.2,1.8.3)',\
 	net.bytebuddy.byte-buddy;version='[1.12.1,1.12.2)',\
 	net.bytebuddy.byte-buddy-agent;version='[1.12.1,1.12.2)',\
 	org.mockito.mockito-core;version='[4.1.0,4.1.1)',\
