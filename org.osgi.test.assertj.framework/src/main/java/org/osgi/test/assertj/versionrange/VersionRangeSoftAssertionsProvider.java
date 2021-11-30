@@ -16,6 +16,19 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@org.osgi.annotation.bundle.Export
-@org.osgi.annotation.versioning.Version("1.1.0")
-package org.osgi.test.assertj.version;
+package org.osgi.test.assertj.versionrange;
+
+import org.assertj.core.api.SoftAssertionsProvider;
+import org.osgi.framework.VersionRange;
+
+public interface VersionRangeSoftAssertionsProvider extends SoftAssertionsProvider {
+	/**
+	 * Create assertion for {@link org.osgi.framework.Version}.
+	 *
+	 * @param actual the actual value.
+	 * @return the created assertion object.
+	 */
+	default VersionRangeAssert assertThat(VersionRange actual) {
+		return proxy(VersionRangeAssert.class, VersionRange.class, actual);
+	}
+}

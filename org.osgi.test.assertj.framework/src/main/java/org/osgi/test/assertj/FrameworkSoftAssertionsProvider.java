@@ -1,0 +1,20 @@
+package org.osgi.test.assertj;
+
+import org.osgi.test.assertj.bundle.BundleSoftAssertionsProvider;
+import org.osgi.test.assertj.bundlecontext.BundleContextSoftAssertionsProvider;
+import org.osgi.test.assertj.bundleevent.BundleEventSoftAssertionsProvider;
+import org.osgi.test.assertj.bundlereference.BundleReferenceSoftAssertionsProvider;
+import org.osgi.test.assertj.dictionary.DictionarySoftAssertionsProvider;
+import org.osgi.test.assertj.frameworkevent.FrameworkEventSoftAssertionsProvider;
+import org.osgi.test.assertj.serviceevent.ServiceEventSoftAssertionsProvider;
+import org.osgi.test.assertj.servicereference.ServiceReferenceSoftAssertionsProvider;
+import org.osgi.test.assertj.serviceregistration.ServiceRegistrationSoftAssertionsProvider;
+import org.osgi.test.assertj.version.VersionSoftAssertionsProvider;
+import org.osgi.test.assertj.versionrange.VersionRangeSoftAssertionsProvider;
+
+public interface FrameworkSoftAssertionsProvider
+	extends BundleSoftAssertionsProvider, BundleContextSoftAssertionsProvider, BundleEventSoftAssertionsProvider,
+	BundleReferenceSoftAssertionsProvider, DictionarySoftAssertionsProvider, FrameworkEventSoftAssertionsProvider,
+	ServiceEventSoftAssertionsProvider, ServiceReferenceSoftAssertionsProvider,
+	ServiceRegistrationSoftAssertionsProvider, VersionSoftAssertionsProvider, VersionRangeSoftAssertionsProvider {
+}
