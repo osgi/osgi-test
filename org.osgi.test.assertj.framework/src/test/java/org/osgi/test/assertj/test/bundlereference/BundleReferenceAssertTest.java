@@ -20,10 +20,12 @@ package org.osgi.test.assertj.test.bundlereference;
 
 import org.osgi.framework.BundleReference;
 import org.osgi.test.assertj.bundlereference.BundleReferenceAssert;
+import org.osgi.test.assertj.bundlereference.BundleReferenceSoftAssertionsProvider;
 
-class BundleReferenceAssertTest extends AbstractBundleReferenceAssertTest<BundleReferenceAssert, BundleReference> {
+class BundleReferenceAssertTest extends
+	AbstractBundleReferenceAssertTest<BundleReferenceAssert, BundleReference, BundleReferenceSoftAssertionsProvider> {
 
 	BundleReferenceAssertTest() {
-		super(BundleReferenceAssert::assertThat, BundleReference.class);
+		super(BundleReferenceAssert::assertThat, BundleReferenceSoftAssertionsProvider.class, BundleReference.class);
 	}
 }

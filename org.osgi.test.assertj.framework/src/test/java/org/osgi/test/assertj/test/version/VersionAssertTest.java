@@ -18,10 +18,19 @@
 
 package org.osgi.test.assertj.test.version;
 
+import org.junit.jupiter.api.Test;
+import org.osgi.framework.Version;
 import org.osgi.test.assertj.version.VersionAssert;
+import org.osgi.test.assertj.version.VersionSoftAssertionsProvider;
 
 public class VersionAssertTest extends AbstractVersionAssertTest<VersionAssert> {
 	public VersionAssertTest() {
 		super(VersionAssert::assertThat);
+	}
+
+	@Test
+	void softAssertionsProvider() throws Exception {
+		setActual(new Version("1.0.0"));
+		softAssertionsProvider(VersionSoftAssertionsProvider.class);
 	}
 }

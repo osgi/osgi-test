@@ -30,12 +30,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.assertj.bundlecontext.BundleContextAssert;
+import org.osgi.test.assertj.bundlecontext.BundleContextSoftAssertionsProvider;
 import org.osgi.test.assertj.test.bundlereference.AbstractBundleReferenceAssertTest;
 
-class BundleContextAssertTest extends AbstractBundleReferenceAssertTest<BundleContextAssert, BundleContext> {
+class BundleContextAssertTest
+	extends AbstractBundleReferenceAssertTest<BundleContextAssert, BundleContext, BundleContextSoftAssertionsProvider> {
 
 	BundleContextAssertTest() {
-		super(BundleContextAssert::assertThat, BundleContext.class);
+		super(BundleContextAssert::assertThat, BundleContextSoftAssertionsProvider.class, BundleContext.class);
 	}
 
 	@Test

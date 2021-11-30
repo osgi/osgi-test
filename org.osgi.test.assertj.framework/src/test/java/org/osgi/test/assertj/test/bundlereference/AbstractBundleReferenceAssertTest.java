@@ -22,22 +22,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.assertj.core.api.AssertFactory;
+import org.assertj.core.api.SoftAssertionsProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleReference;
 import org.osgi.test.assertj.bundlereference.AbstractBundleReferenceAssert;
-import org.osgi.test.assertj.test.testutil.AbstractAssertTest;
+import org.osgi.test.assertj.test.testutil.AbstractAssertAndSAPTest;
 
-public abstract class AbstractBundleReferenceAssertTest<ASSERT extends AbstractBundleReferenceAssert<ASSERT, ACTUAL>, ACTUAL extends BundleReference>
-	extends AbstractAssertTest<ASSERT, ACTUAL> {
+public abstract class AbstractBundleReferenceAssertTest<ASSERT extends AbstractBundleReferenceAssert<ASSERT, ACTUAL>, ACTUAL extends BundleReference, SAP extends SoftAssertionsProvider>
+	extends AbstractAssertAndSAPTest<ASSERT, ACTUAL, SAP> {
 
-	protected AbstractBundleReferenceAssertTest(AssertFactory<ACTUAL, ASSERT> factory, Class<ACTUAL> actualClass) {
-		super(factory);
-		this.actualClass = actualClass;
+	protected AbstractBundleReferenceAssertTest(AssertFactory<ACTUAL, ASSERT> factory, Class<SAP> sap,
+		Class<ACTUAL> actualClass) {
+		super(factory, sap, actualClass);
 	}
 
-	final protected Class<ACTUAL>	actualClass;
 	protected Bundle				bundle;
 	protected Bundle				otherBundle;
 

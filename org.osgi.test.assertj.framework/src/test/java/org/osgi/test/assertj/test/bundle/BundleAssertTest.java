@@ -52,12 +52,13 @@ import org.osgi.framework.Bundle;
 import org.osgi.framework.Version;
 import org.osgi.framework.wiring.BundleRevision;
 import org.osgi.test.assertj.bundle.BundleAssert;
-import org.osgi.test.assertj.test.testutil.AbstractAssertTest;
+import org.osgi.test.assertj.bundle.BundleSoftAssertionsProvider;
+import org.osgi.test.assertj.test.testutil.AbstractAssertAndSAPTest;
 
-public class BundleAssertTest extends AbstractAssertTest<BundleAssert, Bundle> {
+public class BundleAssertTest extends AbstractAssertAndSAPTest<BundleAssert, Bundle, BundleSoftAssertionsProvider> {
 
 	public BundleAssertTest() {
-		super(BundleAssert::assertThat);
+		super(BundleAssert::assertThat, BundleSoftAssertionsProvider.class, Bundle.class, () -> mock(Bundle.class));
 	}
 
 	public static final long	WAIT_TIME	= 2L;

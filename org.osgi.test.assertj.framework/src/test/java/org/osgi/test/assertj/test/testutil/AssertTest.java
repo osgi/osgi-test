@@ -18,7 +18,13 @@
 
 package org.osgi.test.assertj.test.testutil;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -26,7 +32,9 @@ import java.util.function.Supplier;
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractThrowableAssert;
 import org.assertj.core.api.Assert;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.api.SoftAssertionsProvider;
 import org.opentest4j.AssertionFailedError;
 import org.osgi.test.common.exceptions.Exceptions;
 
@@ -50,6 +58,53 @@ public interface AssertTest<SELF extends Assert<SELF, ACTUAL>, ACTUAL> {
 	 * @return The soft assertions object used for the current tests.
 	 */
 	SoftAssertions softly();
+
+	@SuppressWarnings("unchecked")
+	default <SAP extends SoftAssertionsProvider> void softAssertionsProvider(Class<SAP> sap) throws Exception {
+		softAssertionsProvider(sap, (Class<ACTUAL>) actual().getClass());
+	}
+	// Tests that the SoftAssertionsProvider is "properly implemented".
+	// Definition of "properly implemented":
+	// - Contains an "assertThat" method with the appropriate parameter and
+	// return type.
+	// - Checks that this assertThat() method invokes proxy() with the
+	// appropriate arguments.
+	// - Checks that this assertThat() method returns the result that proxy()
+	// returns.
+	default <SAP extends SoftAssertionsProvider> void softAssertionsProvider(Class<SAP> sap, Class<ACTUAL> actualClass)
+		throws Exception {
+
+		AtomicReference<Method> m = new AtomicReference<>();
+		Assertions.assertThatCode(() -> m.set(sap.getMethod("assertThat", actualClass)))
+			.doesNotThrowAnyException();
+
+		Assertions.assertThat(m.get()
+			.getReturnType())
+			.as("returnType")
+			.isEqualTo(aut().getClass());
+
+		SAP sapInstance = spy(sap);
+
+		when(sapInstance.proxy(any(), any(), any())).thenReturn(aut());
+
+		Object retval = m.get()
+			.invoke(sapInstance, actual());
+
+		// Check that the returned assertion from assertThat() is the one
+		// returned by proxy().
+		softly().assertThat(retval)
+			.as("returnedAssertion")
+			.isSameAs(aut());
+
+		doVerify(sapInstance, actualClass);
+	}
+
+	// Delegated to another method to reduce the scope of the @SuppressWarnings
+	// to the minimum required.
+	@SuppressWarnings("unchecked")
+	default void doVerify(SoftAssertionsProvider sapInstance, Class<ACTUAL> actualClass) {
+		verify(sapInstance).proxy((Class<SELF>) aut().getClass(), actualClass, actual());
+	}
 
 	default <T> AbstractThrowableAssert<?, ?> assertEqualityAssertion(String field, Function<T, SELF> assertion,
 		T actual, T failing) {
