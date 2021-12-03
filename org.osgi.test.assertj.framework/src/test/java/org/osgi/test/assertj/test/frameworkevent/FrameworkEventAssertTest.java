@@ -45,12 +45,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkEvent;
 import org.osgi.test.assertj.frameworkevent.FrameworkEventAssert;
-import org.osgi.test.assertj.test.testutil.AbstractAssertTest;
+import org.osgi.test.assertj.frameworkevent.FrameworkEventSoftAssertionsProvider;
+import org.osgi.test.assertj.test.testutil.AbstractAssertAndSAPTest;
 
-class FrameworkEventAssertTest extends AbstractAssertTest<FrameworkEventAssert, FrameworkEvent> {
+class FrameworkEventAssertTest
+	extends AbstractAssertAndSAPTest<FrameworkEventAssert, FrameworkEvent, FrameworkEventSoftAssertionsProvider> {
 
 	FrameworkEventAssertTest() {
-		super(FrameworkEventAssert::assertThat);
+		super(FrameworkEventAssert::assertThat, FrameworkEventSoftAssertionsProvider.class, FrameworkEvent.class);
 	}
 
 	Bundle		bundle;

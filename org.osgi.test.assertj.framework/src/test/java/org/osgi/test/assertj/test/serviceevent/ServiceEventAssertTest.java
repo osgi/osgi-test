@@ -39,12 +39,14 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceReference;
 import org.osgi.test.assertj.serviceevent.ServiceEventAssert;
-import org.osgi.test.assertj.test.testutil.AbstractAssertTest;
+import org.osgi.test.assertj.serviceevent.ServiceEventSoftAssertionsProvider;
+import org.osgi.test.assertj.test.testutil.AbstractAssertAndSAPTest;
 
-class ServiceEventAssertTest extends AbstractAssertTest<ServiceEventAssert, ServiceEvent> {
+class ServiceEventAssertTest
+	extends AbstractAssertAndSAPTest<ServiceEventAssert, ServiceEvent, ServiceEventSoftAssertionsProvider> {
 
 	ServiceEventAssertTest() {
-		super(ServiceEventAssert::assertThat);
+		super(ServiceEventAssert::assertThat, ServiceEventSoftAssertionsProvider.class, ServiceEvent.class);
 	}
 
 	ServiceReference<?>	reference;

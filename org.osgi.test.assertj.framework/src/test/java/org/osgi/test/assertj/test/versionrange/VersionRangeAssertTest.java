@@ -30,13 +30,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.osgi.framework.Version;
 import org.osgi.framework.VersionRange;
-import org.osgi.test.assertj.test.testutil.AbstractAssertTest;
+import org.osgi.test.assertj.test.testutil.AbstractAssertAndSAPTest;
 import org.osgi.test.assertj.versionrange.VersionRangeAssert;
+import org.osgi.test.assertj.versionrange.VersionRangeSoftAssertionsProvider;
 
-public class VersionRangeAssertTest extends AbstractAssertTest<VersionRangeAssert, VersionRange> {
+public class VersionRangeAssertTest
+	extends AbstractAssertAndSAPTest<VersionRangeAssert, VersionRange, VersionRangeSoftAssertionsProvider> {
 
 	public VersionRangeAssertTest() {
-		super(VersionRangeAssert::assertThat);
+		super(VersionRangeAssert::assertThat, VersionRangeSoftAssertionsProvider.class, VersionRange.class,
+			() -> new VersionRange("[1.0,2.0)"));
 	}
 
 	@BeforeEach
