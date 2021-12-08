@@ -19,7 +19,7 @@ org.osgi:org.osgi.test.common:${osgi_test_version}
 org.osgi:org.osgi.test.junit5:${osgi_test_version}
 org.osgi:org.osgi.test.assertj.framework:${osgi_test_version}
 org.apache.felix:org.apache.felix.scr:2.1.28
-org.apache.felix:org.apache.felix.logback:1.0.2
+org.apache.felix:org.apache.felix.logback:1.0.4
 ch.qos.logback:logback-classic:1.2.0
 ch.qos.logback:logback-core:1.2.0
 org.slf4j:slf4j-api:1.7.22

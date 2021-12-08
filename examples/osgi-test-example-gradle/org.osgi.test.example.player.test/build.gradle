@@ -20,7 +20,7 @@ dependencies {
 	runtimeOnly(project(":org.osgi.test.example.player.impl"))
 	runtimeOnly("org.junit.platform:junit-platform-launcher")
 	runtimeOnly("org.apache.felix:org.apache.felix.scr:2.1.28")
-	runtimeOnly("org.apache.felix:org.apache.felix.logback:1.0.2")
+	runtimeOnly("org.apache.felix:org.apache.felix.logback:1.0.4")
 	runtimeOnly("org.eclipse.platform:org.eclipse.osgi:3.17.100")
 	runtimeOnly("org.osgi:org.osgi.util.function:1.2.0")
 	runtimeOnly("org.osgi:org.osgi.util.promise:1.2.0")
