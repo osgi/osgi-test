@@ -40,7 +40,7 @@
 		<bnd.version>6.1.0</bnd.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
 		<assertj.version>3.22.0</assertj.version>
-		<mockito.version>4.2.0</mockito.version>
+		<mockito.version>4.3.0</mockito.version>
 		<osgi-test.version>1.0.1</osgi-test.version>
 	</properties>
 
