@@ -145,10 +145,9 @@
 				<executions>
 					<!-- Integration Test Configuration -->
 					<execution>
-						<id>bnd-process-tests</id>
-						<phase>process-test-classes</phase>
+						<id>test-jar</id>
 						<goals>
-							<goal>bnd-process-tests</goal>
+							<goal>test-jar</goal>
 						</goals>
 						<configuration>
 							<artifactFragment>false</artifactFragment>
