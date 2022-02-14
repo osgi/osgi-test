@@ -1,4 +1,4 @@
-org.osgi:osgi.annotation:8.0.1
+org.osgi:osgi.annotation:8.1.0
 org.osgi:osgi.core:8.0.0
 org.osgi:org.osgi.namespace.service:1.0.0
 org.osgi:org.osgi.service.component.annotations:1.4.0
