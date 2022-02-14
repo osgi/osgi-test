@@ -9,7 +9,7 @@ repositories {
 
 dependencies {
 	def configurationName = pluginManager.hasPlugin("java-library") ? "api" : "compileOnly"
-	add(configurationName, "org.osgi:osgi.annotation:8.0.1")
+	add(configurationName, "org.osgi:osgi.annotation:8.1.0")
 }
 
 group = "org.osgi.test.example"

@@ -341,6 +341,12 @@
 					<configuration>
 						<detectJavaApiLink>false</detectJavaApiLink>
 						<doclint>none</doclint>
+						<links>
+							<link>https://docs.osgi.org/javadoc/osgi.annotation/${osgi.annotation.version}</link>
+						</links>
+						<additionalJOptions>
+							<additionalJOption>-J-Dhttp.agent=maven-javadoc-plugin</additionalJOption>
+						</additionalJOptions>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -360,7 +366,7 @@
 				<plugin>
 					<groupId>org.sonatype.plugins</groupId>
 					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.6.9</version>
+					<version>1.6.10</version>
 					<extensions>true</extensions>
 				</plugin>
 				<plugin>
