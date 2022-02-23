@@ -18,6 +18,7 @@
 
 package org.osgi.test.junit5.context;
 
+import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
 import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
 import static org.osgi.test.common.inject.FieldInjector.findAnnotatedFields;
@@ -30,6 +31,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.List;
 
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
@@ -40,6 +43,7 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.junit.jupiter.api.extension.TestInstances;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
@@ -70,7 +74,7 @@ import org.osgi.test.common.install.BundleInstaller;
  * }
  * </pre>
  */
-public class BundleContextExtension implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
+public class BundleContextExtension implements BeforeEachCallback, BeforeAllCallback, ParameterResolver {
 
 	public static final String	BUNDLE_CONTEXT_KEY	= "bundle.context";
 	public static final String	INSTALL_BUNDLE_KEY	= "bundle.installer";
@@ -94,31 +98,68 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 				ExtensionConfigurationException::new);
 			setField(field, null, getBundleInstaller(extensionContext));
 		});
+		if (isPerClass(extensionContext)) {
+			injectNonStaticFields(extensionContext, extensionContext.getRequiredTestInstance());
+		}
+		injectNonStaticFields(extensionContext, false);
+	}
 
+	static void injectNonStaticFields(ExtensionContext extensionContext, boolean onPerClass) {
+		if (!extensionContext.getTestInstances()
+			.isPresent()) {
+			return;
+		}
+		TestInstances instances = extensionContext.getRequiredTestInstances();
+		Object innerMost = instances.getInnermostInstance();
+		for (Object instance : instances.getAllInstances()) {
+			// Skip the innermost; it will be set by the caller
+			if (innerMost == instance) {
+				continue;
+			}
+			final Class<?> testClass = instance.getClass();
+			boolean perInstance = !isAnnotatedPerClass(testClass);
+			if (perInstance ^ onPerClass) {
+				injectNonStaticFields(extensionContext, instance);
+			}
+		}
+	}
+
+	static void injectNonStaticFields(ExtensionContext extensionContext, Object instance) {
+		final Class<?> testClass = instance.getClass();
+		List<Field> fields = findAnnotatedNonStaticFields(testClass, InjectBundleContext.class);
+
+		fields.forEach(field -> {
+			assertFieldIsOfType(field, BundleContext.class, InjectBundleContext.class,
+				ExtensionConfigurationException::new);
+			setField(field, instance, getBundleContext(extensionContext));
+		});
+
+		fields = findAnnotatedNonStaticFields(testClass, InjectBundleInstaller.class);
+
+		fields.forEach(field -> {
+			assertFieldIsOfType(field, BundleInstaller.class, InjectBundleInstaller.class,
+				ExtensionConfigurationException::new);
+			setField(field, instance, getBundleInstaller(extensionContext));
+		});
+	}
+
+	static boolean isPerClass(ExtensionContext context) {
+		return context.getTestInstanceLifecycle()
+			.orElse(Lifecycle.PER_METHOD) == Lifecycle.PER_CLASS;
+	}
+
+	static boolean isAnnotatedPerClass(Class<?> testClass) {
+		return findAnnotation(testClass, TestInstance.class).map(TestInstance::value)
+			.map(x -> x == Lifecycle.PER_CLASS)
+			.orElse(false);
 	}
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		for (Object instance : extensionContext.getRequiredTestInstances()
-			.getAllInstances()) {
-			final Class<?> testClass = instance.getClass();
-			List<Field> fields = findAnnotatedNonStaticFields(testClass, InjectBundleContext.class);
-
-			fields.forEach(field -> {
-				assertFieldIsOfType(field, BundleContext.class, InjectBundleContext.class,
-					ExtensionConfigurationException::new);
-				setField(field, instance, getBundleContext(extensionContext));
-			});
-
-			fields = findAnnotatedNonStaticFields(testClass, InjectBundleInstaller.class);
-
-			fields.forEach(field -> {
-				assertFieldIsOfType(field, BundleInstaller.class, InjectBundleInstaller.class,
-					ExtensionConfigurationException::new);
-				setField(field, instance, getBundleInstaller(extensionContext));
-			});
-
+		if (!isPerClass(extensionContext)) {
+			injectNonStaticFields(extensionContext, extensionContext.getRequiredTestInstance());
 		}
+		injectNonStaticFields(extensionContext, false);
 	}
 
 	/**
@@ -215,5 +256,4 @@ public class BundleContextExtension implements BeforeAllCallback, BeforeEachCall
 		return extensionContext
 			.getStore(Namespace.create(BundleContextExtension.class, extensionContext.getUniqueId()));
 	}
-
 }
