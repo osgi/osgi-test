@@ -100,10 +100,9 @@
 				<artifactId>bnd-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>bnd-process-tests</id>
-						<phase>process-test-classes</phase>
+						<id>test-jar</id>
 						<goals>
-							<goal>bnd-process-tests</goal>
+							<goal>test-jar</goal>
 						</goals>
 						<configuration>
 							<bnd><![CDATA[
@@ -122,22 +121,6 @@
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-testing-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<artifactId>maven-jar-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>test-jar</id>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-						<configuration>
-							<archive>
-								<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-							</archive>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

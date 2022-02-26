@@ -37,7 +37,7 @@
 		<java.release>8</java.release>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<bnd.version>6.1.0</bnd.version>
+		<bnd.version>6.2.0</bnd.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
 		<assertj.version>3.22.0</assertj.version>
 		<mockito.version>4.3.1</mockito.version>
@@ -112,12 +112,12 @@
 					<groupId>biz.aQute.bnd</groupId>
 					<artifactId>bnd-maven-plugin</artifactId>
 					<version>${bnd.version}</version>
+					<extensions>true</extensions>
 					<executions>
 						<execution>
-							<id>bnd-process</id>
-							<phase>process-classes</phase>
+							<id>jar</id>
 							<goals>
-								<goal>bnd-process</goal>
+								<goal>jar</goal>
 							</goals>
 							<configuration>
 								<bnd><![CDATA[
@@ -227,16 +227,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>3.2.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.2</version>
-					<configuration>
-						<archive>
-							<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-						</archive>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -368,18 +358,6 @@
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>bnd-process</id>
-						<goals>
-							<goal>bnd-process</goal>
-						</goals>
-						<inherited>false</inherited>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -525,9 +503,17 @@
 		<profile>
 			<id>bnd-next</id>
 			<properties>
-				<bnd.version>6.2.0-SNAPSHOT</bnd.version>
+				<bnd.version>6.3.0-SNAPSHOT</bnd.version>
 			</properties>
 			<repositories>
+				<repository>
+					<id>bnd-releases</id>
+					<url>https://bndtools.jfrog.io/bndtools/libs-release/</url>
+					<layout>default</layout>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
 				<repository>
 					<id>bnd-snapshots</id>
 					<url>https://bndtools.jfrog.io/bndtools/libs-snapshot/</url>
@@ -538,6 +524,14 @@
 				</repository>
 			</repositories>
 			<pluginRepositories>
+				<pluginRepository>
+					<id>bnd-releases</id>
+					<url>https://bndtools.jfrog.io/bndtools/libs-release/</url>
+					<layout>default</layout>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
 				<pluginRepository>
 					<id>bnd-snapshots</id>
 					<url>https://bndtools.jfrog.io/bndtools/libs-snapshot/</url>

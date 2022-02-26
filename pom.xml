@@ -36,7 +36,7 @@
 		<java.release>8</java.release>
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
-		<bnd.version>6.1.0</bnd.version>
+		<bnd.version>6.2.0</bnd.version>
 		<junit-jupiter.compile.version>5.6.0</junit-jupiter.compile.version>
 		<junit-platform.compile.version>1.6.0</junit-platform.compile.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
@@ -139,12 +139,12 @@
 					<groupId>biz.aQute.bnd</groupId>
 					<artifactId>bnd-maven-plugin</artifactId>
 					<version>${bnd.version}</version>
+					<extensions>true</extensions>
 					<executions>
 						<execution>
-							<id>bnd-process</id>
-							<phase>process-classes</phase>
+							<id>jar</id>
 							<goals>
-								<goal>bnd-process</goal>
+								<goal>jar</goal>
 							</goals>
 							<configuration>
 								<bnd><![CDATA[
@@ -156,10 +156,9 @@
 						</execution>
 						<!-- Integration Test Configuration -->
 						<execution>
-							<id>bnd-process-tests</id>
-							<phase>process-test-classes</phase>
+							<id>test-jar</id>
 							<goals>
-								<goal>bnd-process-tests</goal>
+								<goal>test-jar</goal>
 							</goals>
 							<configuration>
 								<artifactFragment>false</artifactFragment>
@@ -265,37 +264,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-resources-plugin</artifactId>
 					<version>3.2.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>3.2.2</version>
-					<executions>
-						<execution>
-							<id>default-jar</id>
-							<phase>package</phase>
-							<goals>
-								<goal>jar</goal>
-							</goals>
-							<configuration>
-								<archive>
-									<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-								</archive>
-							</configuration>
-						</execution>
-						<execution>
-							<id>test-jar</id>
-							<phase>package</phase>
-							<goals>
-								<goal>test-jar</goal>
-							</goals>
-							<configuration>
-								<archive>
-									<manifestFile>${project.build.testOutputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-								</archive>
-							</configuration>
-						</execution>
-					</executions>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -459,30 +427,6 @@
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>bnd-process</id>
-						<goals>
-							<goal>bnd-process</goal>
-						</goals>
-						<inherited>false</inherited>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-					<!-- Integration Test Configuration -->
-					<execution>
-						<id>bnd-process-tests</id>
-						<phase>process-test-classes</phase>
-						<goals>
-							<goal>bnd-process-tests</goal>
-						</goals>
-						<inherited>false</inherited>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
@@ -734,7 +678,7 @@
 		<profile>
 			<id>bnd-next</id>
 			<properties>
-				<bnd.version>6.2.0-SNAPSHOT</bnd.version>
+				<bnd.version>6.3.0-SNAPSHOT</bnd.version>
 			</properties>
 			<repositories>
 				<repository>
