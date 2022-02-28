@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-	compileOnly("org.osgi:org.osgi.service.component.annotations:1.4.0")
+	compileOnly("org.osgi:org.osgi.service.component.annotations:1.5.0")
 	implementation(project(":org.osgi.test.example.api"))
 	testImplementation(platform("org.junit:junit-bom:${junit_jupiter_version}"))
 	testImplementation("org.junit.jupiter:junit-jupiter")
