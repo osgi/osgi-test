@@ -1,7 +1,7 @@
 org.osgi:osgi.annotation:8.1.0
 org.osgi:osgi.core:8.0.0
 org.osgi:org.osgi.namespace.service:1.0.0
-org.osgi:org.osgi.service.component.annotations:1.4.0
+org.osgi:org.osgi.service.component.annotations:1.5.0
 org.junit.jupiter:junit-jupiter-api:${junit_jupiter_version}
 org.junit.jupiter:junit-jupiter-params:${junit_jupiter_version}
 org.junit.jupiter:junit-jupiter-engine:${junit_jupiter_version}
@@ -18,7 +18,7 @@ org.objenesis:objenesis:3.2
 org.osgi:org.osgi.test.common:${osgi_test_version}
 org.osgi:org.osgi.test.junit5:${osgi_test_version}
 org.osgi:org.osgi.test.assertj.framework:${osgi_test_version}
-org.apache.felix:org.apache.felix.scr:2.1.28
+org.apache.felix:org.apache.felix.scr:2.2.0
 org.apache.felix:org.apache.felix.logback:1.0.6
 ch.qos.logback:logback-classic:1.2.10
 ch.qos.logback:logback-core:1.2.10
