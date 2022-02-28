@@ -148,6 +148,7 @@
 							</goals>
 							<configuration>
 								<bnd><![CDATA[
+SPDX-License-Identifier: ${project.licenses[0].name}
 -includeresource.legal:\
  "META-INF/=${project.parent.basedir}/LICENSE",\
  "META-INF/=${project.parent.basedir}/NOTICE"
