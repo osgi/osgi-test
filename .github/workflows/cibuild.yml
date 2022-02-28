@@ -56,7 +56,7 @@ jobs:
         - 'ubuntu-latest'
         include:
         - os: 'windows-latest'
-          java: '8'
+          java: '17'
         - os: 'ubuntu-latest'
           java: '17'
           canonical: ${{ (github.repository == 'osgi/osgi-test') && ((github.ref == 'refs/heads/main') || (github.ref == 'refs/heads/release')) && (github.event_name != 'pull_request') }}
