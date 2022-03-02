@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.test.common.install.BundleInstaller;
-import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.context.BundleInstallerExtension;
 
 /**
  * Inject {@link BundleInstaller} into test classes and methods.
@@ -62,6 +62,6 @@ import org.osgi.test.junit5.context.BundleContextExtension;
 	FIELD, PARAMETER
 })
 @Retention(RUNTIME)
-@ExtendWith(BundleContextExtension.class)
+@ExtendWith(BundleInstallerExtension.class)
 @Documented
 public @interface InjectBundleInstaller {}

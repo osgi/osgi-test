@@ -25,18 +25,15 @@ import static org.osgi.test.common.inject.FieldInjector.setField;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
-import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
-import org.osgi.test.common.annotation.InjectBundleContext;
-import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.annotation.InjectBundleInstaller;
+import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.inject.InjectingExtension;
 
 /**
@@ -62,68 +59,29 @@ import org.osgi.test.junit5.inject.InjectingExtension;
  * }
  * </pre>
  */
-// Include BundleInstallerExtension for backward compatibility
-@ExtendWith(BundleInstallerExtension.class)
-public class BundleContextExtension extends InjectingExtension<InjectBundleContext> {
+public class BundleInstallerExtension extends InjectingExtension<InjectBundleInstaller> {
 
-	public static final String BUNDLE_CONTEXT_KEY = "bundle.context";
+	public static final String	INSTALL_BUNDLE_KEY	= "bundle.installer";
 
-	public BundleContextExtension() {
-		super(InjectBundleContext.class);
+	public BundleInstallerExtension() {
+		super(InjectBundleInstaller.class);
 	}
 
-	public static BundleContext getBundleContext(ExtensionContext extensionContext) {
-		BundleContext bundleContext = getStore(extensionContext)
-			.getOrComputeIfAbsent(BUNDLE_CONTEXT_KEY,
-				key -> new CloseableResourceBundleContext(getParentBundleContext(extensionContext)),
-				CloseableResourceBundleContext.class)
-			.get();
-		return bundleContext;
+	public static BundleInstaller getBundleInstaller(ExtensionContext extensionContext) {
+		return getStore(extensionContext).getOrComputeIfAbsent(INSTALL_BUNDLE_KEY,
+			key -> new BundleInstaller(BundleContextExtension.getBundleContext(extensionContext)),
+			BundleInstaller.class);
 	}
-
-	private static BundleContext getParentBundleContext(ExtensionContext extensionContext) {
-		BundleContext parentContext = extensionContext.getParent()
-			.filter(context -> context.getTestClass()
-				.isPresent())
-			.map(BundleContextExtension::getBundleContext)
-			.orElseGet(() -> FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
-				.getBundleContext());
-		return parentContext;
-	}
-
-	public static class CloseableResourceBundleContext implements CloseableResource {
-
-		private final BundleContext bundleContext;
-
-		CloseableResourceBundleContext(BundleContext bundleContext) {
-			this.bundleContext = CloseableBundleContext.proxy(bundleContext);
-		}
-
-		@Override
-		public void close() throws Exception {
-			((AutoCloseable) get()).close();
-		}
-
-		public BundleContext get() {
-			return bundleContext;
-		}
-
-		@Override
-		public String toString() {
-			return get().toString();
-		}
-	}
-
 	static Store getStore(ExtensionContext extensionContext) {
 		return extensionContext
-			.getStore(Namespace.create(BundleContextExtension.class, extensionContext.getUniqueId()));
+			.getStore(Namespace.create(BundleInstallerExtension.class, extensionContext.getUniqueId()));
 	}
 
 	@Override
 	protected void injectField(Field field, Object instance, ExtensionContext context) {
-		assertFieldIsOfType(field, BundleContext.class, InjectBundleContext.class,
+		assertFieldIsOfType(field, BundleInstaller.class, InjectBundleInstaller.class,
 			ExtensionConfigurationException::new);
-		setField(field, instance, getBundleContext(context));
+		setField(field, instance, getBundleInstaller(context));
 	}
 
 	@Override
@@ -131,7 +89,7 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 		final Parameter parameter = parameterContext.getParameter();
 
 		Class<?> parameterType = parameter.getType();
-		assertParameterIsOfType(parameterType, BundleContext.class, supported, ParameterResolutionException::new);
-		return getBundleContext(extensionContext);
+		assertParameterIsOfType(parameterType, BundleInstaller.class, supported, ParameterResolutionException::new);
+		return getBundleInstaller(extensionContext);
 	}
 }

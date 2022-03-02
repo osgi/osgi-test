@@ -132,7 +132,7 @@ public class InstalledBundleExtension implements BeforeAllCallback, BeforeEachCa
 
 		try {
 			BundleContext bc = BundleContextExtension.getBundleContext(extensionContext);
-			BundleInstaller ib = BundleContextExtension.getBundleInstaller(extensionContext);
+			BundleInstaller ib = BundleInstallerExtension.getBundleInstaller(extensionContext);
 
 			String spec = injectBundle.value();
 			if (spec.startsWith("http:") || spec.startsWith("https:") || spec.startsWith("file:")) {
