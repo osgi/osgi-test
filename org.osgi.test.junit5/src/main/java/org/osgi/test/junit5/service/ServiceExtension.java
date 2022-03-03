@@ -18,8 +18,6 @@
 
 package org.osgi.test.junit5.service;
 
-import static org.osgi.test.common.inject.FieldInjector.findAnnotatedFields;
-import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFields;
 import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.reflect.Field;
@@ -31,8 +29,6 @@ import java.lang.reflect.WildcardType;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.extension.BeforeAllCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
@@ -40,7 +36,6 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.ParameterResolver;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.list.ListSupplierDelegate;
@@ -48,6 +43,7 @@ import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.common.service.ServiceConfiguration;
 import org.osgi.test.common.service.ServiceConfigurationKey;
 import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.inject.InjectingExtension;
 
 /**
  * A JUnit 5 Extension to depend on OSGi services.
@@ -68,48 +64,27 @@ import org.osgi.test.junit5.context.BundleContextExtension;
  * }
  * </pre>
  */
-public class ServiceExtension implements BeforeAllCallback, BeforeEachCallback, ParameterResolver {
+public class ServiceExtension extends InjectingExtension<InjectService> {
 
-	@Override
-	public void beforeAll(ExtensionContext extensionContext) throws Exception {
-
-		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectService.class,
-			m -> Modifier.isStatic(m.getModifiers()));
-
-		fields.forEach(field -> {
-			assertValidFieldCandidate(field);
-
-			InjectService serviceUseParameter = field.getAnnotation(InjectService.class);
-
-			TargetType targetType = TargetType.of(field);
-			setField(field, null, resolveReturnValue(targetType, serviceUseParameter, extensionContext));
-		});
+	public ServiceExtension() {
+		super(InjectService.class);
 	}
 
 	@Override
-	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-
-		for (Object instance : extensionContext.getRequiredTestInstances()
-			.getAllInstances()) {
-			List<Field> fields = findAnnotatedNonStaticFields(instance.getClass(), InjectService.class);
-
-			fields.forEach(field -> {
-				assertValidFieldCandidate(field);
-
-				InjectService serviceUseParameter = field.getAnnotation(InjectService.class);
-
-				TargetType targetType = TargetType.of(field);
-				setField(field, instance, resolveReturnValue(targetType, serviceUseParameter, extensionContext));
-			});
-		}
+	protected void injectField(Field field, Object instance, ExtensionContext context) {
+		assertValidFieldCandidate(field);
+		// assertFieldIsOfType(field, BundleContext.class,
+		// InjectBundleContext.class,
+		// ExtensionConfigurationException::new);
+		InjectService injectService = field.getAnnotation(InjectService.class);
+		TargetType targetType = TargetType.of(field);
+		setField(field, instance, resolveReturnValue(targetType, injectService, context));
 	}
 
 	@Override
-	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-		throws ParameterResolutionException {
-
+	protected Object injectParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		Optional<InjectService> injectService = parameterContext.findAnnotation(InjectService.class);
-		Parameter parameter = parameterContext.getParameter();
+		final Parameter parameter = parameterContext.getParameter();
 
 		TargetType targetType = TargetType.of(parameter);
 

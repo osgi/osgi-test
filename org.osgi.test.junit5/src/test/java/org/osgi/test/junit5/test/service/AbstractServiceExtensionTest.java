@@ -31,6 +31,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.assertj.core.api.AbstractThrowableAssert;
+import org.assertj.core.api.Condition;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -40,22 +41,24 @@ import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.test.common.context.CloseableBundleContext;
 import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.exceptions.Exceptions;
 import org.osgi.test.junit5.test.ExecutorExtension;
 import org.osgi.test.junit5.test.ExecutorParameter;
+import org.osgi.test.junit5.test.activator.TestActivator;
 import org.osgi.test.junit5.test.types.Foo;
 
 @ExtendWith(ExecutorExtension.class)
 abstract class AbstractServiceExtensionTest {
 
 	abstract static class TestBase {
-		static AtomicReference<SoftAssertions>		lastSoftAssertions	= new AtomicReference<>();
-		static AtomicReference<Foo>					lastService			= new AtomicReference<>();
-		static AtomicReference<List<Foo>>			lastServices		= new AtomicReference<>();
-		SoftAssertions								softly;
+		static AtomicReference<SoftAssertions>	lastSoftAssertions	= new AtomicReference<>();
+		static AtomicReference<Foo>				lastService			= new AtomicReference<>();
+		static AtomicReference<List<Foo>>		lastServices		= new AtomicReference<>();
+		SoftAssertions							softly;
 
 		Foo getService() {
 			return null;
@@ -104,12 +107,27 @@ abstract class AbstractServiceExtensionTest {
 			.getBundleContext());
 	}
 
+	Condition<ServiceReference<?>> service(Object s) {
+		return new Condition<ServiceReference<?>>() {
+
+			@Override
+			public boolean matches(ServiceReference<?> value) {
+				Object service = bundleContext.getService(value);
+				try {
+					return value != null && bundleContext.getService(value) == s;
+				} finally {
+					bundleContext.ungetService(value);
+				}
+			}
+		};
+	}
+
 	@AfterEach
 	public void afterEach() throws Exception {
 		((AutoCloseable) bundleContext).close();
 		assertThat(FrameworkUtil.getBundle(getClass())
 			.getRegisteredServices()).as("registered services")
-				.isNull();
+				.haveExactly(1, service(TestActivator.BAR));
 	}
 
 	protected AbstractThrowableAssert<?, ? extends Throwable> futureAssertThatTest(Class<?> testClass) {
