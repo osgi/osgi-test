@@ -58,6 +58,8 @@ import org.osgi.test.junit5.inject.InjectingExtension;
  * 	}
  * }
  * </pre>
+ *
+ * @since 1.1
  */
 public class BundleInstallerExtension extends InjectingExtension<InjectBundleInstaller> {
 

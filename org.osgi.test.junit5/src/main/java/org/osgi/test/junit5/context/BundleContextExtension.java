@@ -37,6 +37,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.inject.InjectingExtension;
 
 /**
@@ -67,6 +68,12 @@ import org.osgi.test.junit5.inject.InjectingExtension;
 public class BundleContextExtension extends InjectingExtension<InjectBundleContext> {
 
 	public static final String BUNDLE_CONTEXT_KEY = "bundle.context";
+	/**
+	 * @deprecated Replaced by
+	 *             {@link BundleInstallerExtension#INSTALL_BUNDLE_KEY}.
+	 */
+	@Deprecated
+	public static final String	INSTALL_BUNDLE_KEY	= BundleInstallerExtension.INSTALL_BUNDLE_KEY;
 
 	public BundleContextExtension() {
 		super(InjectBundleContext.class);
@@ -79,6 +86,15 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 				CloseableResourceBundleContext.class)
 			.get();
 		return bundleContext;
+	}
+
+	/**
+	 * @deprecated Replaced by
+	 *             {@link BundleInstallerExtension#getBundleInstaller(ExtensionContext)}.
+	 */
+	@Deprecated
+	public static BundleInstaller getBundleInstaller(ExtensionContext extensionContext) {
+		return BundleInstallerExtension.getBundleInstaller(extensionContext);
 	}
 
 	private static BundleContext getParentBundleContext(ExtensionContext extensionContext) {
