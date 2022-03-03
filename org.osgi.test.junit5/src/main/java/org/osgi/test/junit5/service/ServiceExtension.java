@@ -18,8 +18,6 @@
 
 package org.osgi.test.junit5.service;
 
-import static org.osgi.test.common.inject.FieldInjector.setField;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -71,19 +69,16 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 	}
 
 	@Override
-	protected void injectField(Field field, Object instance, ExtensionContext context) {
+	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
 		assertValidFieldCandidate(field);
-		// assertFieldIsOfType(field, BundleContext.class,
-		// InjectBundleContext.class,
-		// ExtensionConfigurationException::new);
-		InjectService injectService = field.getAnnotation(InjectService.class);
+		InjectService injectService = field.getAnnotation(supported);
 		TargetType targetType = TargetType.of(field);
-		setField(field, instance, resolveReturnValue(targetType, injectService, context));
+		return resolveReturnValue(targetType, injectService, extensionContext);
 	}
 
 	@Override
-	protected Object injectParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		Optional<InjectService> injectService = parameterContext.findAnnotation(InjectService.class);
+	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
+		Optional<InjectService> injectService = parameterContext.findAnnotation(supported);
 		final Parameter parameter = parameterContext.getParameter();
 
 		TargetType targetType = TargetType.of(parameter);
@@ -95,7 +90,7 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
 
-		if (!parameterContext.isAnnotated(InjectService.class)) {
+		if (!parameterContext.isAnnotated(supported)) {
 			return false;
 		}
 
@@ -113,13 +108,14 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 		if (serviceType instanceof Class || serviceType instanceof WildcardType) {
 			return true;
 		}
-		throw new ParameterResolutionException("Can only resolve @" + InjectService.class.getSimpleName()
+		throw new ParameterResolutionException("Can only resolve @" + supported.getSimpleName()
 			+ " parameter for services with non-generic types, service type was: " + serviceType.getTypeName());
 	}
 
-	static void assertValidFieldCandidate(Field field) {
+	void assertValidFieldCandidate(Field field) {
 		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())) {
-			throw new ExtensionConfigurationException("@" + InjectService.class.getSimpleName() + " field ["
+			throw new ExtensionConfigurationException(
+				"@" + supported.getSimpleName() + " field ["
 				+ field.getName() + "] must not be final or private.");
 		}
 	}

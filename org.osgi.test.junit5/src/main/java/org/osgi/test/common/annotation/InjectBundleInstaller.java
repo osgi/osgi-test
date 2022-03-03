@@ -41,7 +41,7 @@ import org.osgi.test.junit5.context.BundleInstallerExtension;
  *
  * <pre>
  * // For JUnit5
- * &#64;ExtendWith(BundleContextExtension.class)
+ * &#64;ExtendWith(BundleInstallerExtension.class)
  * class MyTests {
  * 	// For JUnit4
  * 	&#64;Rule

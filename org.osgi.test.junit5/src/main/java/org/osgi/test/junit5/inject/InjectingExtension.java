@@ -3,6 +3,7 @@ package org.osgi.test.junit5.inject;
 import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 import static org.osgi.test.common.inject.FieldInjector.findAnnotatedFields;
 import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFields;
+import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -21,8 +22,6 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstances;
-import org.osgi.test.common.annotation.InjectBundleContext;
-import org.osgi.test.common.annotation.InjectBundleInstaller;
 
 public abstract class InjectingExtension<A extends Annotation>
 	implements BeforeEachCallback, BeforeAllCallback, ParameterResolver {
@@ -55,32 +54,31 @@ public abstract class InjectingExtension<A extends Annotation>
 
 	static boolean isPerClass(ExtensionContext context) {
 		return context.getTestInstanceLifecycle()
-			.orElse(Lifecycle.PER_METHOD) == Lifecycle.PER_CLASS;
+			.filter(Lifecycle.PER_CLASS::equals)
+			.isPresent();
 	}
 
 	static boolean isAnnotatedPerClass(Class<?> testClass) {
 		return findAnnotation(testClass, TestInstance.class).map(TestInstance::value)
-			.map(x -> x == Lifecycle.PER_CLASS)
-			.orElse(false);
+			.filter(Lifecycle.PER_CLASS::equals)
+			.isPresent();
 	}
 
 	void injectNonStaticFields(ExtensionContext extensionContext, Object instance) {
 		final Class<?> testClass = instance.getClass();
 		List<Field> fields = findAnnotatedNonStaticFields(testClass, supported);
 
-		fields.forEach(field -> injectField(field, instance, extensionContext));
+		fields.forEach(field -> setField(field, instance, fieldValue(field, extensionContext)));
 	}
 
 	/**
-	 * Resolve {@link Parameter} annotated with
-	 * {@link InjectBundleContext @InjectBundleContext} OR
-	 * {@link InjectBundleInstaller @InjectBundleInstaller} in the supplied
-	 * {@link ParameterContext}.
+	 * Resolve annotated {@link Parameter} with
+	 * {@link #parameterValue(ParameterContext, ExtensionContext)} result.
 	 */
 	@Override
 	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		if (parameterContext.isAnnotated(supported)) {
-			return injectParameter(parameterContext, extensionContext);
+			return parameterValue(parameterContext, extensionContext);
 		}
 
 		throw new ExtensionConfigurationException(
@@ -89,9 +87,7 @@ public abstract class InjectingExtension<A extends Annotation>
 
 	/**
 	 * Determine if the {@link Parameter} in the supplied
-	 * {@link ParameterContext} is annotated with
-	 * {@link InjectBundleContext @InjectBundleContext} OR
-	 * {@link InjectBundleInstaller @InjectBundleInstaller}.
+	 * {@link ParameterContext} is annotated with supported annotation.
 	 */
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
@@ -104,16 +100,16 @@ public abstract class InjectingExtension<A extends Annotation>
 		return ours;
 	}
 
-	protected abstract void injectField(Field field, Object instance, ExtensionContext context);
+	protected abstract Object fieldValue(Field field, ExtensionContext extensionContext);
 
-	protected abstract Object injectParameter(ParameterContext parameterContext, ExtensionContext extensionContext);
+	protected abstract Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext);
 
 	@Override
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
 		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), supported,
 			m -> Modifier.isStatic(m.getModifiers()));
 
-		fields.forEach(field -> injectField(field, null, extensionContext));
+		fields.forEach(field -> setField(field, null, fieldValue(field, extensionContext)));
 		if (isPerClass(extensionContext)) {
 			injectNonStaticFields(extensionContext, extensionContext.getRequiredTestInstance());
 		}

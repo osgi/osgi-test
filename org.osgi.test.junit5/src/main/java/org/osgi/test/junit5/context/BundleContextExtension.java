@@ -20,7 +20,6 @@ package org.osgi.test.junit5.context;
 
 import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
 import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
-import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
@@ -43,7 +42,7 @@ import org.osgi.test.junit5.inject.InjectingExtension;
 /**
  * A JUnit 5 Extension to get the OSGi {@link BundleContext} of the test bundle.
  * <p>
- * The {@link BundleContext} implementation provided by this rule will
+ * The {@link BundleContext} implementation provided by this extension will
  * automatically clean up all service registrations, bundle, service and
  * framework listeners, as well as installed bundles left behind.
  * <p>
@@ -136,14 +135,13 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 	}
 
 	@Override
-	protected void injectField(Field field, Object instance, ExtensionContext context) {
-		assertFieldIsOfType(field, BundleContext.class, InjectBundleContext.class,
-			ExtensionConfigurationException::new);
-		setField(field, instance, getBundleContext(context));
+	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
+		assertFieldIsOfType(field, BundleContext.class, supported, ExtensionConfigurationException::new);
+		return getBundleContext(extensionContext);
 	}
 
 	@Override
-	protected Object injectParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		final Parameter parameter = parameterContext.getParameter();
 
 		Class<?> parameterType = parameter.getType();

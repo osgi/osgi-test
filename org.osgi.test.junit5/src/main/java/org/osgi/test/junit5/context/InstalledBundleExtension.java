@@ -20,12 +20,12 @@ package org.osgi.test.junit5.context;
 
 import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
 import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
-import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Optional;
 
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -62,13 +62,12 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 	 * {@link ParameterContext}.
 	 */
 	@Override
-	public Object injectParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
+		Optional<InjectInstalledBundle> injectBundle = parameterContext.findAnnotation(supported);
 		Parameter parameter = parameterContext.getParameter();
 		Class<?> parameterType = parameter.getType();
-		assertParameterIsOfType(parameterType, Bundle.class, InjectInstalledBundle.class,
-			ParameterResolutionException::new);
-		InjectInstalledBundle injectBundle = parameter.getAnnotation(InjectInstalledBundle.class);
-		return installedBundleOf(injectBundle, extensionContext);
+		assertParameterIsOfType(parameterType, Bundle.class, supported, ParameterResolutionException::new);
+		return installedBundleOf(injectBundle.get(), extensionContext);
 	}
 
 	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext) {
@@ -79,7 +78,7 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 
 			String spec = injectBundle.value();
 			if (spec.startsWith("http:") || spec.startsWith("https:") || spec.startsWith("file:")) {
-				return ib.installBundle(new URL(injectBundle.value()), injectBundle.start());
+				return ib.installBundle(new URL(spec), injectBundle.start());
 			} else {
 				return ib.installBundle(BundleInstaller.EmbeddedLocation.of(bc, spec), injectBundle.start());
 			}
@@ -96,10 +95,10 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 	}
 
 	@Override
-	protected void injectField(Field field, Object instance, ExtensionContext context) {
-		assertFieldIsOfType(field, Bundle.class, InjectInstalledBundle.class, ExtensionConfigurationException::new);
-		InjectInstalledBundle injectBundle = field.getAnnotation(InjectInstalledBundle.class);
-		setField(field, instance, installedBundleOf(injectBundle, context));
+	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
+		assertFieldIsOfType(field, Bundle.class, supported, ExtensionConfigurationException::new);
+		InjectInstalledBundle injectBundle = field.getAnnotation(supported);
+		return installedBundleOf(injectBundle, extensionContext);
 	}
 
 }

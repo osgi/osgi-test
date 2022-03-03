@@ -20,7 +20,6 @@ package org.osgi.test.junit5.context;
 
 import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
 import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
-import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
@@ -37,24 +36,24 @@ import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.inject.InjectingExtension;
 
 /**
- * A JUnit 5 Extension to get the OSGi {@link BundleContext} of the test bundle.
+ * A JUnit 5 Extension to get a {@link BundleInstaller} for the test bundle.
  * <p>
- * The {@link BundleContext} implementation provided by this rule will
+ * The {@link BundleContext} implementation used by this extension will
  * automatically clean up all service registrations, bundle, service and
  * framework listeners, as well as installed bundles left behind.
  * <p>
  * Example:
  *
  * <pre>
- * &#64;ExtendWith(BundleContextExtension.class)
+ * &#64;ExtendWith(BundleInstallerExtension.class)
  * class MyTests {
  *
- * 	&#64;InjectBundleContext
- * 	BundleContext bundleContext;
+ * 	&#64;InjectBundleInstaller
+ * 	BundleInstaller bundleInstaller;
  *
  * 	&#64;Test
  * 	public void aTest() {
- * 		Bundle bundle = bundleContext.getBundle();
+ * 		// use bundleInstaller
  * 	}
  * }
  * </pre>
@@ -74,20 +73,20 @@ public class BundleInstallerExtension extends InjectingExtension<InjectBundleIns
 			key -> new BundleInstaller(BundleContextExtension.getBundleContext(extensionContext)),
 			BundleInstaller.class);
 	}
+
 	static Store getStore(ExtensionContext extensionContext) {
 		return extensionContext
 			.getStore(Namespace.create(BundleInstallerExtension.class, extensionContext.getUniqueId()));
 	}
 
 	@Override
-	protected void injectField(Field field, Object instance, ExtensionContext context) {
-		assertFieldIsOfType(field, BundleInstaller.class, InjectBundleInstaller.class,
-			ExtensionConfigurationException::new);
-		setField(field, instance, getBundleInstaller(context));
+	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
+		assertFieldIsOfType(field, BundleInstaller.class, supported, ExtensionConfigurationException::new);
+		return getBundleInstaller(extensionContext);
 	}
 
 	@Override
-	protected Object injectParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
 		final Parameter parameter = parameterContext.getParameter();
 
 		Class<?> parameterType = parameter.getType();
