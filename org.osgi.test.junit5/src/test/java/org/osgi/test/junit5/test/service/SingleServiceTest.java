@@ -43,6 +43,7 @@ public class SingleServiceTest {
 
 	@BeforeEach
 	public void beforeEach() throws Exception {
+		assertThat(logService).isNotNull();
 		assertThat(staticLogService).isNotNull();
 	}
 

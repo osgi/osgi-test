@@ -29,6 +29,9 @@ abstract class BundleContextResourceChecker<RESOURCE> extends AbstractResourceCh
 
 	BundleContextResourceChecker(BundleContext bc, Map<CallbackPoint, RESOURCE> scopedResourcesMap) {
 		super(scopedResourcesMap);
+		if (bc == null) {
+			throw new IllegalArgumentException("BundleContext was null");
+		}
 		this.bc = bc;
 	}
 

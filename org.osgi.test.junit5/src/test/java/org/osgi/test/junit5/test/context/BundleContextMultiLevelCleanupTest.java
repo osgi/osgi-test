@@ -40,7 +40,12 @@ class BundleContextMultiLevelCleanupTest<RESOURCE> extends MultiLevelCleanupTest
 	@SuppressWarnings("unchecked")
 	static <STATIC> void setFactory(
 		BiFunction<BundleContext, Map<CallbackPoint, STATIC>, AbstractResourceChecker<STATIC>> factory) {
-		BundleContextMultiLevelCleanupTest.factory = (bc, map) -> factory.apply(bc, (Map<CallbackPoint, STATIC>) map);
+		BundleContextMultiLevelCleanupTest.factory = (bc, map) -> {
+			if (bc == null) {
+				throw new AssertionError("BundleContext was null");
+			}
+			return factory.apply(bc, (Map<CallbackPoint, STATIC>) map);
+		};
 	}
 
 	static BiFunction<BundleContext, Map<CallbackPoint, ?>, AbstractResourceChecker<?>> factory;

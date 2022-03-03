@@ -138,6 +138,7 @@
 									afterEach.jar,\
 									afterAll.jar,\
 									afterClass.jar
+								Bundle-Activator: org.osgi.test.junit5.test.activator.TestActivator
 								Test-Cases: ${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE;PUBLIC}
 							]]></bnd>
 							<includeClassesDir>false</includeClassesDir>
