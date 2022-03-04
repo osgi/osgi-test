@@ -52,6 +52,7 @@ public class ServiceExtension_Injection_PerClassTest {
 
 	Bar					beforeAllBarNew;
 	Bar					beforeAllBar;
+	final Bar			constructorBar;
 
 	@InjectBundleContext
 	BundleContext		bundleContext;
@@ -59,11 +60,17 @@ public class ServiceExtension_Injection_PerClassTest {
 	@InjectService(cardinality = 0)
 	ServiceAware<Bar>	barServiceAware;
 
+	ServiceExtension_Injection_PerClassTest(@InjectService
+	Bar bar) {
+		constructorBar = bar;
+	}
+
 	@BeforeAll
 	void beforeAll(@InjectService
 	Bar barParam) {
 		assertThat(staticBar).isSameAs(TestActivator.BAR)
-			.isSameAs(barParam);
+			.isSameAs(barParam)
+			.isSameAs(constructorBar);
 		beforeAllBar = staticBar;
 		beforeAllBarNew = new Bar() {};
 		staticBC.registerService(Bar.class, beforeAllBarNew, dictionaryOf(SERVICE_RANKING, 10));

@@ -46,9 +46,16 @@ public class BundleContextExtension_BundleContextInjection_PerClassTest {
 
 	BundleContext		beforeAllContext;
 
+	BundleContext		constructorContext;
+
 	OSGiSoftAssertions	staticSoftly;
 
 	OSGiSoftAssertions	softly;
+
+	BundleContextExtension_BundleContextInjection_PerClassTest(@InjectBundleContext
+	BundleContext bc) {
+		constructorContext = bc;
+	}
 
 	@BeforeAll
 	void beforeAll(@InjectBundleContext
@@ -59,6 +66,7 @@ public class BundleContextExtension_BundleContextInjection_PerClassTest {
 			.as("staticBC:beforeAll")
 			.isNotNull()
 			.isSameAs(bc)
+			.isSameAs(constructorContext)
 			.refersToBundle(bundle);
 		staticSoftly.assertAll();
 	}

@@ -50,9 +50,16 @@ public class BundleInjectionTest {
 	@InjectInstalledBundle(TB1_JAR)
 	Bundle						bundleField;
 
+	final Bundle				bundleFieldConstructor;
+
 	static OSGiSoftAssertions	staticSoftly;
 
 	OSGiSoftAssertions			softly;
+
+	BundleInjectionTest(@InjectInstalledBundle(TB1_JAR)
+	Bundle bundle) {
+		bundleFieldConstructor = bundle;
+	}
 
 	@BeforeAll
 	static void beforeAll(@InjectInstalledBundle(TB1_JAR) Bundle bundleParam) {
@@ -80,7 +87,8 @@ public class BundleInjectionTest {
 			.isNotNull()
 			.isSameAs(bundleField)
 			.isSameAs(bundleFieldStatic)
-			.isSameAs(iBBundle);
+			.isSameAs(iBBundle)
+			.isSameAs(bundleFieldConstructor);
 		softly.assertAll();
 	}
 

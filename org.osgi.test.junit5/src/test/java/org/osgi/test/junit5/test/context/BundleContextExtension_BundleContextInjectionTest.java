@@ -18,6 +18,8 @@
 
 package org.osgi.test.junit5.test.context;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -43,12 +45,21 @@ public class BundleContextExtension_BundleContextInjectionTest {
 	@InjectBundleContext
 	BundleContext				bundleContext;
 
+	final BundleContext			constructorContext;
+
 	static OSGiSoftAssertions	staticSoftly;
 
 	OSGiSoftAssertions			softly;
 
+	BundleContextExtension_BundleContextInjectionTest(@InjectBundleContext
+	BundleContext bc) {
+		constructorContext = bc;
+		assertThat(bc).isSameAs(staticBC);
+	}
+
 	@BeforeAll
-	static void beforeAll(@InjectBundleContext BundleContext bc) {
+	static void beforeAll(@InjectBundleContext
+	BundleContext bc) {
 		staticSoftly = new OSGiSoftAssertions();
 		staticSoftly.assertThat(staticBC)
 			.as("staticBC:beforeAll")
@@ -59,18 +70,21 @@ public class BundleContextExtension_BundleContextInjectionTest {
 	}
 
 	@BeforeEach
-	void beforeEach(@InjectBundleContext BundleContext bc) {
+	void beforeEach(@InjectBundleContext
+	BundleContext bc) {
 		softly = new OSGiSoftAssertions();
 		softly.assertThat(bundleContext)
 			.as("bundleContext:beforeEach")
 			.isNotNull()
 			.isSameAs(bc)
+			.isNotSameAs(constructorContext)
 			.refersToBundle(bundle);
 		softly.assertAll();
 	}
 
 	@Test
-	void innerTest(@InjectBundleContext BundleContext bc) {
+	void innerTest(@InjectBundleContext
+	BundleContext bc) {
 		softly = new OSGiSoftAssertions();
 		softly.assertThat(bundleContext)
 			.as("bundleContext:innerTest")
@@ -87,7 +101,8 @@ public class BundleContextExtension_BundleContextInjectionTest {
 	// This test is meant to check that the extension is doing the
 	// right thing before and after parameterized tests, hence
 	// the parameter is not actually used.
-	void parameterizedTest(int unused, @InjectBundleContext BundleContext bc) {
+	void parameterizedTest(int unused, @InjectBundleContext
+	BundleContext bc) {
 		softly = new OSGiSoftAssertions();
 		softly.assertThat(bundleContext)
 			.as("bundleContext:parameterizedTest")
@@ -104,7 +119,8 @@ public class BundleContextExtension_BundleContextInjectionTest {
 		BundleContext nestedBC;
 
 		@BeforeEach
-		void beforeEach(@InjectBundleContext BundleContext bc) {
+		void beforeEach(@InjectBundleContext
+		BundleContext bc) {
 			softly = new OSGiSoftAssertions();
 			softly.assertThat(bundleContext)
 				.as("bundleContext:nested.beforeEach")
@@ -115,7 +131,8 @@ public class BundleContextExtension_BundleContextInjectionTest {
 		}
 
 		@Test
-		void test(@InjectBundleContext BundleContext bc) {
+		void test(@InjectBundleContext
+		BundleContext bc) {
 			softly = new OSGiSoftAssertions();
 			softly.assertThat(bundleContext)
 				.as("bundleContext:nested.test")
@@ -126,7 +143,8 @@ public class BundleContextExtension_BundleContextInjectionTest {
 		}
 
 		@AfterEach
-		void afterEach(@InjectBundleContext BundleContext bc) {
+		void afterEach(@InjectBundleContext
+		BundleContext bc) {
 			softly = new OSGiSoftAssertions();
 			softly.assertThat(bundleContext)
 				.as("bundleContext:nested.afterEach")
@@ -138,7 +156,8 @@ public class BundleContextExtension_BundleContextInjectionTest {
 	}
 
 	@AfterEach
-	void afterEach(@InjectBundleContext BundleContext bc) {
+	void afterEach(@InjectBundleContext
+	BundleContext bc) {
 		softly = new OSGiSoftAssertions();
 		softly.assertThat(bundleContext)
 			.as("bundleContext:afterEach")
@@ -149,7 +168,8 @@ public class BundleContextExtension_BundleContextInjectionTest {
 	}
 
 	@AfterAll
-	static void afterAll(@InjectBundleContext BundleContext bc) {
+	static void afterAll(@InjectBundleContext
+	BundleContext bc) {
 		staticSoftly = new OSGiSoftAssertions();
 		staticSoftly.assertThat(staticBC)
 			.as("staticBC:afterAll")

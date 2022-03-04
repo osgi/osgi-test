@@ -6,7 +6,6 @@ import static org.osgi.test.common.inject.FieldInjector.findAnnotatedNonStaticFi
 import static org.osgi.test.common.inject.FieldInjector.setField;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstances;
 
@@ -91,13 +89,7 @@ public abstract class InjectingExtension<A extends Annotation>
 	 */
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		final boolean ours = parameterContext.isAnnotated(supported);
-
-		if (ours && (parameterContext.getDeclaringExecutable() instanceof Constructor)) {
-			throw new ParameterResolutionException(
-				getClass().getSimpleName() + " does not support parameter injection on constructors");
-		}
-		return ours;
+		return parameterContext.isAnnotated(supported);
 	}
 
 	protected abstract Object fieldValue(Field field, ExtensionContext extensionContext);
