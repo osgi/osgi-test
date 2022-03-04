@@ -43,7 +43,7 @@
 		<junit-platform.version>1.8.2</junit-platform.version>
 		<assertj.version>3.22.0</assertj.version>
 		<mockito.version>4.3.1</mockito.version>
-		<awaitility.version>4.1.1</awaitility.version>
+		<awaitility.version>4.2.0</awaitility.version>
 		<osgi.annotation.version>8.1.0</osgi.annotation.version>
 		<osgi.dto.version>1.0.0</osgi.dto.version>
 		<osgi.resource.version>1.0.0</osgi.resource.version>
