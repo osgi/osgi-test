@@ -72,7 +72,7 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 			return installedBundleOf(injectBundle, extensionContext);
 		} catch (Exception e) {
 			throw new ParameterResolutionException(
-				String.format("@InjectInstalledBundle [%s]: couldn't resolve bundle parameter [%s]: %s",
+				String.format("@%s [%s]: couldn't resolve bundle parameter [%s]: %s", supported.getSimpleName(),
 					parameter.getName(),
 					injectBundle.value(), e));
 		}
@@ -110,7 +110,7 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 			return installedBundleOf(injectBundle, extensionContext);
 		} catch (Exception e) {
 			throw new ExtensionConfigurationException(String
-				.format("@InjectInstalledBundle [%s]: couldn't resolve bundle [%s]: %s", field.getName(),
+				.format("@%s [%s]: couldn't resolve bundle [%s]: %s", supported.getSimpleName(), field.getName(),
 					injectBundle.value(), e));
 		}
 	}
