@@ -112,7 +112,7 @@ public class BundleContextExtension_BundleInstallerInjectionSanityCheckingTest {
 
 	static class PrivateStaticField extends TestBase {
 		@InjectBundleInstaller
-		static final BundleInstaller bc = null;
+		static private BundleInstaller bc;
 
 		@Override
 		@Test
@@ -127,7 +127,7 @@ public class BundleContextExtension_BundleInstallerInjectionSanityCheckingTest {
 
 	static class PrivateField extends TestBase {
 		@InjectBundleInstaller
-		final BundleInstaller bc = null;
+		private BundleInstaller bc;
 
 		@Override
 		@Test
