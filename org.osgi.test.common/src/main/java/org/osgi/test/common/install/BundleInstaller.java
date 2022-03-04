@@ -20,6 +20,7 @@ package org.osgi.test.common.install;
 
 import static org.osgi.test.common.exceptions.Exceptions.duck;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -204,7 +205,7 @@ public class BundleInstaller {
 			return Objects.hash(bundleSymbolicName, bundleVersion, file, path);
 		}
 
-		public InputStream openStream(BundleContext bc) throws IOException, IllegalArgumentException {
+		public InputStream openStream(BundleContext bc) throws IOException {
 
 			Bundle bundle = Stream.of(bc.getBundles())
 				.filter(b -> b.getSymbolicName()
@@ -216,18 +217,20 @@ public class BundleInstaller {
 					String.format("Bundle %s:%s does not exist in framework", bundleSymbolicName, bundleVersion)));
 
 			Enumeration<URL> entries = bundle.findEntries(path, file, false);
-			URL jarEmbeddedFileUrl = Collections.list(entries)
-				.stream()
+			Stream<URL> entryStream = entries == null ? Stream.empty()
+				: Collections.list(entries)
+					.stream();
+			URL jarEmbeddedFileUrl = entryStream
 				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException(String.format("File %s in Path %s not in Bundle %s:%s ",
-					file, path, bundle.getSymbolicName(), bundle.getVersion())));
+				.orElseThrow(
+					() -> new FileNotFoundException(String.format("File [%s/%s] not found in Bundle [%s:%s]", path,
+						file, bundle.getSymbolicName(), bundle.getVersion())));
 
 			return jarEmbeddedFileUrl.openStream();
 		}
 
 		@Override
 		public String toString() {
-
 			return String.format("bundle:" + bundleSymbolicName + ":" + bundleVersion + ":" + path + "/" + file);
 		}
 	}

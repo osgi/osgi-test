@@ -21,11 +21,11 @@ package org.osgi.test.junit5.context;
 import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
 import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
 
+import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Optional;
 
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -63,15 +63,23 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 	 */
 	@Override
 	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		Optional<InjectInstalledBundle> injectBundle = parameterContext.findAnnotation(supported);
+		InjectInstalledBundle injectBundle = parameterContext.findAnnotation(supported)
+			.get();
 		Parameter parameter = parameterContext.getParameter();
 		Class<?> parameterType = parameter.getType();
 		assertParameterIsOfType(parameterType, Bundle.class, supported, ParameterResolutionException::new);
-		return installedBundleOf(injectBundle.get(), extensionContext);
+		try {
+			return installedBundleOf(injectBundle, extensionContext);
+		} catch (Exception e) {
+			throw new ParameterResolutionException(
+				String.format("@%s [%s]: couldn't resolve bundle parameter [%s]: %s", supported.getSimpleName(),
+					parameter.getName(),
+					injectBundle.value(), e));
+		}
 	}
 
-	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext) {
-
+	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext)
+		throws FileNotFoundException {
 		try {
 			BundleContext bc = BundleContextExtension.getBundleContext(extensionContext);
 			BundleInstaller ib = BundleInstallerExtension.getBundleInstaller(extensionContext);
@@ -82,7 +90,7 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 			} else {
 				return ib.installBundle(BundleInstaller.EmbeddedLocation.of(bc, spec), injectBundle.start());
 			}
-		} catch (MalformedURLException | IllegalArgumentException e) {
+		} catch (MalformedURLException e) {
 			throw new ExtensionConfigurationException(
 				String.format("Could not parse URL from given String %s.", injectBundle.value()), e);
 		}
@@ -98,7 +106,13 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
 		assertFieldIsOfType(field, Bundle.class, supported, ExtensionConfigurationException::new);
 		InjectInstalledBundle injectBundle = field.getAnnotation(supported);
-		return installedBundleOf(injectBundle, extensionContext);
+		try {
+			return installedBundleOf(injectBundle, extensionContext);
+		} catch (Exception e) {
+			throw new ExtensionConfigurationException(String
+				.format("@%s [%s]: couldn't resolve bundle [%s]: %s", supported.getSimpleName(), field.getName(),
+					injectBundle.value(), e));
+		}
 	}
 
 }

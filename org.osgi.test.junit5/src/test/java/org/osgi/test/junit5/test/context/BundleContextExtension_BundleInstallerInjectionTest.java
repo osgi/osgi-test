@@ -48,9 +48,17 @@ public class BundleContextExtension_BundleInstallerInjectionTest {
 	@InjectBundleInstaller
 	BundleInstaller				bundleInstaller;
 
+	final BundleInstaller		constructorBI;
+
 	static OSGiSoftAssertions	staticSoftly;
 
 	OSGiSoftAssertions			softly;
+
+	BundleContextExtension_BundleInstallerInjectionTest(@InjectBundleInstaller
+	BundleInstaller bi) {
+		constructorBI = bi;
+		assertThat(constructorBI).isSameAs(staticBI);
+	}
 
 	@BeforeAll
 	static void beforeAll(@InjectBundleInstaller
@@ -75,6 +83,7 @@ public class BundleContextExtension_BundleInstallerInjectionTest {
 			.as("bundleInstaller:beforeEach")
 			.isNotNull()
 			.isSameAs(bi)
+			.isNotSameAs(constructorBI)
 			.extracting(BundleInstaller::getBundleContext)
 			.isSameAs(bundleContext);
 		softly.assertAll();

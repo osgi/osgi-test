@@ -42,7 +42,7 @@ import org.osgi.test.junit5.test.testutils.OSGiSoftAssertions;
 @TestInstance(PER_CLASS)
 public class BundleInjection_PerClassTest {
 
-	private static final String	TB1_JAR	= "tb1.jar";
+	private static final String	TB1_JAR			= "tb1.jar";
 	private static final String	INNER_TEST_JAR	= "innerTest.jar";
 
 	@InjectBundleInstaller
@@ -54,6 +54,7 @@ public class BundleInjection_PerClassTest {
 	Bundle						bundleField;
 
 	Bundle						bundleFieldBeforeAll;
+	final Bundle				bundleFieldConstructor;
 
 	@InjectInstalledBundle(INNER_TEST_JAR)
 	Bundle						bundleField2;
@@ -61,6 +62,11 @@ public class BundleInjection_PerClassTest {
 	static OSGiSoftAssertions	staticSoftly;
 
 	OSGiSoftAssertions			softly;
+
+	BundleInjection_PerClassTest(@InjectInstalledBundle(TB1_JAR)
+	Bundle bundle) {
+		bundleFieldConstructor = bundle;
+	}
 
 	@BeforeAll
 	void beforeAll(@InjectInstalledBundle(TB1_JAR)
@@ -76,7 +82,8 @@ public class BundleInjection_PerClassTest {
 			.as("bundleField:beforeAll")
 			.isNotNull()
 			.isSameAs(bundleParam)
-			.isSameAs(iBBundle);
+			.isSameAs(iBBundle)
+			.isSameAs(bundleFieldConstructor);
 
 		staticSoftly.assertThat(bundleField2)
 			.as("bundleField2:beforeAll")
@@ -87,7 +94,8 @@ public class BundleInjection_PerClassTest {
 	}
 
 	@BeforeEach
-	void beforeEach(@InjectInstalledBundle(TB1_JAR) Bundle bundleParam) {
+	void beforeEach(@InjectInstalledBundle(TB1_JAR)
+	Bundle bundleParam) {
 		Bundle iBBundle = bI.installBundle(TB1_JAR, false);
 		assertThat(bundleParam).isNotNull();
 		softly = new OSGiSoftAssertions();
@@ -106,7 +114,8 @@ public class BundleInjection_PerClassTest {
 	}
 
 	@Test
-	void innerTest(@InjectInstalledBundle(TB1_JAR) Bundle bundleParam) {
+	void innerTest(@InjectInstalledBundle(TB1_JAR)
+	Bundle bundleParam) {
 
 		assertThat(bI).isNotNull();
 		Bundle iBBundle = bI.installBundle(TB1_JAR, false);
@@ -122,7 +131,8 @@ public class BundleInjection_PerClassTest {
 	}
 
 	@Test
-	void embeddedLocationTest(@InjectBundleContext BundleContext bundleContext) throws IOException {
+	void embeddedLocationTest(@InjectBundleContext
+	BundleContext bundleContext) throws IOException {
 
 		EmbeddedLocation eLoc = BundleInstaller.EmbeddedLocation.of(bundleContext, TB1_JAR);
 		assertThat(eLoc).isNotNull();

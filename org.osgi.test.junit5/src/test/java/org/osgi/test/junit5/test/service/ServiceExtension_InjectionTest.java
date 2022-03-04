@@ -49,7 +49,10 @@ public class ServiceExtension_InjectionTest {
 	@InjectService
 	static Bar				staticBar;
 
+	static Bar				beforeAllBarNew;
 	static Bar				beforeAllBar;
+
+	final Bar				constructorBar;
 
 	@InjectBundleContext
 	BundleContext			bundleContext;
@@ -59,13 +62,20 @@ public class ServiceExtension_InjectionTest {
 	@InjectService(cardinality = 0)
 	ServiceAware<Bar>		barServiceAware;
 
+	ServiceExtension_InjectionTest(@InjectService
+	Bar bar) {
+		constructorBar = bar;
+		assertThat(beforeAllBarNew).isSameAs(bar);
+	}
+
 	@BeforeAll
 	static void beforeAll(@InjectService
 	Bar barParam) {
 		assertThat(staticBar).isSameAs(TestActivator.BAR)
 			.isSameAs(barParam);
-		beforeAllBar = new Bar() {};
-		staticBC.registerService(Bar.class, beforeAllBar, dictionaryOf(SERVICE_RANKING, 10));
+		beforeAllBar = barParam;
+		beforeAllBarNew = new Bar() {};
+		staticBC.registerService(Bar.class, beforeAllBarNew, dictionaryOf(SERVICE_RANKING, 10));
 	}
 
 	@Test
@@ -82,10 +92,12 @@ public class ServiceExtension_InjectionTest {
 			.isNotSameAs(bar)
 			.isNotSameAs(barParam);
 		softly.assertThat(bar)
-			.isSameAs(beforeAllBar)
+			.isSameAs(beforeAllBarNew)
+			.isSameAs(constructorBar)
 			.isSameAs(barParam)
 			.isNotSameAs(staticBar);
 		softly.assertThat(staticBar)
+			.isSameAs(beforeAllBar)
 			.isSameAs(TestActivator.BAR);
 	}
 
