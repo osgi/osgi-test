@@ -42,8 +42,7 @@ public class BundleContextExtension_BundleContextInjectionSanityCheckingTest {
 	@Test
 	void annotatedParameter_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectParameterType.class).isInstanceOf(ParameterResolutionException.class)
-			.hasMessageEndingWith(
-				"Can only resolve @InjectBundleContext parameter of type org.osgi.framework.BundleContext but was: java.lang.String");
+			.hasMessageContainingAll("java.lang.String", "@InjectBundleContext", "org.osgi.framework.BundleContext");
 	}
 
 	static class IncorrectFieldType extends TestBase {
@@ -59,8 +58,8 @@ public class BundleContextExtension_BundleContextInjectionSanityCheckingTest {
 	@Test
 	void annotatedField_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectFieldType.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessage(
-				"[myField] Can only resolve @InjectBundleContext field of type org.osgi.framework.BundleContext but was: java.lang.String");
+			.hasMessageContainingAll("myField", "java.lang.String", "@InjectBundleContext",
+				"org.osgi.framework.BundleContext");
 	}
 
 	static class IncorrectStaticFieldType extends TestBase {
@@ -76,8 +75,8 @@ public class BundleContextExtension_BundleContextInjectionSanityCheckingTest {
 	@Test
 	void annotatedStaticField_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectStaticFieldType.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessage(
-				"[myStaticField] Can only resolve @InjectBundleContext field of type org.osgi.framework.BundleContext but was: java.lang.String");
+			.hasMessageContainingAll("myStaticField", "java.lang.String", "@InjectBundleContext",
+				"org.osgi.framework.BundleContext");
 	}
 
 	static class FinalStaticField extends TestBase {
@@ -92,7 +91,7 @@ public class BundleContextExtension_BundleContextInjectionSanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsFinal_throwsException() {
 		assertThatTest(FinalStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*final.*");
+			.hasMessageContainingAll("bc", "must not be private or final", "@InjectBundleContext");
 	}
 
 	static class FinalField extends TestBase {
@@ -107,7 +106,7 @@ public class BundleContextExtension_BundleContextInjectionSanityCheckingTest {
 	@Test
 	void annotatedField_thatIsFinal_throwsException() {
 		assertThatTest(FinalField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*final.*");
+			.hasMessageContainingAll("bc", "must not be private or final", "@InjectBundleContext");
 	}
 
 	static class PrivateField extends TestBase {
@@ -122,7 +121,7 @@ public class BundleContextExtension_BundleContextInjectionSanityCheckingTest {
 	@Test
 	void annotatedField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*private.*");
+			.hasMessageContainingAll("bc", "must not be private or final", "@InjectBundleContext");
 	}
 
 	static class StaticPrivateField extends TestBase {
@@ -137,6 +136,6 @@ public class BundleContextExtension_BundleContextInjectionSanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsPrivate_throwsException() {
 		assertThatTest(StaticPrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectBundleContext field \\[bc\\] must not be .*private.*");
+			.hasMessageContainingAll("bc", "must not be private or final", "@InjectBundleContext");
 	}
 }

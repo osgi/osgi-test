@@ -18,22 +18,19 @@
 
 package org.osgi.test.junit5.service;
 
+import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
+
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Function;
 
-import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.list.ListSupplierDelegate;
@@ -69,55 +66,66 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 	}
 
 	@Override
-	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
-		assertValidFieldCandidate(field);
-		InjectService injectService = field.getAnnotation(supported);
-		TargetType targetType = TargetType.of(field);
-		return resolveReturnValue(targetType, injectService, extensionContext);
-	}
-
-	@Override
-	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		Optional<InjectService> injectService = parameterContext.findAnnotation(supported);
-		final Parameter parameter = parameterContext.getParameter();
-
-		TargetType targetType = TargetType.of(parameter);
-
-		return resolveReturnValue(targetType, injectService.get(), extensionContext);
-	}
-
-	@Override
-	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-		throws ParameterResolutionException {
-
-		if (!parameterContext.isAnnotated(supported)) {
-			return false;
-		}
-
-		Parameter parameter = parameterContext.getParameter();
-		Class<?> memberType = parameter.getType();
-		Type genericMemberType = parameter.getParameterizedType();
-		Type serviceType = genericMemberType;
-
-		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
-			serviceType = ((ParameterizedType) genericMemberType).getActualTypeArguments()[0];
-		} else if (ServiceAware.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
-			serviceType = ((ParameterizedType) genericMemberType).getActualTypeArguments()[0];
+	protected boolean supportsType(TargetType targetType, Function<String, ? extends RuntimeException> exception,
+		ExtensionContext extensionContext) {
+		Type serviceType = targetType.getGenericType();
+		if (targetType.hasParameterizedTypes()
+			&& (targetType.matches(List.class) || targetType.matches(ServiceAware.class))) {
+			serviceType = targetType.getFirstGenericTypes()
+				.get();
 		}
 		// The service type must be a raw type
 		if (serviceType instanceof Class || serviceType instanceof WildcardType) {
 			return true;
 		}
-		throw new ParameterResolutionException("Can only resolve @" + supported.getSimpleName()
-			+ " parameter for services with non-generic types, service type was: " + serviceType.getTypeName());
+		throw exception.apply(String.format(
+			"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
+			targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
 	}
 
-	void assertValidFieldCandidate(Field field) {
-		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())) {
-			throw new ExtensionConfigurationException(
-				"@" + supported.getSimpleName() + " field ["
-				+ field.getName() + "] must not be final or private.");
+	@Override
+	protected Object resolveField(Field field, ExtensionContext extensionContext) {
+		InjectService injectService = findAnnotation(field, annotation()).get();
+		TargetType targetType = TargetType.of(field);
+		return resolveValue(targetType, injectService, extensionContext);
+	}
+
+	@Override
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+		InjectService injectService = parameterContext.findAnnotation(annotation())
+			.get();
+		TargetType targetType = TargetType.of(parameterContext.getParameter());
+		return resolveValue(targetType, injectService, extensionContext);
+	}
+
+	private Object resolveValue(TargetType targetType, InjectService injectService, ExtensionContext extensionContext) {
+		Type serviceType = targetType.getType();
+		if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
+			serviceType = targetType.getFirstGenericTypes()
+				.orElse(targetType.getGenericType());
 		}
+
+		if (serviceType instanceof WildcardType) {
+			serviceType = Object.class;
+		}
+
+		if (!injectService.service()
+			.equals(Object.class)) {
+			serviceType = injectService.service();
+		}
+
+		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType, injectService.filter(),
+			injectService.filterArguments(), injectService.cardinality(), injectService.timeout(), extensionContext);
+
+		if (targetType.hasParameterizedTypes()) {
+			if (targetType.matches(ServiceAware.class)) {
+				return configuration;
+			}
+			if (targetType.matches(List.class)) {
+				return new ListSupplierDelegate<>(configuration::getServices);
+			}
+		}
+		return configuration.getService();
 	}
 
 	public static <S> ServiceConfiguration<S> getServiceConfiguration(Class<S> serviceType, String format,
@@ -130,43 +138,6 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 				CloseableServiceConfiguration.class)
 			.get();
 		return serviceConfiguration;
-	}
-
-	static Object resolveReturnValue(TargetType targetType, InjectService injectService,
-		ExtensionContext extensionContext) throws ParameterResolutionException {
-
-		Type serviceType = targetType.getType();
-
-		if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
-			Optional<Type> o = targetType.getFirstGenericTypes();
-			if (o.isPresent()) {
-				serviceType = (o.get());
-			}
-		}
-
-		// supportsParameter() If Jupiter does the right thing then this method
-		// should not be called without serviceType being a class
-		assert serviceType instanceof Class || serviceType instanceof WildcardType;
-
-		if (serviceType instanceof WildcardType) {
-			serviceType = Object.class;
-
-		}
-		if (!injectService.service()
-			.equals(Object.class)) {
-			serviceType = injectService.service();
-		}
-
-		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType, injectService.filter(),
-			injectService.filterArguments(), injectService.cardinality(), injectService.timeout(), extensionContext);
-
-		if (targetType.matches(List.class) && targetType.hasParameterizedTypes()) {
-			return new ListSupplierDelegate<>(configuration::getServices);
-		} else if (targetType.matches(ServiceAware.class) && targetType.hasParameterizedTypes()) {
-			return configuration;
-		}
-
-		return configuration.getService();
 	}
 
 	static Store getStore(ExtensionContext extensionContext) {

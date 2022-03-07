@@ -65,9 +65,7 @@ public class ServiceExtension_SanityCheckingTest {
 	})
 	void annotatedParameter_withNonRawType_throwsException(Class<?> test) {
 		assertThatTest(test).isInstanceOf(ParameterResolutionException.class)
-			.hasMessageEndingWith(
-				"Can only resolve @InjectService parameter for services with non-generic types, service type was: "
-					+ AtomicReference.class.getName() + "<?>");
+			.hasMessageContainingAll("non-generic type", "@InjectService", AtomicReference.class.getName());
 	}
 
 	static class FinalField extends TestBase {
@@ -82,7 +80,7 @@ public class ServiceExtension_SanityCheckingTest {
 	@Test
 	void annotatedField_thatIsFinal_throwsException() {
 		assertThatTest(FinalField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectService field \\[bc\\] must not be.*final.*");
+			.hasMessageContainingAll("bc", "must not be private or final", "@InjectService");
 	}
 
 	static class PrivateField extends TestBase {
@@ -97,6 +95,6 @@ public class ServiceExtension_SanityCheckingTest {
 	@Test
 	void annotatedField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectService field \\[bc\\] must not be.*private.*");
+			.hasMessageContainingAll("bc", "must not be private or final", "@InjectService");
 	}
 }

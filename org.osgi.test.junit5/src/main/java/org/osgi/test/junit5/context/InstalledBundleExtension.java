@@ -18,10 +18,8 @@
 
 package org.osgi.test.junit5.context;
 
-import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
-import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
+import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
 
-import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
@@ -53,7 +51,7 @@ import org.osgi.test.junit5.inject.InjectingExtension;
 public class InstalledBundleExtension extends InjectingExtension<InjectInstalledBundle> {
 
 	public InstalledBundleExtension() {
-		super(InjectInstalledBundle.class);
+		super(InjectInstalledBundle.class, Bundle.class);
 	}
 
 	/**
@@ -62,24 +60,21 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 	 * {@link ParameterContext}.
 	 */
 	@Override
-	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		InjectInstalledBundle injectBundle = parameterContext.findAnnotation(supported)
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+		InjectInstalledBundle injectBundle = parameterContext.findAnnotation(annotation())
 			.get();
-		Parameter parameter = parameterContext.getParameter();
-		Class<?> parameterType = parameter.getType();
-		assertParameterIsOfType(parameterType, Bundle.class, supported, ParameterResolutionException::new);
 		try {
 			return installedBundleOf(injectBundle, extensionContext);
 		} catch (Exception e) {
 			throw new ParameterResolutionException(
-				String.format("@%s [%s]: couldn't resolve bundle parameter [%s]: %s", supported.getSimpleName(),
-					parameter.getName(),
+				String.format("@%s [%s]: couldn't resolve bundle parameter [%s]: %s", annotation().getSimpleName(),
+					parameterContext.getParameter()
+						.getName(),
 					injectBundle.value(), e));
 		}
 	}
 
-	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext)
-		throws FileNotFoundException {
+	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext) {
 		try {
 			BundleContext bc = BundleContextExtension.getBundleContext(extensionContext);
 			BundleInstaller ib = BundleInstallerExtension.getBundleInstaller(extensionContext);
@@ -94,7 +89,6 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 			throw new ExtensionConfigurationException(
 				String.format("Could not parse URL from given String %s.", injectBundle.value()), e);
 		}
-
 	}
 
 	static Store getStore(ExtensionContext extensionContext) {
@@ -103,14 +97,13 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 	}
 
 	@Override
-	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
-		assertFieldIsOfType(field, Bundle.class, supported, ExtensionConfigurationException::new);
-		InjectInstalledBundle injectBundle = field.getAnnotation(supported);
+	protected Object resolveField(Field field, ExtensionContext extensionContext) {
+		InjectInstalledBundle injectBundle = findAnnotation(field, annotation()).get();
 		try {
 			return installedBundleOf(injectBundle, extensionContext);
 		} catch (Exception e) {
 			throw new ExtensionConfigurationException(String
-				.format("@%s [%s]: couldn't resolve bundle [%s]: %s", supported.getSimpleName(), field.getName(),
+				.format("@%s [%s]: couldn't resolve bundle [%s]: %s", annotation().getSimpleName(), field.getName(),
 					injectBundle.value(), e));
 		}
 	}
