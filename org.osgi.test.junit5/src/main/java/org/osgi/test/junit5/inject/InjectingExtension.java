@@ -120,7 +120,7 @@ public abstract class InjectingExtension<A extends Annotation>
 		fields.stream()
 			.filter(field -> supportsField(field, extensionContext))
 			.forEach(field -> setField(field, null, resolveField(field, extensionContext)));
-		if (isPerClass(extensionContext)) {
+		if (isLifecyclePerClass(extensionContext)) {
 			injectNonStaticFields(extensionContext, extensionContext.getRequiredTestInstance());
 		}
 		injectNonStaticFields(extensionContext);
@@ -132,7 +132,7 @@ public abstract class InjectingExtension<A extends Annotation>
 
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		if (!isPerClass(extensionContext)) {
+		if (!isLifecyclePerClass(extensionContext)) {
 			injectNonStaticFields(extensionContext, extensionContext.getRequiredTestInstance());
 		}
 		injectNonStaticFields(extensionContext);
@@ -154,7 +154,7 @@ public abstract class InjectingExtension<A extends Annotation>
 				continue;
 			}
 			final Class<?> testClass = instance.getClass();
-			boolean perInstance = !isAnnotatedPerClass(testClass);
+			boolean perInstance = !isLifecyclePerClass(testClass);
 			if (perInstance) {
 				injectNonStaticFields(extensionContext, instance);
 			}
@@ -170,13 +170,13 @@ public abstract class InjectingExtension<A extends Annotation>
 			.forEach(field -> setField(field, instance, resolveField(field, extensionContext)));
 	}
 
-	private static boolean isPerClass(ExtensionContext context) {
+	protected boolean isLifecyclePerClass(ExtensionContext context) {
 		return context.getTestInstanceLifecycle()
 			.filter(Lifecycle.PER_CLASS::equals)
 			.isPresent();
 	}
 
-	private static boolean isAnnotatedPerClass(Class<?> testClass) {
+	protected boolean isLifecyclePerClass(Class<?> testClass) {
 		return findAnnotation(testClass, TestInstance.class).map(TestInstance::value)
 			.filter(Lifecycle.PER_CLASS::equals)
 			.isPresent();
