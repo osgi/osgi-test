@@ -18,6 +18,8 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
@@ -29,7 +31,7 @@ import org.junit.jupiter.api.extension.TestInstances;
 import org.osgi.test.common.inject.TargetType;
 
 public abstract class InjectingExtension<A extends Annotation>
-	implements BeforeEachCallback, BeforeAllCallback, ParameterResolver {
+	implements BeforeEachCallback, BeforeAllCallback, ParameterResolver, AfterAllCallback, AfterEachCallback {
 
 	private final Class<A>			annotation;
 	private final List<Class<?>>	targetTypes;
@@ -125,12 +127,19 @@ public abstract class InjectingExtension<A extends Annotation>
 	}
 
 	@Override
+	public void afterAll(ExtensionContext extensionContext) throws Exception {}
+
+
+	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
 		if (!isPerClass(extensionContext)) {
 			injectNonStaticFields(extensionContext, extensionContext.getRequiredTestInstance());
 		}
 		injectNonStaticFields(extensionContext);
 	}
+
+	@Override
+	public void afterEach(ExtensionContext extensionContext) throws Exception {}
 
 	private void injectNonStaticFields(ExtensionContext extensionContext) {
 		if (!extensionContext.getTestInstances()
