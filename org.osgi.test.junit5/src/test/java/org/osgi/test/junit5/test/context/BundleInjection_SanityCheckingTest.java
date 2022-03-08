@@ -88,7 +88,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsFinal_throwsException() {
 		assertThatTest(FinalStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageContainingAll("bundle", "must not be private or final", "@InjectInstalledBundle");
+			.hasMessageContainingAll("bundle", "must not be final", "@InjectInstalledBundle");
 	}
 
 	static class FinalField {
@@ -102,7 +102,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedField_thatIsFinal_throwsException() {
 		assertThatTest(FinalField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageContainingAll("bundle", "must not be private or final", "@InjectInstalledBundle");
+			.hasMessageContainingAll("bundle", "must not be final", "@InjectInstalledBundle");
 	}
 
 	static class PrivateStaticField {
@@ -116,7 +116,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageContainingAll("bundle", "must not be private or final", "@InjectInstalledBundle");
+			.hasMessageContainingAll("bundle", "must not be private", "@InjectInstalledBundle");
 	}
 
 	static class PrivateField {
@@ -130,7 +130,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageContainingAll("bundle", "must not be private or final", "@InjectInstalledBundle");
+			.hasMessageContainingAll("bundle", "must not be private", "@InjectInstalledBundle");
 	}
 
 	static class MissingBundle {

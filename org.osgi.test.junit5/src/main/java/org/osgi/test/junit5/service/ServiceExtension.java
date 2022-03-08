@@ -18,19 +18,15 @@
 
 package org.osgi.test.junit5.service;
 
-import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
-
-import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
 import java.util.List;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
-import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.list.ListSupplierDelegate;
@@ -66,8 +62,8 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 	}
 
 	@Override
-	protected boolean supportsType(TargetType targetType, Function<String, ? extends RuntimeException> exception,
-		ExtensionContext extensionContext) {
+	protected boolean supportsType(TargetType targetType, ExtensionContext extensionContext)
+		throws ParameterResolutionException {
 		Type serviceType = targetType.getGenericType();
 		if (targetType.hasParameterizedTypes()
 			&& (targetType.matches(List.class) || targetType.matches(ServiceAware.class))) {
@@ -78,27 +74,14 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 		if (serviceType instanceof Class || serviceType instanceof WildcardType) {
 			return true;
 		}
-		throw exception.apply(String.format(
+		throw new ParameterResolutionException(String.format(
 			"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
 			targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
 	}
 
 	@Override
-	protected Object resolveField(Field field, ExtensionContext extensionContext) {
-		InjectService injectService = findAnnotation(field, annotation()).get();
-		TargetType targetType = TargetType.of(field);
-		return resolveValue(targetType, injectService, extensionContext);
-	}
-
-	@Override
-	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		InjectService injectService = parameterContext.findAnnotation(annotation())
-			.get();
-		TargetType targetType = TargetType.of(parameterContext.getParameter());
-		return resolveValue(targetType, injectService, extensionContext);
-	}
-
-	private Object resolveValue(TargetType targetType, InjectService injectService, ExtensionContext extensionContext) {
+	protected Object resolveValue(TargetType targetType, InjectService injectService,
+		ExtensionContext extensionContext) throws ParameterResolutionException {
 		Type serviceType = targetType.getType();
 		if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
 			serviceType = targetType.getFirstGenericTypes()

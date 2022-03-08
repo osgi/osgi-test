@@ -18,18 +18,17 @@
 
 package org.osgi.test.junit5.context;
 
-import java.lang.reflect.Field;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
-import org.junit.jupiter.api.extension.ParameterContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.inject.InjectingExtension;
 
@@ -129,12 +128,8 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 	}
 
 	@Override
-	protected Object resolveField(Field field, ExtensionContext extensionContext) {
-		return getBundleContext(extensionContext);
-	}
-
-	@Override
-	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+	protected Object resolveValue(TargetType targetType, InjectBundleContext injection,
+		ExtensionContext extensionContext) throws ParameterResolutionException {
 		return getBundleContext(extensionContext);
 	}
 }

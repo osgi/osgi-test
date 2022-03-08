@@ -14,7 +14,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
@@ -30,86 +29,23 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.junit.jupiter.api.extension.TestInstances;
 import org.osgi.test.common.inject.TargetType;
 
-public abstract class InjectingExtension<A extends Annotation>
+public abstract class InjectingExtension<INJECTION extends Annotation>
 	implements BeforeEachCallback, BeforeAllCallback, ParameterResolver, AfterAllCallback, AfterEachCallback {
 
-	private final Class<A>			annotation;
+	private final Class<INJECTION>	annotation;
 	private final List<Class<?>>	targetTypes;
 
-	protected InjectingExtension(Class<A> annotation, Class<?>... targetTypes) {
+	protected InjectingExtension(Class<INJECTION> annotation, Class<?>... targetTypes) {
 		this.annotation = requireNonNull(annotation);
 		this.targetTypes = Arrays.asList(targetTypes);
 	}
 
-	protected Class<A> annotation() {
+	protected Class<INJECTION> annotation() {
 		return annotation;
 	}
 
 	protected List<Class<?>> targetTypes() {
 		return targetTypes;
-	}
-
-	/**
-	 * Determine if this extender supports resolution for the specified
-	 * {@link TargetType} for the specified {@link ExtensionContext}.
-	 */
-	protected boolean supportsType(TargetType targetType, Function<String, ? extends RuntimeException> exception,
-		ExtensionContext extensionContext) {
-		if (!targetTypes().isEmpty()) {
-			Class<?> type = targetType.getType();
-			if (targetTypes().stream()
-				.noneMatch(type::isAssignableFrom)) {
-				throw exception.apply(
-					String.format("Element %s has an unsupported type %s for annotation @%s. Supported types are: %s.",
-						targetType.getName(), type.getName(), annotation().getSimpleName(), targetTypes().stream()
-							.map(Class::getName)
-							.collect(joining())));
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Determine if this extender supports resolution for the specified
-	 * {@link Field} for the specified {@link ExtensionContext}.
-	 */
-	protected boolean supportsField(Field field, ExtensionContext extensionContext) {
-		if (!isAnnotated(field, annotation())) {
-			return false;
-		}
-		if (!supportsType(TargetType.of(field), ExtensionConfigurationException::new, extensionContext)) {
-			return false;
-		}
-		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())) {
-			throw new ExtensionConfigurationException(
-				String.format("Field %s must not be private or final for annotation @%s.", field.getName(),
-					annotation().getSimpleName()));
-		}
-		return true;
-	}
-
-	/**
-	 * Resolve the value for the specified {@link Field} for the specified
-	 * {@link ExtensionContext}.
-	 */
-	protected abstract Object resolveField(Field field, ExtensionContext extensionContext);
-
-	/**
-	 * Determine if this resolver supports resolution of an argument for the
-	 * {@link Parameter} in the specified {@link ParameterContext} for the
-	 * specified {@link ExtensionContext}.
-	 */
-	@Override
-	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-		throws ParameterResolutionException {
-		if (!parameterContext.isAnnotated(annotation())) {
-			return false;
-		}
-		if (!supportsType(TargetType.of(parameterContext.getParameter()), ParameterResolutionException::new,
-			extensionContext)) {
-			return false;
-		}
-		return true;
 	}
 
 	@Override
@@ -129,7 +65,6 @@ public abstract class InjectingExtension<A extends Annotation>
 	@Override
 	public void afterAll(ExtensionContext extensionContext) throws Exception {}
 
-
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
 		if (!isLifecyclePerClass(extensionContext)) {
@@ -140,6 +75,111 @@ public abstract class InjectingExtension<A extends Annotation>
 
 	@Override
 	public void afterEach(ExtensionContext extensionContext) throws Exception {}
+
+	protected int disallowedFieldModifiers() {
+		return Modifier.FINAL | Modifier.PRIVATE;
+	}
+
+	/**
+	 * Determine if this extender supports resolution for the specified
+	 * {@link Field} for the specified {@link ExtensionContext}.
+	 */
+	protected boolean supportsField(Field field, ExtensionContext extensionContext) {
+		if (!isAnnotated(field, annotation())) {
+			return false;
+		}
+		try {
+			if (!supportsType(TargetType.of(field), extensionContext)) {
+				return false;
+			}
+		} catch (ParameterResolutionException pre) {
+			// Convert to ExtensionConfigurationException for field
+			ExtensionConfigurationException ece = new ExtensionConfigurationException(pre.getMessage(), pre.getCause());
+			ece.setStackTrace(pre.getStackTrace());
+			throw ece;
+		}
+
+		if ((field.getModifiers() & disallowedFieldModifiers()) != 0) {
+			throw new ExtensionConfigurationException(
+				String.format("Field %s must not be %s for annotation @%s.", field.getName(),
+					Modifier.toString(field.getModifiers() & disallowedFieldModifiers()),
+					annotation().getSimpleName()));
+		}
+		return true;
+	}
+
+	/**
+	 * Determine if this resolver supports resolution of an argument for the
+	 * {@link Parameter} in the specified {@link ParameterContext} for the
+	 * specified {@link ExtensionContext}.
+	 */
+	@Override
+	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+		throws ParameterResolutionException {
+		if (!parameterContext.isAnnotated(annotation())) {
+			return false;
+		}
+		if (!supportsType(TargetType.of(parameterContext.getParameter()), extensionContext)) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Determine if this extender supports resolution for the specified
+	 * {@link TargetType} for the specified {@link ExtensionContext}.
+	 */
+	protected boolean supportsType(TargetType targetType, ExtensionContext extensionContext)
+		throws ParameterResolutionException {
+		if (!targetTypes().isEmpty()) {
+			Class<?> type = targetType.getType();
+			if (targetTypes().stream()
+				.noneMatch(type::isAssignableFrom)) {
+				throw new ParameterResolutionException(
+					String.format("Element %s has an unsupported type %s for annotation @%s. Supported types are: %s.",
+						targetType.getName(), type.getName(), annotation().getSimpleName(), targetTypes().stream()
+							.map(Class::getName)
+							.collect(joining())));
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Resolve the value for the specified {@link Field} for the specified
+	 * {@link ExtensionContext}.
+	 */
+	protected Object resolveField(Field field, ExtensionContext extensionContext) {
+		INJECTION injection = findAnnotation(field, annotation()).get();
+		TargetType targetType = TargetType.of(field);
+		try {
+			return resolveValue(targetType, injection, extensionContext);
+		} catch (ParameterResolutionException pre) {
+			// Convert to ExtensionConfigurationException for field
+			ExtensionConfigurationException ece = new ExtensionConfigurationException(pre.getMessage(), pre.getCause());
+			ece.setStackTrace(pre.getStackTrace());
+			throw ece;
+		}
+	}
+
+	/**
+	 * Resolve the value for the specified {@link ParameterContext} for the
+	 * specified {@link ExtensionContext}.
+	 */
+	@Override
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+		INJECTION injection = parameterContext.findAnnotation(annotation())
+			.get();
+		TargetType targetType = TargetType.of(parameterContext.getParameter());
+		return resolveValue(targetType, injection, extensionContext);
+	}
+
+	/**
+	 * Resolve the value for the specified {@link TargetType} and injection
+	 * annotation for the specified {@link ExtensionContext}.
+	 */
+	protected abstract Object resolveValue(TargetType targetType, INJECTION injection,
+		ExtensionContext extensionContext) throws ParameterResolutionException;
 
 	private void injectNonStaticFields(ExtensionContext extensionContext) {
 		if (!extensionContext.getTestInstances()

@@ -18,22 +18,16 @@
 
 package org.osgi.test.junit5.context;
 
-import static org.junit.platform.commons.support.AnnotationSupport.findAnnotation;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
-import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectInstalledBundle;
+import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.inject.InjectingExtension;
 
@@ -54,26 +48,6 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 		super(InjectInstalledBundle.class, Bundle.class);
 	}
 
-	/**
-	 * Resolve {@link Parameter} annotated with
-	 * {@link InjectInstalledBundle @InjectInstalledBundle} in the supplied
-	 * {@link ParameterContext}.
-	 */
-	@Override
-	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		InjectInstalledBundle injectBundle = parameterContext.findAnnotation(annotation())
-			.get();
-		try {
-			return installedBundleOf(injectBundle, extensionContext);
-		} catch (Exception e) {
-			throw new ParameterResolutionException(
-				String.format("@%s [%s]: couldn't resolve bundle parameter [%s]: %s", annotation().getSimpleName(),
-					parameterContext.getParameter()
-						.getName(),
-					injectBundle.value(), e));
-		}
-	}
-
 	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext) {
 		try {
 			BundleContext bc = BundleContextExtension.getBundleContext(extensionContext);
@@ -91,21 +65,14 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 		}
 	}
 
-	static Store getStore(ExtensionContext extensionContext) {
-		return extensionContext
-			.getStore(Namespace.create(InstalledBundleExtension.class, extensionContext.getUniqueId()));
-	}
-
 	@Override
-	protected Object resolveField(Field field, ExtensionContext extensionContext) {
-		InjectInstalledBundle injectBundle = findAnnotation(field, annotation()).get();
+	protected Object resolveValue(TargetType targetType, InjectInstalledBundle injectBundle,
+		ExtensionContext extensionContext) throws ParameterResolutionException {
 		try {
 			return installedBundleOf(injectBundle, extensionContext);
 		} catch (Exception e) {
-			throw new ExtensionConfigurationException(String
-				.format("@%s [%s]: couldn't resolve bundle [%s]: %s", annotation().getSimpleName(), field.getName(),
-					injectBundle.value(), e));
+			throw new ParameterResolutionException(String.format("@%s [%s]: couldn't resolve bundle parameter [%s]: %s",
+				annotation().getSimpleName(), targetType.getName(), injectBundle.value(), e));
 		}
 	}
-
 }

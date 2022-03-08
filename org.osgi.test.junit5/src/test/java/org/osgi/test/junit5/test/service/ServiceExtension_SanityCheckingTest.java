@@ -80,7 +80,7 @@ public class ServiceExtension_SanityCheckingTest {
 	@Test
 	void annotatedField_thatIsFinal_throwsException() {
 		assertThatTest(FinalField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageContainingAll("bc", "must not be private or final", "@InjectService");
+			.hasMessageContainingAll("bc", "must not be final", "@InjectService");
 	}
 
 	static class PrivateField extends TestBase {
@@ -95,6 +95,6 @@ public class ServiceExtension_SanityCheckingTest {
 	@Test
 	void annotatedField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageContainingAll("bc", "must not be private or final", "@InjectService");
+			.hasMessageContainingAll("bc", "must not be private", "@InjectService");
 	}
 }
