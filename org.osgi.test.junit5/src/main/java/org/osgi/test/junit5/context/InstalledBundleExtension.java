@@ -18,24 +18,16 @@
 
 package org.osgi.test.junit5.context;
 
-import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
-import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
-
-import java.io.FileNotFoundException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
-import org.junit.jupiter.api.extension.ExtensionContext.Store;
-import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectInstalledBundle;
+import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.inject.InjectingExtension;
 
@@ -53,33 +45,10 @@ import org.osgi.test.junit5.inject.InjectingExtension;
 public class InstalledBundleExtension extends InjectingExtension<InjectInstalledBundle> {
 
 	public InstalledBundleExtension() {
-		super(InjectInstalledBundle.class);
+		super(InjectInstalledBundle.class, Bundle.class);
 	}
 
-	/**
-	 * Resolve {@link Parameter} annotated with
-	 * {@link InjectInstalledBundle @InjectInstalledBundle} in the supplied
-	 * {@link ParameterContext}.
-	 */
-	@Override
-	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		InjectInstalledBundle injectBundle = parameterContext.findAnnotation(supported)
-			.get();
-		Parameter parameter = parameterContext.getParameter();
-		Class<?> parameterType = parameter.getType();
-		assertParameterIsOfType(parameterType, Bundle.class, supported, ParameterResolutionException::new);
-		try {
-			return installedBundleOf(injectBundle, extensionContext);
-		} catch (Exception e) {
-			throw new ParameterResolutionException(
-				String.format("@%s [%s]: couldn't resolve bundle parameter [%s]: %s", supported.getSimpleName(),
-					parameter.getName(),
-					injectBundle.value(), e));
-		}
-	}
-
-	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext)
-		throws FileNotFoundException {
+	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext) {
 		try {
 			BundleContext bc = BundleContextExtension.getBundleContext(extensionContext);
 			BundleInstaller ib = BundleInstallerExtension.getBundleInstaller(extensionContext);
@@ -94,25 +63,16 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 			throw new ExtensionConfigurationException(
 				String.format("Could not parse URL from given String %s.", injectBundle.value()), e);
 		}
-
-	}
-
-	static Store getStore(ExtensionContext extensionContext) {
-		return extensionContext
-			.getStore(Namespace.create(InstalledBundleExtension.class, extensionContext.getUniqueId()));
 	}
 
 	@Override
-	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
-		assertFieldIsOfType(field, Bundle.class, supported, ExtensionConfigurationException::new);
-		InjectInstalledBundle injectBundle = field.getAnnotation(supported);
+	protected Object resolveValue(TargetType targetType, InjectInstalledBundle injectBundle,
+		ExtensionContext extensionContext) throws ParameterResolutionException {
 		try {
 			return installedBundleOf(injectBundle, extensionContext);
 		} catch (Exception e) {
-			throw new ExtensionConfigurationException(String
-				.format("@%s [%s]: couldn't resolve bundle [%s]: %s", supported.getSimpleName(), field.getName(),
-					injectBundle.value(), e));
+			throw new ParameterResolutionException(String.format("@%s [%s]: couldn't resolve bundle parameter [%s]: %s",
+				annotation().getSimpleName(), targetType.getName(), injectBundle.value(), e));
 		}
 	}
-
 }

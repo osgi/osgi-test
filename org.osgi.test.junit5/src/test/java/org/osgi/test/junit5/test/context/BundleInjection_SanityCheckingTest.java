@@ -42,8 +42,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedParameter_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectParameterType.class).isInstanceOf(ParameterResolutionException.class)
-			.hasMessageEndingWith(
-				"Can only resolve @InjectInstalledBundle parameter of type org.osgi.framework.Bundle but was: java.lang.String");
+			.hasMessageContainingAll("java.lang.String", "@InjectInstalledBundle", "org.osgi.framework.Bundle");
 	}
 
 	static class IncorrectFieldType {
@@ -58,8 +57,8 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedField_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectFieldType.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessage(
-				"[myField] Can only resolve @InjectInstalledBundle field of type org.osgi.framework.Bundle but was: java.lang.String");
+			.hasMessageContainingAll("myField", "java.lang.String", "@InjectInstalledBundle",
+				"org.osgi.framework.Bundle");
 	}
 
 	static class IncorrectStaticFieldType {
@@ -74,8 +73,8 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedStaticField_withIncorrectType_throwsException() {
 		assertThatTest(IncorrectStaticFieldType.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessage(
-				"[myStaticField] Can only resolve @InjectInstalledBundle field of type org.osgi.framework.Bundle but was: java.lang.String");
+			.hasMessageContainingAll("myStaticField", "java.lang.String", "@InjectInstalledBundle",
+				"org.osgi.framework.Bundle");
 	}
 
 	static class FinalStaticField {
@@ -89,7 +88,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsFinal_throwsException() {
 		assertThatTest(FinalStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectInstalledBundle field \\[bundle\\] must not be .*final.*");
+			.hasMessageContainingAll("bundle", "must not be final", "@InjectInstalledBundle");
 	}
 
 	static class FinalField {
@@ -103,7 +102,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedField_thatIsFinal_throwsException() {
 		assertThatTest(FinalField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectInstalledBundle field \\[bundle\\] must not be .*final.*");
+			.hasMessageContainingAll("bundle", "must not be final", "@InjectInstalledBundle");
 	}
 
 	static class PrivateStaticField {
@@ -117,7 +116,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedStaticField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateStaticField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectInstalledBundle field \\[bundle\\] must not be .*private.*");
+			.hasMessageContainingAll("bundle", "must not be private", "@InjectInstalledBundle");
 	}
 
 	static class PrivateField {
@@ -131,7 +130,7 @@ public class BundleInjection_SanityCheckingTest {
 	@Test
 	void annotatedField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
-			.hasMessageMatching("@InjectInstalledBundle field \\[bundle\\] must not be .*private.*");
+			.hasMessageContainingAll("bundle", "must not be private", "@InjectInstalledBundle");
 	}
 
 	static class MissingBundle {

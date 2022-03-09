@@ -18,24 +18,17 @@
 
 package org.osgi.test.junit5.context;
 
-import static org.osgi.test.common.inject.FieldInjector.assertFieldIsOfType;
-import static org.osgi.test.common.inject.FieldInjector.assertParameterIsOfType;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Parameter;
-
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
-import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.inject.InjectingExtension;
 
@@ -75,7 +68,7 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 	public static final String	INSTALL_BUNDLE_KEY	= BundleInstallerExtension.INSTALL_BUNDLE_KEY;
 
 	public BundleContextExtension() {
-		super(InjectBundleContext.class);
+		super(InjectBundleContext.class, BundleContext.class);
 	}
 
 	public static BundleContext getBundleContext(ExtensionContext extensionContext) {
@@ -135,17 +128,8 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 	}
 
 	@Override
-	protected Object fieldValue(Field field, ExtensionContext extensionContext) {
-		assertFieldIsOfType(field, BundleContext.class, supported, ExtensionConfigurationException::new);
-		return getBundleContext(extensionContext);
-	}
-
-	@Override
-	protected Object parameterValue(ParameterContext parameterContext, ExtensionContext extensionContext) {
-		final Parameter parameter = parameterContext.getParameter();
-
-		Class<?> parameterType = parameter.getType();
-		assertParameterIsOfType(parameterType, BundleContext.class, supported, ParameterResolutionException::new);
+	protected Object resolveValue(TargetType targetType, InjectBundleContext injection,
+		ExtensionContext extensionContext) throws ParameterResolutionException {
 		return getBundleContext(extensionContext);
 	}
 }

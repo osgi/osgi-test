@@ -18,32 +18,23 @@
 
 package org.osgi.test.junit5.cm;
 
-import static org.osgi.test.common.inject.FieldInjector.findAnnotatedFields;
-import static org.osgi.test.common.inject.FieldInjector.setField;
-
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
-import java.lang.reflect.ParameterizedType;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
@@ -55,71 +46,60 @@ import org.osgi.test.common.annotation.config.WithConfigurations;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfigurations;
 import org.osgi.test.common.dictionary.Dictionaries;
+import org.osgi.test.common.exceptions.FunctionWithException;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.junit5.context.BundleContextExtension;
+import org.osgi.test.junit5.inject.InjectingExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
-public class ConfigurationExtension
+public class ConfigurationExtension extends InjectingExtension<InjectConfiguration>
 	implements BeforeEachCallback, ParameterResolver, BeforeAllCallback, AfterAllCallback, AfterEachCallback {
+
+	public ConfigurationExtension() {
+		super(InjectConfiguration.class);
+	}
 
 	private static final String					STORE_CONFIGURATION_KEY	= "store.configurationAdmin";
 
 	private static BlockingConfigurationHandler	blockingConfigHandler;
 
-	static BundleContext bc(ExtensionContext extensionContext) {
-		return BundleContextExtension.getBundleContext(extensionContext);
-	}
-
-	static ConfigurationAdmin ca(ExtensionContext extensionContext) {
+	static ConfigurationAdmin configurationAdmin(ExtensionContext extensionContext) {
 		return ServiceExtension
 			.getServiceConfiguration(ConfigurationAdmin.class, "", new String[0], 0, 0, extensionContext)
 			.getService();
 	}
 
 	@Override
-	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-
+	public void beforeAll(ExtensionContext extensionContext) throws Exception {
+		BlockingConfigurationHandlerImpl blockingConfigHandlerImpl = new BlockingConfigurationHandlerImpl();
+		BundleContextExtension.getBundleContext(extensionContext)
+			.registerService(ConfigurationListener.class, blockingConfigHandlerImpl, null);
+		blockingConfigHandler = blockingConfigHandlerImpl;
 		storeConfigCopy(extensionContext);
-		handleInjectConfigAnnotationOnFields(extensionContext);
 		handleAnnotationsOnActiveElement(extensionContext);
 	}
 
-	private void handleInjectConfigAnnotationOnFields(ExtensionContext extensionContext) throws Exception {
-		List<Field> fields = findAnnotatedFields(extensionContext.getRequiredTestClass(), InjectConfiguration.class);
-		for (Field field : fields) {
-			handleInjectConfigAnnotationOnField(extensionContext, field);
+	@Override
+	public void afterAll(ExtensionContext extensionContext) throws Exception {
+		reset(extensionContext);
+	}
+
+	@Override
+	public void beforeEach(ExtensionContext extensionContext) throws Exception {
+		if (!isLifecyclePerClass(extensionContext)) {
+			storeConfigCopy(extensionContext);
 		}
+		handleAnnotationsOnActiveElement(extensionContext);
+		super.beforeEach(extensionContext);
 	}
 
-	private void handleInjectConfigAnnotationOnField(ExtensionContext extensionContext, Field field) throws Exception {
-		assertValidFieldCandidate(field);
-
-		ConfigurationAdmin ca = ca(extensionContext);
-		TargetType targetType = TargetType.of(field);
-		InjectConfiguration injectConfiguration = field.getAnnotation(InjectConfiguration.class);
-
-		Configuration ic = ConfigUtil.getConfigsByServicePid(ca, injectConfiguration.value(),
-			injectConfiguration.timeout());
-
-		Object objectToInject = transformConfigToTargetType(ic, targetType);
-
-		setField(field, extensionContext.getRequiredTestInstance(), objectToInject);
+	@Override
+	public void afterEach(ExtensionContext extensionContext) throws Exception {
+		super.afterEach(extensionContext);
+		reset(extensionContext);
 	}
 
-	private void storeConfigCopy(ExtensionContext extensionContext) throws Exception {
-
-		List<Configuration> configurations = ConfigUtil.getAllConfigurations(ca(extensionContext));
-		List<ConfigurationCopy> configurationCopies = ConfigUtil.cloneConfigurations(configurations);
-
-		extensionContext.getStore(Namespace.create(ConfigurationExtension.class, extensionContext.getUniqueId()))
-			.put(STORE_CONFIGURATION_KEY, configurationCopies);
-
-	}
-
-	Configuration handleWithConfiguration(WithConfiguration configAnnotation, ConfigurationAdmin configurationAdmin,
-		BlockingConfigurationHandler blockingConfigHandler)
-		throws ParameterResolutionException, IllegalArgumentException {
-
+	Configuration handleWithConfiguration(WithConfiguration configAnnotation, ConfigurationAdmin configurationAdmin) {
 		try {
 			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin, configAnnotation.pid(),
 				0l);
@@ -136,16 +116,14 @@ public class ConfigurationExtension
 				configBefore == null);
 
 			return configuration;
-
 		} catch (Exception e) {
-			throw new ParameterResolutionException("ConfigurationAdmin could not be found", e);
+			throw new ParameterResolutionException(
+				String.format("Unable to obtain Configuration for %s.", configAnnotation.pid()), e);
 		}
-
 	}
 
 	Configuration handleWithFactoryConfiguration(WithFactoryConfiguration configAnnotation,
-		ConfigurationAdmin configurationAdmin) throws ParameterResolutionException, IllegalArgumentException {
-
+		ConfigurationAdmin configurationAdmin) {
 		try {
 			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin,
 				configAnnotation.factoryPid() + "~" + configAnnotation.name());
@@ -163,209 +141,187 @@ public class ConfigurationExtension
 				configBefore == null);
 
 			return configuration;
-
 		} catch (Exception e) {
-			throw new ParameterResolutionException("ConfigurationAdmin could not be found", e);
-		}
-
-	}
-
-	static void assertValidFieldCandidate(Field field) {
-		if (Modifier.isFinal(field.getModifiers()) || Modifier.isPrivate(field.getModifiers())
-			|| Modifier.isStatic(field.getModifiers())) {
-			throw new ExtensionConfigurationException("@" + WithConfiguration.class.getSimpleName() + " field ["
-				+ field.getName() + "] must not be final, private or static.");
+			throw new ParameterResolutionException(
+				String.format("Unable to obtain Configuration for %s.", configAnnotation.factoryPid()), e);
 		}
 	}
 
 	@Override
-	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
+	protected boolean supportsType(TargetType targetType, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
-
-		ConfigurationAdmin ca = ca(extensionContext);
-		try {
-			Optional<InjectConfiguration> injectConfiguration = parameterContext
-				.findAnnotation(InjectConfiguration.class);
-
-			TargetType targetType = TargetType.of(parameterContext.getParameter());
-
-			if (injectConfiguration.isPresent()) {
-
-				InjectConfiguration ic = injectConfiguration.get();
-
-				Configuration configuration = null;
-				boolean valueUsed = false;
-				boolean withConfigUsed = false;
-				boolean withFactoryConfigUsed = false;
-				if (!ic.value()
-					.equals(Property.NOT_SET)) {
-
-					configuration = ConfigUtil.getConfigsByServicePid(ca(extensionContext), ic.value(), ic.timeout());
-
-					valueUsed = true;
-				} else if (!ic.withConfig()
-					.pid()
-					.equals(Property.NOT_SET)) {
-
-					if (valueUsed) {
-						throw new IllegalArgumentException(
-							"@InjectConfiguration - only one of the Fields `value`, `withConfig` or `withFactoryConfig` could be used.");
-					}
-					WithConfiguration wc = ic.withConfig();
-					configuration = handleWithConfiguration(wc, ca, blockingConfigHandler);
-					withConfigUsed = true;
-				} else if (!ic.withFactoryConfig()
-					.factoryPid()
-					.equals(Property.NOT_SET)) {
-
-					if (valueUsed || withConfigUsed) {
-						throw new IllegalArgumentException(
-							"@InjectConfiguration - only one of the Fields `value`, `withConfig` or `withFactoryConfig` could be used.");
-					}
-
-					WithFactoryConfiguration wc = ic.withFactoryConfig();
-					configuration = handleWithFactoryConfiguration(wc, ca);
-					withFactoryConfigUsed = true;
-				}
-				if (!valueUsed && !withConfigUsed && !withFactoryConfigUsed) {
-					throw new IllegalArgumentException(
-						"@InjectConfiguration - one of the Fields `value`, `withConfig` or `withFactoryConfig` must be used.");
-				}
-				return transformConfigToTargetType(configuration, targetType);
-			}
-			return null;
-		} catch (Exception e) {
-
-			throw new ParameterResolutionException("Could not get Configuration from Configuration-Admin", e);
-		}
-	}
-
-	private Object transformConfigToTargetType(Configuration configuration, TargetType targetType) throws Exception {
-
 		if (targetType.matches(Configuration.class)) {
-			return configuration;
-		} else if (targetType.matches(Optional.class, Configuration.class)) {
-			return Optional.ofNullable(configuration);
-		} else if (targetType.matches(Map.class, String.class, Object.class)) {
-			return Dictionaries.asMap(configuration.getProperties());
-		} else if (targetType.matches(Dictionary.class, String.class, Object.class)) {
-			return configuration.getProperties();
+			return true;
 		}
-		throw new ParameterResolutionException("Bad Parameter-Type");
+		if (targetType.matches(Optional.class, Configuration.class)) {
+			return true;
+		}
+		if (targetType.matches(Map.class, String.class, Object.class)) {
+			return true;
+		}
+		if (targetType.matches(Dictionary.class, String.class, Object.class)) {
+			return true;
+		}
+		throw new ParameterResolutionException(String.format(
+			"Element %s has an unsupported type %s for annotation @%s. Supported types are: Configuration, Optional<Configuration>, Map<String,Object>, Dictionary<String,Object>.",
+			targetType.getName(), targetType.getType()
+				.getName(),
+			annotation().getSimpleName()));
 	}
 
+	@Override
+	protected int disallowedFieldModifiers() {
+		return super.disallowedFieldModifiers() | Modifier.STATIC;
+	}
+
+	// Overridden to make baselining happy
 	@Override
 	public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
+		return super.supportsParameter(parameterContext, extensionContext);
+	}
 
-		if (parameterContext.isAnnotated(InjectConfiguration.class)) {
-			Parameter parameter = parameterContext.getParameter();
-			if (parameter.getType()
-				.isAssignableFrom(Configuration.class)
-				|| parameter.getType()
-					.isAssignableFrom(Optional.class)
-					&& (((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments()[0]
-						.equals(Configuration.class))
-				|| parameter.getType()
-					.isAssignableFrom(Map.class)
-				|| parameter.getType()
-					.isAssignableFrom(Dictionary.class)) {
-				return true;
-			}
-		}
-		return false;
+	// Overridden to make baselining happy
+	@Override
+	public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+		return super.resolveParameter(parameterContext, extensionContext);
 	}
 
 	@Override
-	public void beforeAll(ExtensionContext extensionContext) throws Exception {
+	protected Object resolveValue(TargetType targetType, InjectConfiguration injectConfiguration,
+		ExtensionContext extensionContext) throws ParameterResolutionException {
+		int option = 0;
+		if (!injectConfiguration.value()
+			.equals(Property.NOT_SET)) {
+			option += 1;
+		}
+		if (!injectConfiguration.withConfig()
+			.pid()
+			.equals(Property.NOT_SET)) {
+			option += 2;
+		}
+		if (!injectConfiguration.withFactoryConfig()
+			.factoryPid()
+			.equals(Property.NOT_SET)) {
+			option += 4;
+		}
+		Configuration configuration = null;
+		switch (option) {
+			case 1 :
+				try {
+					configuration = ConfigUtil.getConfigsByServicePid(configurationAdmin(extensionContext),
+						injectConfiguration.value(), injectConfiguration.timeout());
+				} catch (Exception e) {
+					throw new ParameterResolutionException(
+						String.format("Unable to obtain Configuration for %s.", injectConfiguration.value()), e);
+				}
+				break;
+			case 2 :
+				configuration = handleWithConfiguration(injectConfiguration.withConfig(),
+					configurationAdmin(extensionContext));
+				break;
+			case 4 :
+				configuration = handleWithFactoryConfiguration(injectConfiguration.withFactoryConfig(),
+					configurationAdmin(extensionContext));
+				break;
+			default :
+				throw new ParameterResolutionException(
+					String.format("@%s - one of the Fields `value`, `withConfig` or `withFactoryConfig` must be used.",
+						annotation().getSimpleName()));
+		}
+		if (targetType.matches(Configuration.class)) {
+			return configuration;
+		}
+		if (targetType.matches(Optional.class, Configuration.class)) {
+			return Optional.ofNullable(configuration);
+		}
+		if (targetType.matches(Map.class, String.class, Object.class)) {
+			if (configuration == null) {
+				return null;
+			}
+			return Dictionaries.asMap(configuration.getProperties());
+		}
+		if (targetType.matches(Dictionary.class, String.class, Object.class)) {
+			if (configuration == null) {
+				return null;
+			}
+			return configuration.getProperties();
+		}
 
-		BlockingConfigurationHandlerImpl blockingConfigHandlerImpl = new BlockingConfigurationHandlerImpl();
-		bc(extensionContext).registerService(ConfigurationListener.class, blockingConfigHandlerImpl, null);
-		blockingConfigHandler = blockingConfigHandlerImpl;
-		storeConfigCopy(extensionContext);
-		handleAnnotationsOnActiveElement(extensionContext);
-
+		throw new ParameterResolutionException(String.format(
+			"Element %s has an unsupported type %s for annotation @%s. Supported types are: Configuration, Optional<Configuration>, Map<String,Object>, Dictionary<String,Object>.",
+			targetType.getName(), targetType.getType()
+				.getName(),
+			annotation().getSimpleName()));
 	}
 
 	private void handleAnnotationsOnActiveElement(ExtensionContext extensionContext) {
-
 		handleWithConfigurations(extensionContext);
 		handleWithConfiguration(extensionContext);
 		handleWithFactoryConfigurations(extensionContext);
 		handleWithFactoryConfiguration(extensionContext);
-
 	}
 
 	private void handleWithFactoryConfiguration(ExtensionContext extensionContext) {
 		extensionContext.getElement()
-			.ifPresent((element) -> {
-				WithFactoryConfiguration factoryConfigAnnotation = element
-					.getAnnotation(WithFactoryConfiguration.class);
-				if (factoryConfigAnnotation != null) {
-					handleWithFactoryConfiguration(factoryConfigAnnotation, ca(extensionContext));
-				}
-			});
+			.map(element -> element.getAnnotation(WithFactoryConfiguration.class))
+			.ifPresent(factoryConfigAnnotation -> handleWithFactoryConfiguration(factoryConfigAnnotation,
+				configurationAdmin(extensionContext)));
 	}
 
 	private void handleWithFactoryConfigurations(ExtensionContext extensionContext) {
 		extensionContext.getElement()
-			.ifPresent((element) -> {
-				WithFactoryConfigurations factoryConfigAnnotations = element
-					.getAnnotation(WithFactoryConfigurations.class);
-				if (factoryConfigAnnotations != null) {
-					Stream.of(factoryConfigAnnotations.value())
-						.forEachOrdered((factoryConfigAnnotation) -> {
-							handleWithFactoryConfiguration(factoryConfigAnnotation, ca(extensionContext));
-						});
+			.map(element -> element.getAnnotation(WithFactoryConfigurations.class))
+			.map(WithFactoryConfigurations::value)
+			.ifPresent(factoryConfigAnnotations -> {
+				ConfigurationAdmin ca = configurationAdmin(extensionContext);
+				for (WithFactoryConfiguration factoryConfigAnnotation : factoryConfigAnnotations) {
+					handleWithFactoryConfiguration(factoryConfigAnnotation, ca);
 				}
 			});
 	}
 
 	private void handleWithConfiguration(ExtensionContext extensionContext) {
 		extensionContext.getElement()
-			.ifPresent((element) -> {
-				WithConfiguration configAnnotation = element.getAnnotation(WithConfiguration.class);
-				if (configAnnotation != null) {
-					handleWithConfiguration(configAnnotation, ca(extensionContext), blockingConfigHandler);
-				}
-			});
+			.map(element -> element.getAnnotation(WithConfiguration.class))
+			.ifPresent(
+				configAnnotation -> handleWithConfiguration(configAnnotation, configurationAdmin(extensionContext)));
 	}
 
 	private void handleWithConfigurations(ExtensionContext extensionContext) {
 		extensionContext.getElement()
-			.ifPresent((element) -> {
-				WithConfigurations configAnnotations = element.getAnnotation(WithConfigurations.class);
-				if (configAnnotations != null) {
-					Stream.of(configAnnotations.value())
-						.forEachOrdered((configAnnotation) -> {
-							handleWithConfiguration(configAnnotation, ca(extensionContext), blockingConfigHandler);
-						});
+			.map(element -> element.getAnnotation(WithConfigurations.class))
+			.map(WithConfigurations::value)
+			.ifPresent(configAnnotations -> {
+				ConfigurationAdmin ca = configurationAdmin(extensionContext);
+				for (WithConfiguration configAnnotation : configAnnotations) {
+					handleWithConfiguration(configAnnotation, ca);
 				}
 			});
-	}
-
-	@Override
-	public void afterEach(ExtensionContext extensionContext) throws Exception {
-		reset(extensionContext);
-
-	}
-
-	@Override
-	public void afterAll(ExtensionContext extensionContext) throws Exception {
-
-		reset(extensionContext);
-	}
-
-	private void reset(ExtensionContext extensionContext) throws Exception {
-		@SuppressWarnings("unchecked")
-		List<ConfigurationCopy> copys = getStore(extensionContext).get(STORE_CONFIGURATION_KEY, List.class);
-		ConfigUtil.resetConfig(blockingConfigHandler, ca(extensionContext), copys);
-		getStore(extensionContext).remove(STORE_CONFIGURATION_KEY, List.class);
 	}
 
 	static Store getStore(ExtensionContext extensionContext) {
 		return extensionContext
 			.getStore(Namespace.create(ConfigurationExtension.class, extensionContext.getUniqueId()));
+	}
+
+	private void storeConfigCopy(ExtensionContext extensionContext) throws Exception {
+		getStore(extensionContext).getOrComputeIfAbsent(STORE_CONFIGURATION_KEY,
+			FunctionWithException.asFunction(key -> {
+				List<Configuration> configurations = ConfigUtil
+					.getAllConfigurations(configurationAdmin(extensionContext));
+				List<ConfigurationCopy> configurationCopies = ConfigUtil.cloneConfigurations(configurations);
+				return configurationCopies;
+			}), List.class);
+	}
+
+	private void reset(ExtensionContext extensionContext) throws Exception {
+		@SuppressWarnings("unchecked")
+		List<ConfigurationCopy> configurationCopies = getStore(extensionContext).remove(STORE_CONFIGURATION_KEY,
+			List.class);
+		if (configurationCopies != null) {
+			ConfigUtil.resetConfig(blockingConfigHandler, configurationAdmin(extensionContext), configurationCopies);
+		}
 	}
 
 	public void updateConfigurationRespectNew(Configuration configurationToBeUpdated,
