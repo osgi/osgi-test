@@ -52,6 +52,6 @@
 	junit-vintage-engine;version='[5.8.2,5.8.3)',\
 	org.apache.servicemix.bundles.junit;version='[4.13.2,4.13.3)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
-	org.osgi.test.common;version='[1.1.0,1.1.1)',\
-	org.osgi.test.junit4;version='[1.1.0,1.1.1)',\
-	org.osgi.test.junit4-tests;version='[1.1.0,1.1.1)'
+	org.osgi.test.common;version='[1.2.0,1.2.1)',\
+	org.osgi.test.junit4;version='[1.2.0,1.2.1)',\
+	org.osgi.test.junit4-tests;version='[1.2.0,1.2.1)'
