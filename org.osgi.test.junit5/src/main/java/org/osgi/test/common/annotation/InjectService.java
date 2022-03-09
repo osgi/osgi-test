@@ -97,11 +97,11 @@ public @interface InjectService {
 	/**
 	 * Indicate to take the serviceClass from not from the parameter. Use
 	 * `org.osgi.test.common.annotation.InjectService.AnyService` and the
-	 * ParameterType or FieldType`java.lang.Object` for any Service.
+	 * ParameterType or FieldType `java.lang.Object` for any Service.
 	 *
 	 * @return The service class.
 	 */
-	Class<?> service() default Object.class;
+	Class<?> service() default InjectService.class;
 
 	public static final class AnyService {
 		private AnyService() {}

@@ -25,6 +25,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ import org.junit.runners.model.Statement;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.list.ListSupplierDelegate;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.common.service.ServiceConfiguration;
 import org.osgi.test.common.service.ServiceConfigurationKey;
@@ -134,13 +136,20 @@ public class ServiceRule implements AutoCloseable, MethodRule {
 	static Object resolveReturnValue(Class<?> memberType, Type genericMemberType, InjectService serviceUseParameter,
 		BundleContext bundleContext, Map<ServiceConfigurationKey<?>, ServiceConfiguration<?>> configurations) {
 
-		Type serviceType = genericMemberType;
-
-		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
-			serviceType = ((ParameterizedType) serviceType).getActualTypeArguments()[0];
-		} else if (ServiceAware.class.equals(memberType)
-			&& (genericMemberType instanceof ParameterizedType)) {
-			serviceType = ((ParameterizedType) serviceType).getActualTypeArguments()[0];
+		Type serviceType = serviceUseParameter.service();
+		if (serviceType.equals(InjectService.class)) {
+			if (List.class.equals(memberType) || ServiceAware.class.equals(memberType)) {
+				if (genericMemberType instanceof ParameterizedType) {
+					serviceType = ((ParameterizedType) genericMemberType).getActualTypeArguments()[0];
+					if (serviceType instanceof WildcardType) {
+						serviceType = Object.class;
+					}
+				} else {
+					serviceType = Object.class;
+				}
+			} else {
+				serviceType = genericMemberType;
+			}
 		}
 
 		if (!(serviceType instanceof Class)) {
@@ -151,10 +160,10 @@ public class ServiceRule implements AutoCloseable, MethodRule {
 		ServiceConfiguration<?> configuration = getServiceUseConfiguration(serviceUseParameter,
 			(Class<?>) serviceType, bundleContext, configurations);
 
-		if (List.class.equals(memberType) && (genericMemberType instanceof ParameterizedType)) {
-			return configuration.getServices();
-		} else if (ServiceAware.class.equals(memberType)
-			&& (genericMemberType instanceof ParameterizedType)) {
+		if (List.class.equals(memberType)) {
+			return new ListSupplierDelegate<>(configuration::getServices);
+		}
+		if (ServiceAware.class.equals(memberType)) {
 			return configuration;
 		}
 

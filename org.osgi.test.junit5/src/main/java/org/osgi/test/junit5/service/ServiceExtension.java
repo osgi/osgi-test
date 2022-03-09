@@ -64,49 +64,64 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 	@Override
 	protected boolean supportsType(TargetType targetType, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
-		Type serviceType = targetType.getGenericType();
-		if (targetType.hasParameterizedTypes()
-			&& (targetType.matches(List.class) || targetType.matches(ServiceAware.class))) {
-			serviceType = targetType.getFirstGenericTypes()
-				.get();
+		Type serviceType;
+		if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
+			if (targetType.hasParameterizedTypes()) {
+				serviceType = targetType.getFirstGenericTypes()
+					.get();
+				if (serviceType instanceof WildcardType) {
+					serviceType = Object.class;
+				}
+			} else {
+				serviceType = Object.class;
+			}
+		} else {
+			serviceType = targetType.getGenericType();
 		}
-		// The service type must be a raw type
-		if (serviceType instanceof Class || serviceType instanceof WildcardType) {
-			return true;
+
+		if (!(serviceType instanceof Class)) {
+			throw new ParameterResolutionException(String.format(
+				"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
+				targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
 		}
-		throw new ParameterResolutionException(String.format(
-			"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
-			targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
+
+		return true;
 	}
 
 	@Override
-	protected Object resolveValue(TargetType targetType, InjectService injectService,
-		ExtensionContext extensionContext) throws ParameterResolutionException {
-		Type serviceType = targetType.getType();
-		if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
-			serviceType = targetType.getFirstGenericTypes()
-				.orElse(targetType.getGenericType());
+	protected Object resolveValue(TargetType targetType, InjectService injectService, ExtensionContext extensionContext)
+		throws ParameterResolutionException {
+		Type serviceType = injectService.service();
+		if (serviceType.equals(annotation())) {
+			if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
+				if (targetType.hasParameterizedTypes()) {
+					serviceType = targetType.getFirstGenericTypes()
+						.get();
+					if (serviceType instanceof WildcardType) {
+						serviceType = Object.class;
+					}
+				} else {
+					serviceType = Object.class;
+				}
+			} else {
+				serviceType = targetType.getType();
+			}
 		}
 
-		if (serviceType instanceof WildcardType) {
-			serviceType = Object.class;
-		}
-
-		if (!injectService.service()
-			.equals(Object.class)) {
-			serviceType = injectService.service();
+		if (!(serviceType instanceof Class)) {
+			throw new ParameterResolutionException(String.format(
+				"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
+				targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
 		}
 
 		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType, injectService.filter(),
 			injectService.filterArguments(), injectService.cardinality(), injectService.timeout(), extensionContext);
 
-		if (targetType.hasParameterizedTypes()) {
-			if (targetType.matches(ServiceAware.class)) {
-				return configuration;
-			}
-			if (targetType.matches(List.class)) {
-				return new ListSupplierDelegate<>(configuration::getServices);
-			}
+		if (targetType.matches(ServiceAware.class)) {
+			return configuration;
+		}
+		if (targetType.matches(List.class)) {
+			return new ListSupplierDelegate<>(configuration::getServices);
 		}
 		return configuration.getService();
 	}

@@ -39,7 +39,7 @@ public class OwnServiceTest {
 
 	@InjectBundleContext
 	BundleContext				bundleContext;
-	@InjectService(cardinality = 0)
+	@InjectService(cardinality = 0, service = Foo.class)
 	ServiceAware<Foo>	fooServiceAware;
 
 	@Test
