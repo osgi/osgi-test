@@ -37,6 +37,7 @@ public class TargetType {
 	private TargetType(Type type, String name) {
 		this.type = requireNonNull(type);
 		this.name = requireNonNull(name);
+		assert type instanceof Class || type instanceof ParameterizedType;
 	}
 
 	public Class<?> getType() {
