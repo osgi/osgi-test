@@ -16,7 +16,8 @@
 
 -tester: biz.aQute.tester.junit-platform
 
--runvm: ${def;argLine}
+-runvm: -enableassertions:org.osgi.test...,\
+	${def;argLine}
 
 -runfw: org.eclipse.osgi
 -resolve.effective: active
