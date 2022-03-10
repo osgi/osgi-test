@@ -106,8 +106,9 @@ public abstract class InjectingExtension<INJECTION extends Annotation>
 		if (!isAnnotated(field, annotation())) {
 			return false;
 		}
+		TargetType targetType = TargetType.of(field);
 		try {
-			if (!supportsType(TargetType.of(field), extensionContext)) {
+			if (!supportsType(targetType, extensionContext)) {
 				return false;
 			}
 		} catch (ParameterResolutionException pre) {
@@ -137,7 +138,8 @@ public abstract class InjectingExtension<INJECTION extends Annotation>
 		if (!parameterContext.isAnnotated(annotation())) {
 			return false;
 		}
-		if (!supportsType(TargetType.of(parameterContext.getParameter()), extensionContext)) {
+		TargetType targetType = TargetType.of(parameterContext.getParameter());
+		if (!supportsType(targetType, extensionContext)) {
 			return false;
 		}
 		return true;
