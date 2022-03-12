@@ -36,6 +36,7 @@
 		<url>https://github.com/osgi/osgi-test</url>
 		<connection>scm:git:https://github.com/osgi/osgi-test.git</connection>
 		<developerConnection>scm:git:git@github.com:osgi/osgi-test.git</developerConnection>
+		<tag>${revision}</tag>
 	</scm>
 
 	<dependencies>
