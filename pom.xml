@@ -29,7 +29,7 @@
 	<version>${revision}</version>
 
 	<properties>
-		<revision>1.1.0-SNAPSHOT</revision>
+		<revision>1.1.0</revision>
 		<project.build.outputTimestamp>1980-02-01T00:00:00Z</project.build.outputTimestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
@@ -86,7 +86,7 @@
 		<url>https://github.com/osgi/osgi-test</url>
 		<connection>scm:git:https://github.com/osgi/osgi-test.git</connection>
 		<developerConnection>scm:git:git@github.com:osgi/osgi-test.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>1.1.0</tag>
 	</scm>
 	<developers>
 		<developer>
