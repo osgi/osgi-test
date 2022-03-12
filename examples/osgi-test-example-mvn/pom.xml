@@ -41,7 +41,7 @@
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
 		<assertj.version>3.22.0</assertj.version>
 		<mockito.version>4.4.0</mockito.version>
-		<osgi-test.version>1.0.1</osgi-test.version>
+		<osgi-test.version>1.1.0</osgi-test.version>
 	</properties>
 
 	<modules>
