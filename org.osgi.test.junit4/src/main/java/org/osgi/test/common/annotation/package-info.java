@@ -16,10 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@Export(attribute = "junit=4", substitution = Substitution.NOIMPORT)
-@Version("1.1.1")
+@Export(attribute = "junit=4")
+@Version("1.1.0")
 package org.osgi.test.common.annotation;
 
 import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.bundle.Export.Substitution;
 import org.osgi.annotation.versioning.Version;
