@@ -1,0 +1,13 @@
+-include: ${.}/versions.bnd
+
+mavencentral: https://repo.maven.apache.org/maven2
+ossrh: https://oss.sonatype.org/content/repositories/snapshots
+
+-plugin.osgitest:\
+	aQute.bnd.repository.maven.provider.MavenBndRepository;\
+		name="Library - OSGi Test Dependencies";\
+		releaseUrl="${mavencentral}";\
+		snapshotUrl="${ossrh}";\
+		index="${.}/osgitest.mvn";\
+		readOnly=true;\
+		poll_time=-1

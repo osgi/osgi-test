@@ -1,0 +1,11 @@
+-includeresource: \
+	workspace=resources/workspace,\
+	{workspace/versions.bnd=resources/workspace/versions.bnd}
+	
+Provide-Capability: \
+	${osgi-test}
+
+osgi-test:\
+    bnd.library;\
+        bnd.library     = osgi-test; \
+        path            = workspace

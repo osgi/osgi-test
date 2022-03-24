@@ -1,0 +1,6 @@
+junit_jupiter_version: ${junit-jupiter.version}
+junit_platform_version: ${junit-platform.version}
+assertj_version: ${assertj.version}
+mockito_version: ${mockito.version}
+bytebuddy_version: ${bytebuddy.version}
+osgi_test_version: ${revision}
