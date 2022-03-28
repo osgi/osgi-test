@@ -130,6 +130,11 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 	@Override
 	protected Object resolveValue(TargetType targetType, InjectBundleContext injection,
 		ExtensionContext extensionContext) throws ParameterResolutionException {
-		return getBundleContext(extensionContext);
+		BundleContext retval = getBundleContext(extensionContext);
+		if (retval == null) {
+			throw new ParameterResolutionException(
+				"Bundle context was null. Check that you are running your test in an OSGi framework.");
+		}
+		return retval;
 	}
 }
