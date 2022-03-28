@@ -64,6 +64,11 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 	@Override
 	protected boolean supportsType(TargetType targetType, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
+		extractValueType(targetType);
+		return true;
+	}
+
+	private Class<?> extractValueType(TargetType targetType) {
 		Type serviceType;
 		if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
 			if (targetType.hasParameterizedTypes()) {
@@ -78,42 +83,31 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 		} else {
 			serviceType = targetType.getGenericType();
 		}
-
 		if (!(serviceType instanceof Class)) {
 			throw new ParameterResolutionException(String.format(
 				"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
 				targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
 		}
 
-		return true;
+		return (Class<?>) serviceType;
 	}
 
 	@Override
 	protected Object resolveValue(TargetType targetType, InjectService injectService, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
-		Type serviceType = injectService.service();
-		if (serviceType.equals(annotation())) {
-			if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
-				if (targetType.hasParameterizedTypes()) {
-					serviceType = targetType.getFirstGenericTypes()
-						.get();
-					if (serviceType instanceof WildcardType) {
-						serviceType = Object.class;
-					}
-				} else {
-					serviceType = Object.class;
-				}
-			} else {
-				serviceType = targetType.getType();
-			}
-		}
+		final Class<?> valueClass = extractValueType(targetType);
+		final Class<?> serviceClass = injectService.service();
 
-		if (!(serviceType instanceof Class)) {
+		Type serviceType;
+		if (serviceClass.equals(annotation())) {
+			serviceType = valueClass;
+		} else if (!valueClass.isAssignableFrom(serviceClass)) {
 			throw new ParameterResolutionException(String.format(
-				"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
-				targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
+				"Element %s has service type %s for annotation @%s but field expects %s.", targetType.getName(),
+				serviceClass.getName(), annotation().getSimpleName(), valueClass.getTypeName()));
+		} else {
+			serviceType = serviceClass;
 		}
-
 		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType, injectService.filter(),
 			injectService.filterArguments(), injectService.cardinality(), injectService.timeout(), extensionContext);
 

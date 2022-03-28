@@ -22,6 +22,7 @@ import static org.osgi.test.junit5.test.testutils.TestKitUtils.assertThatTest;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.Test;
@@ -44,19 +45,22 @@ public class ServiceExtension_SanityCheckingTest {
 	static class NonRawParameterType {
 		@SuppressWarnings("unused")
 		@Test
-		void myParameterTest(@InjectService AtomicReference<?> param) {}
+		void myParameterTest(@InjectService
+		AtomicReference<?> param) {}
 	}
 
 	static class ListOfNonRawParameterType {
 		@SuppressWarnings("unused")
 		@Test
-		void myParameterTest(@InjectService List<AtomicReference<?>> param) {}
+		void myParameterTest(@InjectService
+		List<AtomicReference<?>> param) {}
 	}
 
 	static class ServiceAwareOfNonRawParameterType {
 		@SuppressWarnings("unused")
 		@Test
-		void myParameterTest(@InjectService ServiceAware<AtomicReference<?>> param) {}
+		void myParameterTest(@InjectService
+		ServiceAware<AtomicReference<?>> param) {}
 	}
 
 	@ParameterizedTest
@@ -71,10 +75,6 @@ public class ServiceExtension_SanityCheckingTest {
 	static class FinalField extends TestBase {
 		@InjectService
 		final Date bc = null;
-
-		@Override
-		@Test
-		void myTest() {}
 	}
 
 	@Test
@@ -85,16 +85,68 @@ public class ServiceExtension_SanityCheckingTest {
 
 	static class PrivateField extends TestBase {
 		@InjectService
-		private Date bc = null;
-
-		@Override
-		@Test
-		void myTest() {}
+		private Date bc;
 	}
 
 	@Test
 	void annotatedField_thatIsPrivate_throwsException() {
 		assertThatTest(PrivateField.class).isInstanceOf(ExtensionConfigurationException.class)
 			.hasMessageContainingAll("bc", "must not be private", "@InjectService");
+	}
+
+	static class MismatchedServiceType extends TestBase {
+		@InjectService(service = AtomicBoolean.class)
+		Date bc;
+	}
+
+	static class MismatchedServiceType_List extends TestBase {
+		@InjectService(service = AtomicBoolean.class)
+		List<Date> bc;
+	}
+
+	static class MismatchedServiceType_ServiceAware extends TestBase {
+		@InjectService(service = AtomicBoolean.class)
+		ServiceAware<Date> bc;
+	}
+
+	@ParameterizedTest
+	@ValueSource(classes = {
+		MismatchedServiceType.class, MismatchedServiceType_List.class, MismatchedServiceType_ServiceAware.class
+	})
+	void annotatedField_withExplicitServiceType_thatDoesntMatchField_throwsException(Class<?> clazz) {
+		assertThatTest(clazz).isInstanceOf(ExtensionConfigurationException.class)
+			.hasMessageContainingAll("bc", "service type " + AtomicBoolean.class.getName(),
+				"expects " + Date.class.getName(),
+				"@InjectService");
+	}
+
+	static class MismatchedServiceType_Parameter {
+		@Test
+		void myParameterTest(@InjectService(service = AtomicBoolean.class)
+		Date bc) {}
+	}
+
+	static class MismatchedServiceType_Parameter_List {
+		@Test
+		void myParameterTest(@InjectService(service = AtomicBoolean.class)
+		List<Date> bc) {}
+	}
+
+	static class MismatchedServiceType_Parameter_ServiceAware {
+		@Test
+		void myParameterTest(@InjectService(service = AtomicBoolean.class)
+		ServiceAware<Date> bc) {}
+	}
+
+	@ParameterizedTest
+	@ValueSource(classes = {
+		MismatchedServiceType_Parameter.class, MismatchedServiceType_Parameter_List.class,
+		MismatchedServiceType_Parameter_ServiceAware.class
+	})
+	void annotatedParameter_withExplicitServiceType_thatDoesntMatchParameter_throwsException(Class<?> testClass) {
+		assertThatTest(testClass)
+			.isInstanceOf(ParameterResolutionException.class)
+			.hasMessageContainingAll("service type " + AtomicBoolean.class.getName(),
+				"expects " + Date.class.getName(), "@InjectService");
 	}
 }
