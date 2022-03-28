@@ -63,9 +63,24 @@ public class ServiceExtension_SanityCheckingTest {
 		ServiceAware<AtomicReference<?>> param) {}
 	}
 
+	static class ServiceAwareOfNonRawUpperBoundType {
+		@SuppressWarnings("unused")
+		@Test
+		void myParameterTest(@InjectService
+		ServiceAware<? extends AtomicReference<?>> param) {}
+	}
+
+	static class ServiceAwareOfNonRawLowerBoundType {
+		@SuppressWarnings("unused")
+		@Test
+		void myParameterTest(@InjectService(service = AtomicReference.class)
+		ServiceAware<? super AtomicReference<?>> param) {}
+	}
+
 	@ParameterizedTest
 	@ValueSource(classes = {
-		NonRawParameterType.class, ListOfNonRawParameterType.class, ServiceAwareOfNonRawParameterType.class
+		NonRawParameterType.class, ListOfNonRawParameterType.class, ServiceAwareOfNonRawParameterType.class,
+		ServiceAwareOfNonRawUpperBoundType.class, ServiceAwareOfNonRawLowerBoundType.class
 	})
 	void annotatedParameter_withNonRawType_throwsException(Class<?> test) {
 		assertThatTest(test).isInstanceOf(ParameterResolutionException.class)
@@ -109,15 +124,43 @@ public class ServiceExtension_SanityCheckingTest {
 		ServiceAware<Date> bc;
 	}
 
+	static class MismatchedServiceType_ServiceAware_UpperWildcard extends TestBase {
+		// AtomicBoolean is not a subclass of Date
+		@InjectService(service = AtomicBoolean.class)
+		ServiceAware<? extends Date> bc;
+	}
+
+	static class MismatchedServiceType_ServiceAware_LowerWildcard extends TestBase {
+		// AtomicBoolean is not a superclass of Date
+		@InjectService(service = AtomicBoolean.class)
+		ServiceAware<? super Date> bc;
+	}
+
 	@ParameterizedTest
 	@ValueSource(classes = {
-		MismatchedServiceType.class, MismatchedServiceType_List.class, MismatchedServiceType_ServiceAware.class
+		MismatchedServiceType.class, MismatchedServiceType_List.class, MismatchedServiceType_ServiceAware.class,
 	})
 	void annotatedField_withExplicitServiceType_thatDoesntMatchField_throwsException(Class<?> clazz) {
 		assertThatTest(clazz).isInstanceOf(ExtensionConfigurationException.class)
 			.hasMessageContainingAll("bc", "service type " + AtomicBoolean.class.getName(),
 				"expects " + Date.class.getName(),
 				"@InjectService");
+	}
+
+	@Test
+	void annotatedField_withExplicitServiceType_andUpperBoundThatDoesntMatch_throwsException() {
+		assertThatTest(MismatchedServiceType_ServiceAware_UpperWildcard.class)
+			.isInstanceOf(ExtensionConfigurationException.class)
+			.hasMessageContainingAll("bc", "service type " + AtomicBoolean.class.getName(),
+				"expects ? extends " + Date.class.getName(), "@InjectService");
+	}
+
+	@Test
+	void annotatedField_withExplicitServiceType_andLowerBoundThatDoesntMatch_throwsException() {
+		assertThatTest(MismatchedServiceType_ServiceAware_LowerWildcard.class)
+			.isInstanceOf(ExtensionConfigurationException.class)
+			.hasMessageContainingAll("bc", "service type " + AtomicBoolean.class.getName(),
+				"expects ? super " + Date.class.getName(), "@InjectService");
 	}
 
 	static class MismatchedServiceType_Parameter {
