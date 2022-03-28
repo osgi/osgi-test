@@ -145,9 +145,6 @@
 								<bndruns>
 									<bndrun>test.bndrun</bndrun>
 								</bndruns>
-								<bundles>
-									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
-								</bundles>
 								<failOnChanges>false</failOnChanges>
 								<includeDependencyManagement>true</includeDependencyManagement>
 								<reportOptional>false</reportOptional>
@@ -175,9 +172,6 @@
 								<bndruns>
 									<bndrun>test.bndrun</bndrun>
 								</bndruns>
-								<bundles>
-									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
-								</bundles>
 								<failOnChanges>false</failOnChanges>
 								<includeDependencyManagement>true</includeDependencyManagement>
 								<resolve>false</resolve>
