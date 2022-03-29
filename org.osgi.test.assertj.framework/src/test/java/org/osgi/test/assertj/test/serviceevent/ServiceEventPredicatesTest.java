@@ -81,17 +81,6 @@ public class ServiceEventPredicatesTest {
 			.test(event))
 			.isTrue();
 
-		softly.assertThat(ServiceEventPredicates.containServiceProperty("key1", 1)
-			.test(event))
-			.isTrue();
-
-		softly.assertThat(ServiceEventPredicates.containServiceProperty("key1", 2)
-			.test(event))
-			.isFalse();
-
-		softly.assertThat(ServiceEventPredicates.containServiceProperty("key3", 3)
-			.test(event))
-			.isFalse();
 
 		softly.assertThat(ServiceEventPredicates.objectClass(A.class)
 			.test(event))

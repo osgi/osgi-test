@@ -24,8 +24,10 @@ import org.osgi.framework.FrameworkEvent;
 
 /**
  * The Class FrameworkEventPredicates.
+ *
+ * @since 1.1
  */
-public class FrameworkEventPredicates {
+public final class FrameworkEventPredicates {
 
 	private FrameworkEventPredicates() {}
 	/**

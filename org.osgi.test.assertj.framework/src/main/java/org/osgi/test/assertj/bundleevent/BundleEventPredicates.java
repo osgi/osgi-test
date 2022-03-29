@@ -24,8 +24,10 @@ import org.osgi.framework.BundleEvent;
 
 /**
  * The Interface BundleEventPredicates.
+ *
+ * @since 1.1
  */
-public class BundleEventPredicates {
+public final class BundleEventPredicates {
 
 	private BundleEventPredicates() {}
 
@@ -36,7 +38,7 @@ public class BundleEventPredicates {
 	 *
 	 * @return the predicate
 	 */
-	public static Predicate<Object> bundleEvent() {
+	public static <T> Predicate<T> bundleEvent() {
 		return e -> e instanceof BundleEvent;
 	}
 

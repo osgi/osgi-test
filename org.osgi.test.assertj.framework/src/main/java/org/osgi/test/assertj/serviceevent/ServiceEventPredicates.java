@@ -18,13 +18,13 @@
 
 package org.osgi.test.assertj.serviceevent;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.osgi.framework.Constants;
@@ -34,8 +34,10 @@ import org.osgi.test.common.dictionary.Dictionaries;
 
 /**
  * The Class ServiceEventPredicates.
+ *
+ * @since 1.1
  */
-public class ServiceEventPredicates {
+public final class ServiceEventPredicates {
 
 	private ServiceEventPredicates() {}
 	/**
@@ -73,7 +75,7 @@ public class ServiceEventPredicates {
 			Object classes = e.getServiceReference()
 				.getProperty(Constants.OBJECTCLASS);
 
-			if (classes != null && classes instanceof String[]) {
+			if (classes instanceof String[]) {
 				return Stream.of((String[]) classes)
 					.filter(Objects::nonNull)
 					.anyMatch(objectClass.getName()::equals);
@@ -81,18 +83,6 @@ public class ServiceEventPredicates {
 			return false;
 		};
 
-	}
-
-	/**
-	 * Returns a predicate that tests if the object Contain the service
-	 * property.
-	 *
-	 * @param key the key
-	 * @param value the value
-	 * @return the predicate
-	 */
-	public static Predicate<ServiceEvent> containServiceProperty(final String key, Object value) {
-		return e -> containsServiceProperties(Dictionaries.dictionaryOf(key, value)).test(e);
 	}
 
 	/**
@@ -105,8 +95,7 @@ public class ServiceEventPredicates {
 	public static Predicate<ServiceEvent> containsServiceProperties(Map<String, ?> map) {
 		return e -> {
 			ServiceReference<?> sr = e.getServiceReference();
-			List<String> keys = Stream.of(sr.getPropertyKeys())
-				.collect(Collectors.toList());
+			List<String> keys = Arrays.asList(sr.getPropertyKeys());
 			for (Entry<String, ?> entry : map.entrySet()) {
 				if (!keys.contains(entry.getKey())) {
 					return false;
@@ -127,7 +116,7 @@ public class ServiceEventPredicates {
 	 * @return the predicate
 	 */
 	public static Predicate<ServiceEvent> containsServiceProperties(Dictionary<String, ?> properties) {
-		return e -> containsServiceProperties(Dictionaries.asMap(properties)).test(e);
+		return containsServiceProperties(Dictionaries.asMap(properties));
 	}
 
 	/**
@@ -139,7 +128,7 @@ public class ServiceEventPredicates {
 	 * @return the predicate
 	 */
 	public static Predicate<ServiceEvent> matches(int eventTypeMask, final Class<?> objectClass) {
-		return e -> type(eventTypeMask).test(e) && (objectClass(objectClass).test(e));
+		return type(eventTypeMask).and((objectClass(objectClass)));
 	}
 
 	/**
@@ -153,8 +142,8 @@ public class ServiceEventPredicates {
 	 */
 	public static Predicate<ServiceEvent> matches(int eventTypeMask, final Class<?> objectClass,
 		Map<String, ?> properties) {
-		return e -> type(eventTypeMask).test(e) && (objectClass(objectClass).test(e))
-			&& containsServiceProperties(properties).test(e);
+		return type(eventTypeMask).and(objectClass(objectClass))
+			.and(containsServiceProperties(properties));
 	}
 
 	/**
@@ -168,6 +157,6 @@ public class ServiceEventPredicates {
 	 */
 	public static Predicate<ServiceEvent> matches(int eventTypeMask, final Class<?> objectClass,
 		Dictionary<String, ?> properties) {
-		return e -> matches(eventTypeMask, objectClass, Dictionaries.asMap(properties)).test(e);
+		return matches(eventTypeMask, objectClass, Dictionaries.asMap(properties));
 	}
 }
