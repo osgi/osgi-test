@@ -39,8 +39,10 @@ import org.osgi.test.common.bitmaps.ServiceEventType;
 import org.osgi.test.common.dictionary.Dictionaries;
 
 /**
- * A Utility-Class thats Provides public public static methods to create {@link Condition}s
- * for an {@link ServiceEvent}
+ * A Utility-Class thats Provides public public static methods to create
+ * {@link Condition}s for an {@link ServiceEvent}
+ *
+ * @since 1.1
  */
 public final class ServiceEventConditions {
 
@@ -57,17 +59,14 @@ public final class ServiceEventConditions {
 	 * 	assertThat(serviceEvents)// created an {@link ListAssert}
 	 * 		.have(matches(eventTypeMask, objectClass))
 	 * 		.filteredOn(matches(eventTypeMask, objectClass))
-	 * 		.first()// map
-	 * 				// to
-	 * 				// {@link
-	 * 				// ObjectAssert}
-	 * 		.has(matches(eventTypeMask, objectClass));// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.first()// map to {@link ObjectAssert}
+	 * 		.has(matches(eventTypeMask, objectClass));// used on
+	 * 	// {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
-	 * @param eventTypeMask - the typeMask that would be checked against the bundle
-	 *            type of the {@link ServiceEvent}
+	 * @param eventTypeMask - the typeMask that would be checked against the
+	 *            bundle type of the {@link ServiceEvent}
 	 * @param objectClass - the objectClass that would be tested against the
 	 *            ServiceReference
 	 * @return the Condition
@@ -91,17 +90,14 @@ public final class ServiceEventConditions {
 	 * 	assertThat(serviceEvents)// created an {@link ListAssert}
 	 * 		.have(matches(eventTypeMask, filter))
 	 * 		.filteredOn(matches(eventTypeMask, filter))
-	 * 		.first()// map
-	 * 				// to
-	 * 				// {@link
-	 * 				// ObjectAssert}
-	 * 		.has(matches(eventTypeMask, filter));// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.first()// map to {@link ObjectAssert}
+	 * 		.has(matches(eventTypeMask, filter));// used on
+	 * 	// {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
-	 * @param eventTypeMask - the typeMask that would be checked against the bundle
-	 *            type of the {@link ServiceEvent}
+	 * @param eventTypeMask - the typeMask that would be checked against the
+	 *            bundle type of the {@link ServiceEvent}
 	 * @param filter - the filter String would be tested against the
 	 *            ServiceReference
 	 * @return the Condition
@@ -123,20 +119,20 @@ public final class ServiceEventConditions {
 	 * <pre>
 	 * List<ServiceEvent> serviceEvents = null;
 	 *
-	 * public public static void example_matches(int eventTypeMask, Class<?> objectClass, Dictionary<String, Object> dictionary) {
+	 * public public static void example_matches(int eventTypeMask, Class<?> objectClass,
+	 * 	Dictionary<String, Object> dictionary) {
 	 *
 	 * 	assertThat(serviceEvents)// created an {@link ListAssert}
 	 * 		.have(matches(eventTypeMask, objectClass, dictionary))
 	 * 		.filteredOn(matches(eventTypeMask, objectClass, dictionary))
 	 * 		.first()// map to {@link ObjectAssert}
 	 * 		.has(matches(eventTypeMask, objectClass, dictionary));// used on
-	 * 																// {@link
-	 * 	// ObjectAssert}
+	 * 	// {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
-	 * @param eventTypeMask - the typeMask that would be checked against the bundle
-	 *            type of the {@link ServiceEvent}
+	 * @param eventTypeMask - the typeMask that would be checked against the
+	 *            bundle type of the {@link ServiceEvent}
 	 * @param objectClass - the objectClass that would be tested against the
 	 *            ServiceReference
 	 * @param dictionary - the dictionary's entries that would be tested against
@@ -199,8 +195,8 @@ public final class ServiceEventConditions {
 	 * 		.have(serviceReferenceEquals(serviceReference))
 	 * 		.filteredOn(serviceReferenceEquals(serviceReference))
 	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(serviceReferenceEquals(serviceReference));// used on {@link
-	 * 														// ObjectAssert}
+	 * 		.has(serviceReferenceEquals(serviceReference));// used on
+	 * 	// {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -209,7 +205,7 @@ public final class ServiceEventConditions {
 	public static Condition<ServiceEvent> serviceReferenceEquals(ServiceReference<?> serviceReference) {
 
 		return MappedCondition.mappedCondition(ServiceEvent::getServiceReference,
-			ServiceReferenceConditions.sameAs(serviceReference), "ServiceEvent::getServiceReference");
+			ServiceReferenceConditions.isEqualsTo(serviceReference), "ServiceEvent::getServiceReference");
 	}
 
 	/**
@@ -227,8 +223,7 @@ public final class ServiceEventConditions {
 	 * 		.filteredOn(serviceReferenceHas(serviceReferenceCondition))
 	 * 		.first()// map to {@link ObjectAssert}
 	 * 		.has(serviceReferenceHas(serviceReferenceCondition));// used on
-	 * 																// {@link
-	 * 	// ObjectAssert}
+	 * 	// {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -253,8 +248,7 @@ public final class ServiceEventConditions {
 	 * 	assertThat(serviceEvent)// created an {@link ListAssert}
 	 * 		.have(serviceReferenceIsNotNull())
 	 * 		.filteredOn(serviceReferenceIsNotNull())
-	 * 		.first()// map to {@link
-	 * 				// ObjectAssert}
+	 * 		.first()// map to {@link ObjectAssert}
 	 * 		.has(serviceReferenceIsNotNull());// used on {@link ObjectAssert}
 	 * }
 	 * </pre>
@@ -278,8 +272,7 @@ public final class ServiceEventConditions {
 	 * 	assertThat(serviceEvent)// created an {@link ListAssert}
 	 * 		.have(serviceReferenceIsNull())
 	 * 		.filteredOn(serviceReferenceIsNull())
-	 * 		.first()// map to {@link
-	 * 				// ObjectAssert}
+	 * 		.first()// map to {@link ObjectAssert}
 	 * 		.has(serviceReferenceIsNull());// used on {@link ObjectAssert}
 	 * }
 	 * </pre>
@@ -307,13 +300,12 @@ public final class ServiceEventConditions {
 	 * 		.have(type(type))
 	 * 		.filteredOn(type(typeMask))
 	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(type(typeMask));// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.has(type(typeMask));// used on {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
-	 * @param eventTypeMask - the typeMask that would be checked against the bundle
-	 *            type of the {@link ServiceEvent}
+	 * @param eventTypeMask - the typeMask that would be checked against the
+	 *            bundle type of the {@link ServiceEvent}
 	 * @return the Condition
 	 */
 	public static Condition<ServiceEvent> type(final int eventTypeMask) {

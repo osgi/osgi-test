@@ -29,24 +29,26 @@ import org.osgi.framework.Bundle;
 /**
  * A Utility-Class thats Provides public static methods to create
  * {@link Condition}s for an {@link Bundle}
+ *
+ * @since 1.1
  */
 public final class BundleConditions {
 	/**
 	 * Creates a {@link Condition} to be met by an {@link Bundle}. Checking if a
-	 * {@link Bundle} is <b>equal</b> an other Bundle.
+	 * {@link Bundle} is <b>equal</b> to an other Bundle.
 	 * <p>
 	 * Example:
 	 *
 	 * <pre>
 	 * List<Bundle> bundles = null;
 	 *
-	 * public static void sameAs(Bundle bundle) {
+	 * public static void isEqualsTo(Bundle bundle) {
 	 *
 	 * 	assertThat(bundles)// created an {@link ListAssert}
-	 * 		.have(sameAs(bundle))
-	 * 		.filteredOn(sameAs(bundle))
+	 * 		.have(isEqualsTo(bundle))
+	 * 		.filteredOn(isEqualsTo(bundle))
 	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.is(sameAs(bundle));// used on {@link ObjectAssert}
+	 * 		.is(isEqualsTo(bundle));// used on {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -54,7 +56,7 @@ public final class BundleConditions {
 	 *            {@link Bundle}
 	 * @return the Condition<br>
 	 */
-	public static Condition<Bundle> sameAs(Bundle bundle) {
+	public static Condition<Bundle> isEqualsTo(Bundle bundle) {
 		Condition<Bundle> c = VerboseCondition.verboseCondition((b) -> Objects.equals(b, bundle), "bundle equals",
 			(b) -> " was <" + b.toString() + ">");
 		return c;

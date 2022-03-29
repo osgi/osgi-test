@@ -37,6 +37,8 @@ import org.osgi.test.common.dictionary.Dictionaries;
 /**
  * A Utility-Class thats Provides static methods to create {@link Condition}s
  * for an {@link ServiceReference}
+ *
+ * @since 1.2
  */
 public interface ServiceReferenceConditions {
 
@@ -63,10 +65,9 @@ public interface ServiceReferenceConditions {
 	 * static void sameAs(ServiceReference serviceReference) {
 	 *
 	 * 	assertThat(serviceReferences)// created an {@link ListAssert}
-	 * 		.have(sameAs(serviceReference))
-	 * 		.filteredOn(sameAs(serviceReference))
-	 * 		.first()// map to {@link
-	 * 				// ObjectAssert}
+	 * 		.have(isEqualsTo(serviceReference))
+	 * 		.filteredOn(isEqualsTo(serviceReference))
+	 * 		.first()// map to {@link ObjectAssert}
 	 * 		.is(sameAs(serviceReference));// used on {@link ObjectAssert}
 	 * }
 	 * </pre>
@@ -75,7 +76,7 @@ public interface ServiceReferenceConditions {
 	 *            checked against other {@link ServiceReference}s
 	 * @return the Condition<br>
 	 */
-	static Condition<ServiceReference<?>> sameAs(ServiceReference<?> serviceReference) {
+	static Condition<ServiceReference<?>> isEqualsTo(ServiceReference<?> serviceReference) {
 		Condition<ServiceReference<?>> c = VerboseCondition.verboseCondition(sr -> sr.equals(serviceReference),
 			"serviceReference equals", ServiceReference::toString);
 		return c;
@@ -164,11 +165,10 @@ public interface ServiceReferenceConditions {
 	 * </pre>
 	 *
 	 * @return the Condition
-	 */
-
-	/**
-	 * TODO: with switch to osgi.core R7 static Condition<ServiceReference<?>>
-	 * servicePropertiesIsNotNull() { return not(servicePropertiesIsNull()); }
+	 *         <p>
+	 *         TODO: with switch to osgi.core R7 static
+	 *         Condition<ServiceReference<?>> servicePropertiesIsNotNull() {
+	 *         return not(servicePropertiesIsNull()); }
 	 */
 
 	/**
@@ -191,11 +191,11 @@ public interface ServiceReferenceConditions {
 	 * </pre>
 	 *
 	 * @return the Condition
-	 */
-	/**
-	 * TODO: with switch to osgi.core R7 static Condition<ServiceReference<?>>
-	 * servicePropertiesIsNull() { return
-	 * Descriptive.descriptive((Dictionary<String, Object>) null, (sr, d) ->
-	 * Dictionaries.asDictionary(sr) == d, "serviceProperties is"); }
+	 * <p>
+	 * TODO: with switch to osgi.core R7 static
+	 *         Condition<ServiceReference<?>> servicePropertiesIsNull() { return
+	 *         Descriptive.descriptive((Dictionary<String, Object>) null, (sr,
+	 *         d) -> Dictionaries.asDictionary(sr) == d, "serviceProperties
+	 *         is"); }
 	 */
 }

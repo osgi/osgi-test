@@ -33,6 +33,8 @@ import org.osgi.test.common.bitmaps.BundleEventType;
 /**
  * A Utility-Class thats Provides public static methods to create
  * {@link Condition}s for an {@link BundleEvent}
+ *
+ * @since 1.1
  */
 public final class BundleEventConditions {
 
@@ -62,7 +64,7 @@ public final class BundleEventConditions {
 	 */
 	public static Condition<BundleEvent> bundleEquals(Bundle bundle) {
 
-		return MappedCondition.mappedCondition(BundleEvent::getBundle, BundleConditions.sameAs(bundle),
+		return MappedCondition.mappedCondition(BundleEvent::getBundle, BundleConditions.isEqualsTo(bundle),
 			"BundleEvent::getBundle");
 	}
 
@@ -137,10 +139,9 @@ public final class BundleEventConditions {
 	 * 		.have(matches(typeMask, bundle, origin))
 	 * 		.filteredOn(matches(typeMask, bundle, origin))
 	 * 		.first()// map to
-	 * 				// {@link
-	 * 				// ObjectAssert}
-	 * 		.has(matches(typeMask, bundle, origin));// used on {@link
-	 * 	// ObjectAssert}
+	 * 				// {@link ObjectAssert}
+	 * 		.has(matches(typeMask, bundle, origin));// used on
+	 * 			{@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -180,7 +181,7 @@ public final class BundleEventConditions {
 	 */
 	public static Condition<BundleEvent> originEquals(Bundle bundle) {
 
-		return MappedCondition.mappedCondition(BundleEvent::getOrigin, BundleConditions.sameAs(bundle),
+		return MappedCondition.mappedCondition(BundleEvent::getOrigin, BundleConditions.isEqualsTo(bundle),
 			"BundleEvent::getOrigin");
 	}
 
@@ -277,10 +278,9 @@ public final class BundleEventConditions {
 	 * 		.have(typeAndBundle(typeMask, bundle))
 	 * 		.filteredOn(typeAndBundle(typeMask, bundle))
 	 * 		.first()// map to
-	 * 				// {@link
-	 * 				// ObjectAssert}
-	 * 		.has(typeAndBundle(typeMask, bundle));// used on {@link
-	 * 												// ObjectAssert}
+	 * 				// {@link ObjectAssert}
+	 * 		.has(typeAndBundle(typeMask, bundle));// used on
+	 * 				{@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *

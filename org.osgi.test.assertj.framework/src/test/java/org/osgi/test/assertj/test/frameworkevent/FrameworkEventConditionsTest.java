@@ -44,14 +44,6 @@ class FrameworkEventConditionsTest implements ConditionAssert {
 		throwable = new NullPointerException("NullPointerException");
 	}
 
-	@Test
-	void bundleIsNotNull() throws Exception {
-
-		failingHas(FrameworkEventConditions.bundleIsNotNull(), frameworkEvent, "bundle is <null>");
-
-		when(frameworkEvent.getBundle()).thenReturn(bundle);
-		passingHas(FrameworkEventConditions.bundleIsNotNull(), frameworkEvent);
-	}
 
 	@Test
 	void throwableIsNotNull() throws Exception {

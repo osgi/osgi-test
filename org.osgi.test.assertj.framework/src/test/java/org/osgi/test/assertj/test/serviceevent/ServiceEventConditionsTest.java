@@ -66,12 +66,12 @@ class ServiceEventConditionsTest implements ConditionAssert {
 	@SuppressWarnings("unchecked")
 	@Test
 	void serviceReferenceHas() throws Exception {
-		Condition<ServiceReference<?>> c = ServiceReferenceConditions.sameAs(mock(ServiceReference.class));
+		Condition<ServiceReference<?>> c = ServiceReferenceConditions.isEqualsTo(mock(ServiceReference.class));
 
 		when(serviceEvent.getServiceReference()).thenReturn(serviceReference);
 		failingHas(ServiceEventConditions.serviceReferenceHas(c), serviceEvent, "serviceReference equals");
 
-		c = ServiceReferenceConditions.sameAs(serviceReference);
+		c = ServiceReferenceConditions.isEqualsTo(serviceReference);
 		passingHas(ServiceEventConditions.serviceReferenceHas(c), serviceEvent);
 
 	}

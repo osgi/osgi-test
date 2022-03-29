@@ -37,6 +37,8 @@ import org.osgi.test.common.bitmaps.FrameworkEventType;
 /**
  * A Utility-Class thats Provides public static methods to create
  * {@link FrameworkEventConditions} for an {@link FrameworkEvent}
+ *
+ * @since 1.1
  */
 public final class FrameworkEventConditions {
 
@@ -66,34 +68,11 @@ public final class FrameworkEventConditions {
 	 */
 	public static Condition<FrameworkEvent> bundleEquals(Bundle bundle) {
 
-		return MappedCondition.mappedCondition(FrameworkEvent::getBundle, BundleConditions.sameAs(bundle),
+		return MappedCondition.mappedCondition(FrameworkEvent::getBundle, BundleConditions.isEqualsTo(bundle),
 			"FrameworkEvent::getBundle");
 
 	}
 
-	/**
-	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
-	 * Checking if the bundle that is associated with the eventof the
-	 * {@link FrameworkEvent} <b>is not null</b>.
-	 *
-	 * <pre>
-	 * List<FrameworkEvent> frameworkEvents = null;
-	 *
-	 * public static void example_bundleIsNotNull() {
-	 *
-	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
-	 * 		.have(bundleIsNotNull())
-	 * 		.filteredOn(bundleIsNotNull())
-	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(bundleIsNotNull());// used on {@link ObjectAssert}
-	 * }
-	 * </pre>
-	 *
-	 * @return the Condition
-	 */
-	public static Condition<FrameworkEvent> bundleIsNotNull() {
-		return not(bundleIsNull());
-	}
 
 	/**
 	 * Creates a {@link Condition} to be met by an {@link FrameworkEvent}.
@@ -135,8 +114,8 @@ public final class FrameworkEventConditions {
 	 * 		.have(matches(typeMask, bundle, throwableClass))
 	 * 		.filteredOn(matches(typeMask, bundle, throwableClass))
 	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(matches(typeMask, bundle, throwableClass));// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.has(matches(typeMask, bundle, throwableClass)); //used
+	 *  			on {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -166,11 +145,9 @@ public final class FrameworkEventConditions {
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(matches(typeMask, throwableClass))
 	 * 		.filteredOn(matches(typeMask, throwableClass))
-	 * 		.first()// map to
-	 * 				// {@link
-	 * 				// ObjectAssert}
-	 * 		.has(matches(typeMask, throwableClass));// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.first()// map to {@link ObjectAssert}
+	 * 		.has(matches(typeMask, throwableClass));// used on
+	 * 				{@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -197,8 +174,7 @@ public final class FrameworkEventConditions {
 	 * 		.have(throwableIsNotNull())
 	 * 		.filteredOn(throwableIsNotNull())
 	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(throwableIsNotNull());// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.has(throwableIsNotNull());// used on {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -221,8 +197,7 @@ public final class FrameworkEventConditions {
 	 * 		.have(throwableIsNull())
 	 * 		.filteredOn(throwableIsNull())
 	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(throwableIsNull());// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.has(throwableIsNull());// used on {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -246,11 +221,9 @@ public final class FrameworkEventConditions {
 	 * 	assertThat(frameworkEvents)// created an {@link ListAssert}
 	 * 		.have(throwableOfClass(throwableClass))
 	 * 		.filteredOn(throwableOfClass(throwableClass))
-	 * 		.first()// map to
-	 * 				// {@link
-	 * 				// ObjectAssert}
-	 * 		.has(throwableOfClass(throwableClass));// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.first()// map to {@link ObjectAssert}
+	 * 		.has(throwableOfClass(throwableClass));// used on
+	 * 			{@link  ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -283,8 +256,7 @@ public final class FrameworkEventConditions {
 	 * 		.have(type(type))
 	 * 		.filteredOn(type(typeMask))
 	 * 		.first()// map to {@link ObjectAssert}
-	 * 		.has(type(typeMask));// used on {@link
-	 * 	// ObjectAssert}
+	 * 		.has(type(typeMask));// used on {@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *
@@ -315,10 +287,9 @@ public final class FrameworkEventConditions {
 	 * 		.have(typeAndBundle(typeMask, bundles))
 	 * 		.filteredOn(typeAndBundle(typeMask, bundle))
 	 * 		.first()// map to
-	 * 				// {@link
-	 * 				// ObjectAssert}
-	 * 		.has(typeAndBundle(typeMask, bundle));// used on {@link
-	 * 	// ObjectAssert}
+	 * 				// {@link ObjectAssert}
+	 * 		.has(typeAndBundle(typeMask, bundle));// used on
+	 * 	{@link ObjectAssert}
 	 * }
 	 * </pre>
 	 *

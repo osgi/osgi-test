@@ -34,6 +34,8 @@ import org.osgi.test.common.dictionary.Dictionaries;
 /**
  * A Utility-Class thats Provides public static methods to create
  * {@link Condition}s for ServiceProperties
+ *
+ * @since 1.2
  */
 public final class ServicePropertiesConditions {
 	public static Condition<Dictionary<String, Object>> servicePropertiesContains(
