@@ -98,3 +98,12 @@ jobs:
         GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
         OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
+<<<<<<< Upstream, based on 0f9b54f042e952c2b8f92d08d3b260d58fb7dede
+=======
+    - name: Upload Codecov
+      if: ${{ matrix.codecov }}
+      uses: codecov/codecov-action@v2
+      with:
+        name: osgi-test
+        files: ./org.osgi.test.assertj.framework/target/site/jacoco-it/jacoco.xml,./org.osgi.test.assertj.promise/target/site/jacoco-it/jacoco.xml,./org.osgi.test.common/target/site/jacoco-it/jacoco.xml,./org.osgi.test.junit4/target/site/jacoco-it/jacoco.xml,./org.osgi.test.junit5/target/site/jacoco-it/jacoco.xml,./org.osgi.test.junit5.cm/target/site/jacoco-it/jacoco.xml,./org.osgi.test.assertj.cm/target/site/jacoco-it/jacoco.xml
+>>>>>>> 8f27069 Review - reduce Api-surface
