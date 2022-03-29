@@ -207,6 +207,12 @@ public class BundleInstaller {
 
 		public InputStream openStream(BundleContext bc) throws IOException {
 
+			URL jarEmbeddedFileUrl = getURL(bc);
+
+			return jarEmbeddedFileUrl.openStream();
+		}
+
+		public URL getURL(BundleContext bc) throws IOException {
 			Bundle bundle = Stream.of(bc.getBundles())
 				.filter(b -> b.getSymbolicName()
 					.equals(bundleSymbolicName))
@@ -225,8 +231,7 @@ public class BundleInstaller {
 				.orElseThrow(
 					() -> new FileNotFoundException(String.format("File [%s/%s] not found in Bundle [%s:%s]", path,
 						file, bundle.getSymbolicName(), bundle.getVersion())));
-
-			return jarEmbeddedFileUrl.openStream();
+			return jarEmbeddedFileUrl;
 		}
 
 		@Override
