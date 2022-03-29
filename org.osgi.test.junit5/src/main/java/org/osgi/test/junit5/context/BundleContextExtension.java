@@ -25,9 +25,9 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.context.ContextHelper;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.install.BundleInstaller;
 import org.osgi.test.junit5.inject.InjectingExtension;
@@ -94,8 +94,7 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 			.filter(context -> context.getTestClass()
 				.isPresent())
 			.map(BundleContextExtension::getBundleContext)
-			.orElseGet(() -> FrameworkUtil.getBundle(extensionContext.getRequiredTestClass())
-				.getBundleContext());
+			.orElseGet(() -> ContextHelper.getBundleContext(extensionContext.getRequiredTestClass()));
 		return parentContext;
 	}
 
@@ -130,11 +129,10 @@ public class BundleContextExtension extends InjectingExtension<InjectBundleConte
 	@Override
 	protected Object resolveValue(TargetType targetType, InjectBundleContext injection,
 		ExtensionContext extensionContext) throws ParameterResolutionException {
-		BundleContext retval = getBundleContext(extensionContext);
-		if (retval == null) {
-			throw new ParameterResolutionException(
-				"Bundle context was null. Check that you are running your test in an OSGi framework.");
+		try {
+			return getBundleContext(extensionContext);
+		} catch (IllegalStateException e) {
+			throw new ParameterResolutionException("No BundleContext available", e);
 		}
-		return retval;
 	}
 }

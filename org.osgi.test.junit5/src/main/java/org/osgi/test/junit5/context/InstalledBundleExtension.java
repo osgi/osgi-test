@@ -25,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.test.common.annotation.InjectInstalledBundle;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.install.BundleInstaller;
@@ -50,19 +49,28 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 
 	public static Bundle installedBundleOf(InjectInstalledBundle injectBundle, ExtensionContext extensionContext) {
 		try {
-			BundleContext bc = BundleContextExtension.getBundleContext(extensionContext);
 			BundleInstaller ib = BundleInstallerExtension.getBundleInstaller(extensionContext);
 
 			String spec = injectBundle.value();
-			if (spec.startsWith("http:") || spec.startsWith("https:") || spec.startsWith("file:")) {
+			if (prefixMatch(spec, "http:", "https:", "file:")) {
 				return ib.installBundle(new URL(spec), injectBundle.start());
 			} else {
-				return ib.installBundle(BundleInstaller.EmbeddedLocation.of(bc, spec), injectBundle.start());
+				return ib.installBundle(BundleInstaller.EmbeddedLocation.of(ib.getBundleContext(), spec),
+					injectBundle.start());
 			}
 		} catch (MalformedURLException e) {
 			throw new ExtensionConfigurationException(
 				String.format("Could not parse URL from given String %s.", injectBundle.value()), e);
 		}
+	}
+
+	private static boolean prefixMatch(String target, String... prefixes) {
+		for (String prefix : prefixes) {
+			if (target.regionMatches(true, 0, prefix, 0, prefix.length())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

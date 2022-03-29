@@ -79,6 +79,7 @@ public class ServiceConfiguration<S> implements AutoCloseable, ServiceAware<S> {
 	}
 
 	public ServiceConfiguration<S> init(BundleContext bundleContext) {
+		requireNonNull(bundleContext);
 		CountDownLatch countDownLatch = new CountDownLatch(getCardinality());
 
 		ServiceTracker<S, S> tracker = new ServiceTracker<>(bundleContext, getFilter(),

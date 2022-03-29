@@ -18,6 +18,7 @@
 
 package org.osgi.test.common.context;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static org.osgi.test.common.exceptions.ConsumerWithException.asConsumer;
 import static org.osgi.test.common.exceptions.ConsumerWithException.asConsumerIgnoreException;
@@ -138,7 +139,7 @@ public class CloseableBundleContext implements AutoCloseable, InvocationHandler 
 	}
 
 	public CloseableBundleContext(BundleContext bundleContext) {
-		this.bundleContext = bundleContext;
+		this.bundleContext = requireNonNull(bundleContext);
 	}
 
 	@Override

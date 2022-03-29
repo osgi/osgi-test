@@ -29,10 +29,10 @@ import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectBundleContext;
 import org.osgi.test.common.annotation.InjectBundleInstaller;
 import org.osgi.test.common.context.CloseableBundleContext;
+import org.osgi.test.common.context.ContextHelper;
 import org.osgi.test.common.install.BundleInstaller;
 
 /**
@@ -71,8 +71,8 @@ public class BundleContextRule implements AutoCloseable, MethodRule {
 			return this;
 		}
 
-		BundleContext bundleContext = CloseableBundleContext.proxy(FrameworkUtil.getBundle(testInstance.getClass())
-			.getBundleContext());
+		BundleContext bundleContext = CloseableBundleContext
+			.proxy(ContextHelper.getBundleContext(testInstance.getClass()));
 
 		bundleInstaller = new BundleInstaller(bundleContext);
 

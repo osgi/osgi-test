@@ -36,8 +36,8 @@ import org.junit.rules.MethodRule;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.Statement;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.test.common.annotation.InjectService;
+import org.osgi.test.common.context.ContextHelper;
 import org.osgi.test.common.list.ListSupplierDelegate;
 import org.osgi.test.common.service.ServiceAware;
 import org.osgi.test.common.service.ServiceConfiguration;
@@ -66,9 +66,7 @@ public class ServiceRule implements AutoCloseable, MethodRule {
 	private final Map<ServiceConfigurationKey<?>, ServiceConfiguration<?>> configurations = new ConcurrentHashMap<>();
 
 	public ServiceRule init(Object testInstance) {
-		BundleContext bundleContext = FrameworkUtil.getBundle(testInstance
-			.getClass())
-			.getBundleContext();
+		BundleContext bundleContext = ContextHelper.getBundleContext(testInstance.getClass());
 		List<Field> fields = findAnnotatedNonStaticFields(testInstance.getClass(), InjectService.class);
 
 		fields.forEach(field -> {

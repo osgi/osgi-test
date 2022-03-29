@@ -18,6 +18,7 @@
 
 package org.osgi.test.common.install;
 
+import static java.util.Objects.requireNonNull;
 import static org.osgi.test.common.exceptions.Exceptions.duck;
 
 import java.io.FileNotFoundException;
@@ -243,7 +244,7 @@ public class BundleInstaller {
 	private final BundleContext bundleContext;
 
 	public BundleInstaller(BundleContext bundleContext) {
-		this.bundleContext = bundleContext;
+		this.bundleContext = requireNonNull(bundleContext);
 	}
 
 	/**
