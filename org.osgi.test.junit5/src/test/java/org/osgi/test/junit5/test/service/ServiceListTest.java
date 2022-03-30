@@ -37,6 +37,12 @@ public class ServiceListTest {
 	BundleContext										bc;
 	@InjectService
 	List<LogService>									logServices;
+	@InjectService(service = LogService.class)
+	List<?>												unboundedWildcardLogService;
+	@InjectService
+	List<? extends LogService>							upperWildcardLogService;
+	@InjectService(service = LogService.class)
+	List<? super LogService>							lowerWildcardLogService;
 
 	@InjectService(cardinality = 0)
 	List<TestServiceWithMultipleCardinality>			testServices;
@@ -46,8 +52,25 @@ public class ServiceListTest {
 
 	@Test
 	public void testField() throws Exception {
-		assertThat(logServices).size()
-			.isEqualTo(1);
+		assertThat(logServices).hasSize(1);
+	}
+
+	@Test
+	public void testUpperWildcard() {
+		assertThat(upperWildcardLogService).hasSize(1)
+			.isEqualTo(logServices);
+	}
+
+	@Test
+	public void testLowerWildcard() {
+		assertThat(lowerWildcardLogService).hasSize(1)
+			.isEqualTo(logServices);
+	}
+
+	@Test
+	public void testUnboundedWildcard() {
+		assertThat(unboundedWildcardLogService).hasSize(1)
+			.isEqualTo(logServices);
 	}
 
 	@Test

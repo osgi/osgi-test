@@ -62,57 +62,72 @@ public class ServiceExtension extends InjectingExtension<InjectService> {
 	}
 
 	@Override
-	protected boolean supportsType(TargetType targetType, ExtensionContext extensionContext)
+	protected boolean supportsType(TargetType targetType, ExtensionContext extensionContext) {
+		return true;
+	}
+
+	private Type extractServiceType(TargetType targetType, InjectService injectService)
 		throws ParameterResolutionException {
-		Type serviceType;
+		Type valueType;
+		Type upperBoundType = null;
 		if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
 			if (targetType.hasParameterizedTypes()) {
-				serviceType = targetType.getFirstGenericTypes()
+				valueType = targetType.getFirstGenericTypes()
 					.get();
-				if (serviceType instanceof WildcardType) {
-					serviceType = Object.class;
+				if (valueType instanceof WildcardType) {
+					final WildcardType wild = (WildcardType) valueType;
+					upperBoundType = (wild.getUpperBounds().length > 0) ? wild.getUpperBounds()[0] : Object.class;
 				}
 			} else {
-				serviceType = Object.class;
+				valueType = Object.class;
 			}
 		} else {
-			serviceType = targetType.getGenericType();
+			valueType = targetType.getGenericType();
 		}
-
-		if (!(serviceType instanceof Class)) {
+		if (upperBoundType == null) {
+			upperBoundType = valueType;
+		}
+		if (!(upperBoundType instanceof Class)) {
 			throw new ParameterResolutionException(String.format(
 				"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
-				targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
+				targetType.getName(), upperBoundType.getTypeName(), annotation().getSimpleName()));
+		}
+		final Class<?> upperBoundClass = (Class<?>) upperBoundType;
+
+		final Class<?> serviceClass = injectService.service();
+		if (serviceClass.equals(annotation())) {
+			return upperBoundClass;
 		}
 
-		return true;
+		if (!upperBoundClass.isAssignableFrom(serviceClass)) {
+			throw new ParameterResolutionException(String.format(
+				"Element %s has service type %s for annotation @%s but field expects %s.", targetType.getName(),
+				serviceClass.getName(), annotation().getSimpleName(), valueType.getTypeName()));
+		}
+		if (valueType instanceof WildcardType) {
+			final WildcardType wild = (WildcardType) valueType;
+			if (wild.getLowerBounds().length > 0) {
+				final Type lowerBoundType = wild.getLowerBounds()[0];
+				if (!(lowerBoundType instanceof Class)) {
+					throw new ParameterResolutionException(String.format(
+						"Element %s has an unsupported lower bound %s for annotation @%s. Service must have non-generic type.",
+						targetType.getName(), lowerBoundType.getTypeName(), annotation().getSimpleName()));
+				}
+				if (!serviceClass.isAssignableFrom((Class<?>) lowerBoundType)) {
+					throw new ParameterResolutionException(String.format(
+						"Element %s has service type %s for annotation @%s but field expects %s.", targetType.getName(),
+						serviceClass.getName(), annotation().getSimpleName(), valueType.getTypeName()));
+				}
+			}
+		}
+
+		return serviceClass;
 	}
 
 	@Override
 	protected Object resolveValue(TargetType targetType, InjectService injectService, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
-		Type serviceType = injectService.service();
-		if (serviceType.equals(annotation())) {
-			if (targetType.matches(List.class) || targetType.matches(ServiceAware.class)) {
-				if (targetType.hasParameterizedTypes()) {
-					serviceType = targetType.getFirstGenericTypes()
-						.get();
-					if (serviceType instanceof WildcardType) {
-						serviceType = Object.class;
-					}
-				} else {
-					serviceType = Object.class;
-				}
-			} else {
-				serviceType = targetType.getType();
-			}
-		}
-
-		if (!(serviceType instanceof Class)) {
-			throw new ParameterResolutionException(String.format(
-				"Element %s has an unsupported type %s for annotation @%s. Service must have non-generic type.",
-				targetType.getName(), serviceType.getTypeName(), annotation().getSimpleName()));
-		}
+		final Type serviceType = extractServiceType(targetType, injectService);
 
 		ServiceConfiguration<?> configuration = getServiceConfiguration((Class<?>) serviceType, injectService.filter(),
 			injectService.filterArguments(), injectService.cardinality(), injectService.timeout(), extensionContext);

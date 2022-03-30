@@ -106,25 +106,21 @@ public abstract class InjectingExtension<INJECTION extends Annotation>
 		if (!isAnnotated(field, annotation())) {
 			return false;
 		}
+		if ((field.getModifiers() & disallowedFieldModifiers()) != 0) {
+			throw new ExtensionConfigurationException(String.format("Field %s must not be %s for annotation @%s.",
+				field.getName(), Modifier.toString(field.getModifiers() & disallowedFieldModifiers()),
+				annotation().getSimpleName()));
+		}
+
 		TargetType targetType = TargetType.of(field);
 		try {
-			if (!supportsType(targetType, extensionContext)) {
-				return false;
-			}
+			return supportsType(targetType, extensionContext);
 		} catch (ParameterResolutionException pre) {
 			// Convert to ExtensionConfigurationException for field
 			ExtensionConfigurationException ece = new ExtensionConfigurationException(pre.getMessage(), pre.getCause());
 			ece.setStackTrace(pre.getStackTrace());
 			throw ece;
 		}
-
-		if ((field.getModifiers() & disallowedFieldModifiers()) != 0) {
-			throw new ExtensionConfigurationException(
-				String.format("Field %s must not be %s for annotation @%s.", field.getName(),
-					Modifier.toString(field.getModifiers() & disallowedFieldModifiers()),
-					annotation().getSimpleName()));
-		}
-		return true;
 	}
 
 	/**
@@ -139,15 +135,14 @@ public abstract class InjectingExtension<INJECTION extends Annotation>
 			return false;
 		}
 		TargetType targetType = TargetType.of(parameterContext.getParameter());
-		if (!supportsType(targetType, extensionContext)) {
-			return false;
-		}
-		return true;
+		return supportsType(targetType, extensionContext);
 	}
 
 	/**
 	 * Determine if this extender supports resolution for the specified
-	 * {@link TargetType} for the specified {@link ExtensionContext}.
+	 * {@link TargetType} for the specified {@link ExtensionContext}. The
+	 * default implementation checks through all of the types that were passed
+	 * to the constructor.
 	 */
 	protected boolean supportsType(TargetType targetType, ExtensionContext extensionContext)
 		throws ParameterResolutionException {
