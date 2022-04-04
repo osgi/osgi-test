@@ -665,7 +665,7 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 			<dependency>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.configadmin</artifactId>
-				<version>1.9.22</version>
+				<version>1.9.24</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
