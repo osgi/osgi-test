@@ -73,7 +73,7 @@ tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
 
-tasks.named("jar") {
+tasks.named(JavaPlugin.JAR_TASK_NAME) {
 	// Include generated pom file
 	into("META-INF/maven/${project.group}/${project.name}") {
 		from(tasks.named("generatePomFileForMavenPublication"))
