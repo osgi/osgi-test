@@ -29,7 +29,7 @@ dependencies {
 
 description = "OSGi Testing Example Player Test"
 
-tasks.named("jar") {
+tasks.named(JavaPlugin.JAR_TASK_NAME) {
 	bundle {
 		bnd("Test-Cases: \${classes;HIERARCHY_INDIRECTLY_ANNOTATED;org.junit.platform.commons.annotation.Testable;CONCRETE}")
 	}
@@ -37,17 +37,17 @@ tasks.named("jar") {
 
 def resolveTask = tasks.register("resolve", Resolve) {
 	description = "Resolve test.bndrun"
-	group = "test"
+	group = JavaBasePlugin.VERIFICATION_GROUP
 	bndrun = file("test.bndrun")
 	outputBndrun = layout.buildDirectory.file("test.bndrun")
 }
 
 def testOSGiTask = tasks.register("testOSGi", TestOSGi) {
 	description = "OSGi Test test.bndrun"
-	group = "test"
+	group = JavaBasePlugin.VERIFICATION_GROUP
 	bndrun = resolveTask.flatMap { it.outputBndrun }
 }
 
-tasks.named("check") {
+tasks.named(LifecycleBasePlugin.CHECK_TASK_NAME) {
 	dependsOn(testOSGiTask)
 }
