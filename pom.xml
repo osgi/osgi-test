@@ -310,6 +310,7 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 					<configuration>
 						<detectJavaApiLink>false</detectJavaApiLink>
 						<doclint>none</doclint>
+						<notimestamp>true</notimestamp>
 						<links>
 							<link>https://docs.osgi.org/javadoc/osgi.annotation/${osgi.annotation.version}</link>
 						</links>
