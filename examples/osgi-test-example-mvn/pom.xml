@@ -269,9 +269,6 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
 					<version>1.2.7</version>
-					<configuration>
-						<flattenMode>oss</flattenMode>
-					</configuration>
 					<executions>
 						<execution>
 							<id>flatten</id>
@@ -279,6 +276,9 @@
 							<goals>
 								<goal>flatten</goal>
 							</goals>
+							<configuration>
+								<flattenMode>oss</flattenMode>
+							</configuration>
 						</execution>
 						<execution>
 							<id>flatten-clean</id>
