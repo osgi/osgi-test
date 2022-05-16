@@ -343,9 +343,6 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>flatten-maven-plugin</artifactId>
 					<version>1.2.7</version>
-					<configuration>
-						<flattenMode>oss</flattenMode>
-					</configuration>
 					<executions>
 						<execution>
 							<id>flatten</id>
@@ -353,6 +350,9 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 							<goals>
 								<goal>flatten</goal>
 							</goals>
+							<configuration>
+								<flattenMode>oss</flattenMode>
+							</configuration>
 						</execution>
 						<execution>
 							<id>flatten-clean</id>
