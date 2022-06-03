@@ -61,7 +61,7 @@
 	net.bytebuddy.byte-buddy-agent;version='[1.12.10,1.12.11)',\
 	org.awaitility;version='[4.2.0,4.2.1)',\
 	org.hamcrest;version='[2.1.0,2.1.1)',\
-	org.mockito.mockito-core;version='[4.6.0,4.6.1)',\
+	org.mockito.mockito-core;version='[4.6.1,4.6.2)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
 	org.osgi.test.assertj.framework;version='[1.2.0,1.2.1)',\
