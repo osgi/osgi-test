@@ -23,6 +23,6 @@ org.apache.felix:org.apache.felix.logback:1.0.6
 ch.qos.logback:logback-classic:1.2.11
 ch.qos.logback:logback-core:1.2.11
 org.slf4j:slf4j-api:1.7.22
-org.eclipse.platform:org.eclipse.osgi:3.17.200
+org.eclipse.platform:org.eclipse.osgi:3.18.0
 org.osgi:org.osgi.util.function:1.2.0
 org.osgi:org.osgi.util.promise:1.2.0
