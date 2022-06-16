@@ -87,6 +87,13 @@ tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
 
+// Reproducible javadoc
+tasks.withType(Javadoc).configureEach {
+	options {
+		noTimestamp = true
+	}
+}
+
 tasks.named(JavaPlugin.JAR_TASK_NAME) {
 	// META-INF/maven folder
 	def metaInfMaven = publishing.publications.named("maven", MavenPublication).map {
