@@ -24,11 +24,17 @@ java {
 
 publishing {
 	publications {
+		// main publication
 		maven(MavenPublication) {
 			from(components.java)
-			// Configure pom metadata
 			pom {
-				name.set("${groupId}:${artifactId}")
+				name.set(artifactId)
+				description.set(project.provider { project.description })
+			}
+		}
+		// Configure pom metadata
+		withType(MavenPublication) { publication ->
+			pom {
 				url.set("https://www.osgi.org")
 				organization {
 					name.set("OSGi Working Group")
@@ -60,6 +66,14 @@ publishing {
 					}
 				}
 			}
+			tasks.register("generatePomPropertiesFor${publication.name.capitalize()}Publication", WriteProperties) {
+				description = "Generates the Maven pom.properties file for publication '${publication.name}'."
+				group = PublishingPlugin.PUBLISH_TASK_GROUP
+				setOutputFile(layout.buildDirectory.file("publications/${publication.name}/pom-default.properties"))
+				property("groupId", project.provider { publication.groupId })
+				property("artifactId", project.provider { publication.artifactId })
+				property("version", project.provider { publication.version })
+			}
 		}
 	}
 }
@@ -73,11 +87,27 @@ tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
 
+// Reproducible javadoc
+tasks.withType(Javadoc).configureEach {
+	options {
+		noTimestamp = true
+	}
+}
+
 tasks.named(JavaPlugin.JAR_TASK_NAME) {
-	// Include generated pom file
-	into("META-INF/maven/${project.group}/${project.name}") {
+	// META-INF/maven folder
+	def metaInfMaven = publishing.publications.named("maven", MavenPublication).map {
+		"META-INF/maven/${it.groupId}/${it.artifactId}"
+	}
+	// Include generated pom.xml file
+	into(metaInfMaven) {
 		from(tasks.named("generatePomFileForMavenPublication"))
-		rename(".*", "pom.xml")
+		rename { "pom.xml" }
+	}
+	// Include generated pom.properties file
+	into(metaInfMaven) {
+		from(tasks.named("generatePomPropertiesForMavenPublication"))
+		rename { "pom.properties" }
 	}
 	// Common Bnd configuration
 	bundle {
