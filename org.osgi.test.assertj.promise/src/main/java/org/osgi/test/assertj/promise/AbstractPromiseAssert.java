@@ -265,7 +265,7 @@ public abstract class AbstractPromiseAssert<SELF extends AbstractPromiseAssert<S
 	 *             resolved with a failure.
 	 */
 	public AbstractObjectAssert<?, RESULT> hasValueThat() {
-		return isSuccessful().extracting(this::getValue, Assertions::<RESULT> assertThat);
+		return isSuccessful().extracting(this::getValue, Assertions::<RESULT> assertThatObject);
 	}
 
 	/**
