@@ -44,8 +44,8 @@ public class DictionaryAssert<KEY, VALUE>
 
 	public static final <ACTUAL extends Dictionary<K, V>, K, V> InstanceOfAssertFactory<ACTUAL, DictionaryAssert<K, V>> dictionary(
 		Class<K> keyType, Class<V> valueType) {
-		requireNonNull(keyType, shouldNotBeNull("keyType").create());
-		requireNonNull(valueType, shouldNotBeNull("valueType").create());
+		requireNonNull(keyType, shouldNotBeNull("keyType")::create);
+		requireNonNull(valueType, shouldNotBeNull("valueType")::create);
 		@SuppressWarnings({
 			"unchecked", "rawtypes"
 		})

@@ -68,7 +68,7 @@ public class PromiseAssert<RESULT>
 	 */
 	public static <ACTUAL extends Promise<? extends RESULT>, RESULT> InstanceOfAssertFactory<ACTUAL, PromiseAssert<RESULT>> promise(
 		Class<RESULT> resultType) {
-		requireNonNull(resultType, shouldNotBeNull("resultType").create());
+		requireNonNull(resultType, shouldNotBeNull("resultType")::create);
 		@SuppressWarnings({
 			"rawtypes", "unchecked"
 		})
