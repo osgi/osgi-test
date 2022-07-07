@@ -58,7 +58,7 @@ public class ServiceRegistrationAssert<SERVICE> extends
 	 */
 	public static <ACTUAL extends ServiceRegistration<? extends SERVICE>, SERVICE> InstanceOfAssertFactory<ACTUAL, ServiceRegistrationAssert<SERVICE>> serviceRegistration(
 		Class<SERVICE> serviceType) {
-		requireNonNull(serviceType, shouldNotBeNull("serviceType").create());
+		requireNonNull(serviceType, shouldNotBeNull("serviceType")::create);
 		@SuppressWarnings({
 			"rawtypes", "unchecked"
 		})

@@ -59,7 +59,7 @@ public class ServiceReferenceAssert<SERVICE> extends
 	 */
 	public static <ACTUAL extends ServiceReference<? extends SERVICE>, SERVICE> InstanceOfAssertFactory<ACTUAL, ServiceReferenceAssert<SERVICE>> serviceReference(
 		Class<SERVICE> serviceType) {
-		requireNonNull(serviceType, shouldNotBeNull("serviceType").create());
+		requireNonNull(serviceType, shouldNotBeNull("serviceType")::create);
 		@SuppressWarnings({
 			"rawtypes", "unchecked"
 		})
