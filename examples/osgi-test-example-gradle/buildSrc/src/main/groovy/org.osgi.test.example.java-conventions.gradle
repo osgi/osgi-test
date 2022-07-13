@@ -1,6 +1,7 @@
 plugins {
 	id("biz.aQute.bnd.builder")
 	id("maven-publish")
+	id("dev.hargrave.addmavendescriptor")
 }
 
 repositories {
@@ -66,14 +67,6 @@ publishing {
 					}
 				}
 			}
-			tasks.register("generatePomPropertiesFor${publication.name.capitalize()}Publication", WriteProperties) {
-				description = "Generates the Maven pom.properties file for publication '${publication.name}'."
-				group = PublishingPlugin.PUBLISH_TASK_GROUP
-				setOutputFile(layout.buildDirectory.file("publications/${publication.name}/pom-default.properties"))
-				property("groupId", project.provider { publication.groupId })
-				property("artifactId", project.provider { publication.artifactId })
-				property("version", project.provider { publication.version })
-			}
 		}
 	}
 }
@@ -95,20 +88,6 @@ tasks.withType(Javadoc).configureEach {
 }
 
 tasks.named(JavaPlugin.JAR_TASK_NAME) {
-	// META-INF/maven folder
-	def metaInfMaven = publishing.publications.named("maven", MavenPublication).map {
-		"META-INF/maven/${it.groupId}/${it.artifactId}"
-	}
-	// Include generated pom.xml file
-	into(metaInfMaven) {
-		from(tasks.named("generatePomFileForMavenPublication"))
-		rename { "pom.xml" }
-	}
-	// Include generated pom.properties file
-	into(metaInfMaven) {
-		from(tasks.named("generatePomPropertiesForMavenPublication"))
-		rename { "pom.properties" }
-	}
 	// Common Bnd configuration
 	bundle {
 		bnd("""
