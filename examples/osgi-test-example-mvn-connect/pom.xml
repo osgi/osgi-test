@@ -1,35 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) Contributors to the Eclipse Foundation
+	Copyright (c) Contributors to the Eclipse Foundation
 
-    Licensed under the Apache License, Version 2.0 (the "License");
-    you may not use this file except in compliance with the License.
-    You may obtain a copy of the License at
+	Licensed under the Apache License, Version 2.0 (the "License");
+	you may not use this file except in compliance with the License.
+	You may obtain a copy of the License at
 
-        http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
-    Unless required by applicable law or agreed to in writing, software
-    distributed under the License is distributed on an "AS IS" BASIS,
-    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-    See the License for the specific language governing permissions and
-    limitations under the License.
+	Unless required by applicable law or agreed to in writing, software
+	distributed under the License is distributed on an "AS IS" BASIS,
+	WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	See the License for the specific language governing permissions and
+	limitations under the License.
 
-    SPDX-License-Identifier: Apache-2.0
- -->
+	SPDX-License-Identifier: Apache-2.0
+-->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.osgi</groupId>
-	<artifactId>org.osgi.test.parent</artifactId>
-	<description>OSGi Testing Support Parent</description>
+	<groupId>org.osgi.test.example</groupId>
+	<artifactId>org.osgi.test.example.connect.parent</artifactId>
+	<description>OSGi Testing Example Parent</description>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<packaging>pom</packaging>
 	<version>${revision}</version>
 
 	<properties>
-		<revision>1.2.0-SNAPSHOT</revision>
+		<revision>0.1.0-SNAPSHOT</revision>
 		<project.build.outputTimestamp>1980-02-01T00:00:00Z</project.build.outputTimestamp>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
@@ -37,42 +38,21 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<bnd.version>6.2.0</bnd.version>
-		<junit-jupiter.compile.version>5.6.0</junit-jupiter.compile.version>
-		<junit-platform.compile.version>1.6.0</junit-platform.compile.version>
 		<junit-jupiter.version>5.8.2</junit-jupiter.version>
-		<junit-platform.version>1.8.2</junit-platform.version>
 		<assertj.version>3.22.0</assertj.version>
 		<mockito.version>4.4.0</mockito.version>
-		<awaitility.version>4.2.0</awaitility.version>
-		<osgi.annotation.version>8.1.0</osgi.annotation.version>
-		<osgi.dto.version>1.0.0</osgi.dto.version>
-		<osgi.resource.version>1.0.0</osgi.resource.version>
-		<osgi.framework.version>1.10.0</osgi.framework.version>
-		<osgi.tracker.version>1.5.4</osgi.tracker.version>
-		<osgi.log.version>1.4.0</osgi.log.version>
-		<osgi.cm.version>1.6.1</osgi.cm.version>
-		<osgi.function.compile.version>1.0.0</osgi.function.compile.version>
-		<osgi.promise.compile.version>1.0.0</osgi.promise.compile.version>
-		<osgi.function.version>1.2.0</osgi.function.version>
-		<osgi.promise.version>1.2.0</osgi.promise.version>
+		<osgi-test.version>1.1.0</osgi-test.version>
 	</properties>
 
 	<modules>
-		<module>org.osgi.test.common</module>
-		<module>org.osgi.test.assertj.framework</module>
-		<module>org.osgi.test.assertj.log</module>
-		<module>org.osgi.test.assertj.promise</module>
-		<module>org.osgi.test.junit4</module>
-		<module>org.osgi.test.junit5</module>
-		<module>org.osgi.test.junit5.cm</module>
-		<module>org.osgi.test.junit5.listeners.log.osgi</module>
-		<module>org.osgi.test.bom</module>
+		<module>org.osgi.test.example.api</module>
+		<module>org.osgi.test.example.player.impl</module>
 	</modules>
 
 	<url>https://www.osgi.org</url>
 	<organization>
-		<name>Eclipse Foundation</name>
-		<url>https://www.eclipse.org</url>
+		<name>OSGi Working Group</name>
+		<url>https://www.osgi.org</url>
 	</organization>
 	<licenses>
 		<license>
@@ -86,7 +66,6 @@
 		<url>https://github.com/osgi/osgi-test</url>
 		<connection>scm:git:https://github.com/osgi/osgi-test.git</connection>
 		<developerConnection>scm:git:git@github.com:osgi/osgi-test.git</developerConnection>
-		<tag>${revision}</tag>
 	</scm>
 	<developers>
 		<developer>
@@ -122,15 +101,8 @@
 	</developers>
 	<issueManagement>
 		<system>GitHub Issues</system>
-		<url>https://github.com/osgi/osgi-test/issues</url>
+		<url>https://github.com/osgi/osgi-test</url>
 	</issueManagement>
-	<mailingLists>
-		<mailingList>
-			<name>OSGi Users List</name>
-			<post>osgi-users@eclipse.org</post>
-			<archive>http://www.eclipse.org/lists/osgi-users</archive>
-		</mailingList>
-	</mailingLists>
 
 	<build>
 		<pluginManagement>
@@ -148,82 +120,10 @@
 							</goals>
 							<configuration>
 								<bnd><![CDATA[
-SPDX-License-Identifier: ${project.licenses[0].name}
--includeresource.legal:\
- "META-INF/=${project.parent.basedir}/LICENSE",\
- "META-INF/=${project.parent.basedir}/NOTICE"
-]]></bnd>
-							</configuration>
-						</execution>
-						<!-- Integration Test Configuration -->
-						<execution>
-							<id>test-jar</id>
-							<goals>
-								<goal>test-jar</goal>
-							</goals>
-							<configuration>
-								<artifactFragment>false</artifactFragment>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>biz.aQute.bnd</groupId>
-					<artifactId>bnd-resolver-maven-plugin</artifactId>
-					<version>${bnd.version}</version>
-					<executions>
-						<!-- Integration Test Configuration -->
-						<execution>
-							<id>resolve-test</id>
-							<phase>pre-integration-test</phase>
-							<goals>
-								<goal>resolve</goal>
-							</goals>
-							<configuration>
-								<bndruns>
-									<include>test*.bndrun</include>
-								</bndruns>
-								<bundles>
-									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
-								</bundles>
-								<failOnChanges>false</failOnChanges>
-								<includeDependencyManagement>true</includeDependencyManagement>
-								<reportOptional>false</reportOptional>
-								<scopes>
-									<scope>compile</scope>
-									<scope>runtime</scope>
-									<scope>test</scope>
-								</scopes>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>biz.aQute.bnd</groupId>
-					<artifactId>bnd-testing-maven-plugin</artifactId>
-					<version>${bnd.version}</version>
-					<executions>
-						<!-- OSGi integration tests execution -->
-						<execution>
-							<id>testing</id>
-							<goals>
-								<goal>testing</goal>
-							</goals>
-							<configuration>
-								<bndruns>
-									<include>test*.bndrun</include>
-								</bndruns>
-								<bundles>
-									<bundle>${project.build.directory}/${project.build.finalName}-tests.jar</bundle>
-								</bundles>
-								<failOnChanges>false</failOnChanges>
-								<includeDependencyManagement>true</includeDependencyManagement>
-								<resolve>false</resolve>
-								<scopes>
-									<scope>compile</scope>
-									<scope>runtime</scope>
-									<scope>test</scope>
-								</scopes>
+								-noextraheaders: true
+								-noimportjava: true
+								-fixupmessages: The JAR is empty:
+								]]></bnd>
 							</configuration>
 						</execution>
 					</executions>
@@ -270,10 +170,6 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>2.22.2</version>
-					<!-- We let bnd-testing-maven-plugin do all the testing -->
-					<configuration>
-						<skipTests>true</skipTests>
-					</configuration>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -310,33 +206,7 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 					<configuration>
 						<detectJavaApiLink>false</detectJavaApiLink>
 						<doclint>none</doclint>
-						<links>
-							<link>https://docs.osgi.org/javadoc/osgi.annotation/${osgi.annotation.version}</link>
-						</links>
-						<additionalJOptions>
-							<additionalJOption>-J-Dhttp.agent=maven-javadoc-plugin</additionalJOption>
-						</additionalJOptions>
 					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-gpg-plugin</artifactId>
-					<version>3.0.1</version>
-					<executions>
-						<execution>
-							<id>sign-artifacts</id>
-							<phase>verify</phase>
-							<goals>
-								<goal>sign</goal>
-							</goals>
-						</execution>
-					</executions>
-				</plugin>
-				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.6.12</version>
-					<extensions>true</extensions>
 				</plugin>
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
@@ -413,26 +283,7 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 										</goals>
 									</pluginExecutionFilter>
 									<action>
-										<execute>
-											<runOnConfiguration>true</runOnConfiguration>
-											<runOnIncremental>true</runOnIncremental>
-										</execute>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>biz.aQute.bnd</groupId>
-										<artifactId>bnd-baseline-maven-plugin</artifactId>
-										<versionRange>[1,)</versionRange>
-										<goals>
-											<goal>baseline</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<execute>
-											<runOnConfiguration>true</runOnConfiguration>
-											<runOnIncremental>true</runOnIncremental>
-										</execute>
+										<ignore></ignore>
 									</action>
 								</pluginExecution>
 							</pluginExecutions>
@@ -445,55 +296,6 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 			<plugin>
 				<groupId>biz.aQute.bnd</groupId>
 				<artifactId>bnd-maven-plugin</artifactId>
-			</plugin>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-resolver-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>resolve-test</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>resolve</goal>
-						</goals>
-						<inherited>false</inherited>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-testing-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>testing</id>
-						<goals>
-							<goal>testing</goal>
-						</goals>
-						<inherited>false</inherited>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>biz.aQute.bnd</groupId>
-				<artifactId>bnd-baseline-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>baseline</id>
-						<goals>
-							<goal>baseline</goal>
-						</goals>
-						<inherited>false</inherited>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -527,44 +329,14 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>osgi.annotation</artifactId>
-				<version>${osgi.annotation.version}</version>
+				<version>8.1.0</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.service.log</artifactId>
-				<version>${osgi.log.version}</version>
+				<artifactId>osgi.core</artifactId>
+				<version>8.0.0</version>
 				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.dto</artifactId>
-				<version>${osgi.dto.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.resource</artifactId>
-				<version>${osgi.resource.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.framework</artifactId>
-				<version>${osgi.framework.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.util.tracker</artifactId>
-				<version>${osgi.tracker.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.osgi</groupId>
-				<artifactId>org.osgi.service.cm</artifactId>
-				<version>${osgi.cm.version}</version>
-				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
@@ -574,15 +346,21 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.service.component.annotations</artifactId>
+				<version>1.5.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.function</artifactId>
-				<version>${osgi.function.version}</version>
-				<scope>test</scope>
+				<version>1.2.0</version>
+				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.promise</artifactId>
-				<version>${osgi.promise.version}</version>
-				<scope>test</scope>
+				<version>1.2.0</version>
+				<scope>compile</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.assertj</groupId>
@@ -591,58 +369,11 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>org.awaitility</groupId>
-				<artifactId>awaitility</artifactId>
-				<version>${awaitility.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-api</artifactId>
+				<groupId>org.junit</groupId>
+				<artifactId>junit-bom</artifactId>
 				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-commons</artifactId>
-				<version>${junit-platform.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-params</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.jupiter</groupId>
-				<artifactId>junit-jupiter-engine</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.vintage</groupId>
-				<artifactId>junit-vintage-engine</artifactId>
-				<version>${junit-jupiter.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-engine</artifactId>
-				<version>${junit-platform.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-launcher</artifactId>
-				<version>${junit-platform.version}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.junit.platform</groupId>
-				<artifactId>junit-platform-testkit</artifactId>
-				<version>${junit-platform.version}</version>
-				<scope>test</scope>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -657,6 +388,13 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>org.osgi.test.bom</artifactId>
+				<version>${osgi-test.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
 				<groupId>org.eclipse.platform</groupId>
 				<artifactId>org.eclipse.osgi</artifactId>
 				<version>3.17.200</version>
@@ -664,8 +402,8 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 			</dependency>
 			<dependency>
 				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.configadmin</artifactId>
-				<version>1.9.22</version>
+				<artifactId>org.apache.felix.scr</artifactId>
+				<version>2.2.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -682,6 +420,13 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.annotation</artifactId>
+		</dependency>
+	</dependencies>
 
 	<profiles>
 		<profile>
@@ -745,38 +490,6 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 					</plugin>
 				</plugins>
 			</build>
-		</profile>
-		<profile>
-			<id>ossrh</id>
-			<properties>
-				<skipTests>true</skipTests>
-				<maven.test.skip>true</maven.test.skip>
-				<bnd.baseline.skip>true</bnd.baseline.skip>
-				<bnd.resolve.skip>true</bnd.resolve.skip>
-				<jacoco.skip>true</jacoco.skip>
-			</properties>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-					</plugin>
-					<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<configuration>
-							<serverId>ossrh</serverId>
-							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
-			<distributionManagement>
-				<snapshotRepository>
-					<id>ossrh</id>
-					<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-				</snapshotRepository>
-			</distributionManagement>
 		</profile>
 	</profiles>
 

@@ -40,7 +40,8 @@
 -runrequires: \
 	bnd.identity;id='${project.artifactId}-tests',\
 	bnd.identity;id='junit-jupiter-engine',\
-	bnd.identity;id='junit-platform-launcher'
+	bnd.identity;id='junit-platform-launcher',\
+	bnd.identity;id='org.osgi.service.component'
 # This will help us keep -runbundles sorted
 -runstartlevel: \
     order=sortbynameversion,\
@@ -59,7 +60,10 @@
 	org.mockito.mockito-core;version='[4.4.0,4.4.1)',\
 	org.objenesis;version='[3.2.0,3.2.1)',\
 	org.opentest4j;version='[1.2.0,1.2.1)',\
+	org.osgi.service.component;version='[1.5.0,1.5.1)',\
 	org.osgi.test.assertj.framework;version='[1.2.0,1.2.1)',\
 	org.osgi.test.common;version='[1.2.0,1.2.1)',\
 	org.osgi.test.junit5;version='[1.2.0,1.2.1)',\
-	org.osgi.test.junit5-tests;version='[1.2.0,1.2.1)'
+	org.osgi.test.junit5-tests;version='[1.2.0,1.2.1)',\
+	org.osgi.util.function;version='[1.2.0,1.2.1)',\
+	org.osgi.util.promise;version='[1.2.0,1.2.1)'
