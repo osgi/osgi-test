@@ -15,11 +15,31 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
+package org.osgi.test.example.player.impl;
 
-@Export(attribute = "junit=5", substitution = Substitution.NOIMPORT)
-@Version("1.2.0")
-package org.osgi.test.common.annotation;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.bundle.Export.Substitution;
-import org.osgi.annotation.versioning.Version;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import org.osgi.test.common.annotation.WithBundle;
+
+/**
+ * Example of a custom annotation to group some annotations that might be reused
+ * in different tests
+ */
+@Inherited
+@Target({
+	ElementType.TYPE
+})
+@Retention(RUNTIME)
+@Documented
+@WithBundle(value = "org.apache.felix.scr", start = true, isolated = true)
+@WithBundle("org.osgi.util.promise")
+@WithBundle("org.osgi.util.function")
+public @interface UseFelixServiceComponentRuntime {
+
+}

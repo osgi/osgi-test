@@ -15,11 +15,41 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
+package org.osgi.test.junit5.framework;
 
-@Export(attribute = "junit=5", substitution = Substitution.NOIMPORT)
-@Version("1.2.0")
-package org.osgi.test.common.annotation;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.bundle.Export.Substitution;
-import org.osgi.annotation.versioning.Version;
+import org.osgi.framework.connect.ConnectContent.ConnectEntry;
+
+class FileConnectEntry implements ConnectEntry {
+
+	private File file;
+
+	FileConnectEntry(File file) {
+		this.file = file;
+	}
+
+	@Override
+	public String getName() {
+		return file.getName();
+	}
+
+	@Override
+	public long getContentLength() {
+		return file.length();
+	}
+
+	@Override
+	public long getLastModified() {
+		return file.lastModified();
+	}
+
+	@Override
+	public InputStream getInputStream() throws IOException {
+		return new FileInputStream(file);
+	}
+
+}

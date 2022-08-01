@@ -15,11 +15,43 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
+package org.osgi.test.junit5.framework;
 
-@Export(attribute = "junit=5", substitution = Substitution.NOIMPORT)
-@Version("1.2.0")
-package org.osgi.test.common.annotation;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.jar.JarFile;
+import java.util.zip.ZipEntry;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.bundle.Export.Substitution;
-import org.osgi.annotation.versioning.Version;
+import org.osgi.framework.connect.ConnectContent.ConnectEntry;
+
+final class ZipConnectEntry implements ConnectEntry {
+
+	private ZipEntry	entry;
+	private JarFile		jarFile;
+
+	public ZipConnectEntry(JarFile jarFile, ZipEntry entry) {
+		this.jarFile = jarFile;
+		this.entry = entry;
+	}
+
+	@Override
+	public String getName() {
+		return entry.getName();
+	}
+
+	@Override
+	public long getContentLength() {
+		return entry.getSize();
+	}
+
+	@Override
+	public long getLastModified() {
+		return entry.getTime();
+	}
+
+	@Override
+	public InputStream getInputStream() throws IOException {
+		return jarFile.getInputStream(entry);
+	}
+
+}

@@ -15,11 +15,30 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
-
-@Export(attribute = "junit=5", substitution = Substitution.NOIMPORT)
-@Version("1.2.0")
 package org.osgi.test.common.annotation;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.bundle.Export.Substitution;
-import org.osgi.annotation.versioning.Version;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+/**
+ * Container annotation for repeated {@link WithBundle} annotations.
+ *
+ * @author $Id: be4ab77e12eac61d3efe207ac94a2687bb31c76c $
+ */
+@Documented
+@Retention(RUNTIME)
+@Target({
+	ElementType.TYPE
+})
+@Inherited
+public @interface WithBundles {
+	/**
+	 * Repeated {@link WithBundle} annotations.
+	 */
+	WithBundle[] value();
+}

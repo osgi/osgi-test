@@ -45,6 +45,12 @@
 			<artifactId>osgi.annotation</artifactId>
 		</dependency>
 		<dependency>
+		    <groupId>org.osgi</groupId>
+		    <artifactId>org.osgi.service.component</artifactId>
+		    <version>1.5.0</version>
+		    <scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>org.osgi.test.common</artifactId>
 			<version>${revision}</version>

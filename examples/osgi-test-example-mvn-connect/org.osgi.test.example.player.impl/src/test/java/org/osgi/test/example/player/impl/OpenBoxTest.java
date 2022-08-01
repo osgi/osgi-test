@@ -16,10 +16,26 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@Export(attribute = "junit=5", substitution = Substitution.NOIMPORT)
-@Version("1.2.0")
-package org.osgi.test.common.annotation;
+package org.osgi.test.example.player.impl;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.bundle.Export.Substitution;
-import org.osgi.annotation.versioning.Version;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+
+import org.junit.jupiter.api.Test;
+import org.osgi.test.example.api.Ball;
+
+public class OpenBoxTest {
+
+	@Test
+	void myTest() {
+		PlayerImpl p = new PlayerImpl();
+		p.ball = mock(Ball.class);
+		assertThat(p.getBall()).isNotNull();
+		verifyNoInteractions(p.getBall());
+		p.kickBall();
+		verify(p.getBall()).kick();
+	}
+
+}

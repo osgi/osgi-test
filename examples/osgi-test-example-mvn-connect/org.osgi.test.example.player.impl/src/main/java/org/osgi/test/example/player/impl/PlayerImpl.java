@@ -16,10 +16,26 @@
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
 
-@Export(attribute = "junit=5", substitution = Substitution.NOIMPORT)
-@Version("1.2.0")
-package org.osgi.test.common.annotation;
+package org.osgi.test.example.player.impl;
 
-import org.osgi.annotation.bundle.Export;
-import org.osgi.annotation.bundle.Export.Substitution;
-import org.osgi.annotation.versioning.Version;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.test.example.api.Ball;
+import org.osgi.test.example.api.Player;
+
+@Component
+public class PlayerImpl implements Player {
+
+	@Reference
+	Ball ball;
+
+	@Override
+	public void kickBall() {
+		ball.kick();
+	}
+
+	@Override
+	public Ball getBall() {
+		return ball;
+	}
+}
