@@ -20,8 +20,8 @@ package org.osgi.test.common.exceptions;
 
 import static java.util.Objects.requireNonNull;
 
-import java.io.PrintWriter;
 import java.io.CharArrayWriter;
+import java.io.PrintWriter;
 import java.util.StringJoiner;
 import java.util.concurrent.Callable;
 
