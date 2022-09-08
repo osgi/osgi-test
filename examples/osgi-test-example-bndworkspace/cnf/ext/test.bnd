@@ -1,8 +1,8 @@
 junit_jupiter_version: 5.9.0
 junit_platform_version: 1.9.0
 assertj_version: 3.23.1
-mockito_version: 4.7.0
-bytebuddy_version: 1.12.13
+mockito_version: 4.8.0
+bytebuddy_version: 1.12.14
 osgi_test_version: 1.2.1
 
 junit: \
