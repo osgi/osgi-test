@@ -15,7 +15,7 @@ org.assertj:assertj-core:${assertj_version}
 org.mockito:mockito-core:${mockito_version}
 net.bytebuddy:byte-buddy:${bytebuddy_version}
 net.bytebuddy:byte-buddy-agent:${bytebuddy_version}
-org.objenesis:objenesis:3.2
+org.objenesis:objenesis:${objenesis_version}
 org.osgi:org.osgi.test.common:${osgi_test_version}
 org.osgi:org.osgi.test.junit5:${osgi_test_version}
 org.osgi:org.osgi.test.assertj.framework:${osgi_test_version}
