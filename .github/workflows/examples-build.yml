@@ -63,12 +63,17 @@ jobs:
     name: example-${{ matrix.example }} JDK${{ matrix.java }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@ebacdc22ef6c2cfb85ee5ded8f2e640f4c776dd5
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
     - name: Git Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
     - name: Gradle Wrapper Validation
-      uses: gradle/wrapper-validation-action@v1
+      uses: gradle/wrapper-validation-action@55e685c48d84285a5b0418cd094606e199cca3b6
     - name: Set up Java ${{ matrix.java }}
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@de1bb2b0c5634f0fc4438d7aa9944e68f9bf86cc
       with:
         distribution: 'temurin'
         java-version: ${{ matrix.java }}
