@@ -180,6 +180,7 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 								<goal>resolve</goal>
 							</goals>
 							<configuration>
+								<outputBndrunDir>${project.build.directory}</outputBndrunDir>
 								<bndruns>
 									<include>test*.bndrun</include>
 								</bndruns>
@@ -210,6 +211,7 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 								<goal>testing</goal>
 							</goals>
 							<configuration>
+								<bndrunDir>${project.build.directory}</bndrunDir>
 								<bndruns>
 									<include>test*.bndrun</include>
 								</bndruns>
