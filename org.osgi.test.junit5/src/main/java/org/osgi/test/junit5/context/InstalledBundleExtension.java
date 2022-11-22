@@ -19,6 +19,8 @@
 package org.osgi.test.junit5.context;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
@@ -53,12 +55,14 @@ public class InstalledBundleExtension extends InjectingExtension<InjectInstalled
 
 			String spec = injectBundle.value();
 			if (prefixMatch(spec, "http:", "https:", "file:")) {
-				return ib.installBundle(new URL(spec), injectBundle.start());
+				URL url = new URI(spec).parseServerAuthority()
+					.toURL();
+				return ib.installBundle(url, injectBundle.start());
 			} else {
 				return ib.installBundle(BundleInstaller.EmbeddedLocation.of(ib.getBundleContext(), spec),
 					injectBundle.start());
 			}
-		} catch (MalformedURLException e) {
+		} catch (URISyntaxException | MalformedURLException e) {
 			throw new ExtensionConfigurationException(
 				String.format("Could not parse URL from given String %s.", injectBundle.value()), e);
 		}
