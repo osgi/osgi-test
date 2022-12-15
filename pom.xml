@@ -161,9 +161,6 @@ SPDX-License-Identifier: ${project.licenses[0].name}
 							<goals>
 								<goal>test-jar</goal>
 							</goals>
-							<configuration>
-								<artifactFragment>false</artifactFragment>
-							</configuration>
 						</execution>
 					</executions>
 				</plugin>
