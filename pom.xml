@@ -54,7 +54,7 @@
 		<osgi.function.compile.version>1.0.0</osgi.function.compile.version>
 		<osgi.promise.compile.version>1.0.0</osgi.promise.compile.version>
 		<osgi.function.version>1.2.0</osgi.function.version>
-		<osgi.promise.version>1.2.0</osgi.promise.version>
+		<osgi.promise.version>1.3.0</osgi.promise.version>
 	</properties>
 
 	<modules>

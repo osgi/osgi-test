@@ -4,7 +4,7 @@
 Bundle-Description: OSGi Testing Example Player Implementation
 
 -buildpath: \
-	org.osgi.service.component.annotations;version=1.4.0,\
+	org.osgi.service.component.annotations;version=latest,\
 	org.osgi.test.example.api;version=snapshot
 
 -testpath: \
