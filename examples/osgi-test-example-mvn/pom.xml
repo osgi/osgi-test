@@ -406,13 +406,13 @@
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.component</artifactId>
-				<version>1.5.0</version>
+				<version>1.5.1</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.service.component.annotations</artifactId>
-				<version>1.5.0</version>
+				<version>1.5.1</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
@@ -424,7 +424,7 @@
 			<dependency>
 				<groupId>org.osgi</groupId>
 				<artifactId>org.osgi.util.promise</artifactId>
-				<version>1.2.0</version>
+				<version>1.3.0</version>
 				<scope>compile</scope>
 			</dependency>
 			<dependency>
