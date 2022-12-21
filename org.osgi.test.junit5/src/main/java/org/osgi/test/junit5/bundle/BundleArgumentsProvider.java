@@ -17,8 +17,12 @@
  *******************************************************************************/
 package org.osgi.test.junit5.bundle;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -28,53 +32,36 @@ import org.junit.jupiter.params.support.AnnotationConsumer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.test.junit5.context.BundleContextExtension;
 
 public class BundleArgumentsProvider implements ArgumentsProvider, AnnotationConsumer<BundleSource> {
-
-	private BundleSource bundleSource;
+	private BundleSource source;
 
 	@Override
 	public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
-
 		BundleContext bundleContext = BundleContextExtension.getBundleContext(context);
-
-		return filterBundleByAnnotation(bundleContext, bundleSource);
-	}
-
-	static Stream<Arguments> filterBundleByAnnotation(BundleContext bundleContext, BundleSource annotation)
-		throws InvalidSyntaxException {
-
-		String headerFilter = annotation.headerFilter();
-		Filter filter = headerFilter.isEmpty() ? null : bundleContext.createFilter(headerFilter);
-		Bundle[] bundles = bundleContext.getBundles();
-
-		return Arrays.stream(bundles)
+		Stream<Bundle> bundles = Arrays.stream(bundleContext.getBundles())
 			.filter(Objects::nonNull)
-			.filter((Bundle bundle) -> {
-				if (annotation.symbolicNamePattern().length == 0) {
-					return true;
-				}
-				return Arrays.stream(annotation.symbolicNamePattern())
-					.anyMatch((symbolicNamePattern) -> bundle.getSymbolicName()
-						.matches(symbolicNamePattern));
-			})
-			.filter((bundle) -> {
-				return (bundle.getState() & annotation.stateMask()) != 0;
-			})
-			.filter((bundle) -> {
-				if (filter == null) {
-					return true;
-				}
-				return filter.match(bundle.getHeaders());
-			})
-			.map(Arguments::of);
+			.filter(bundle -> (bundle.getState() & source.stateMask()) != 0);
+		String[] symbolicNamePatterns = source.symbolicNamePattern();
+		if (symbolicNamePatterns.length > 0) {
+			List<Pattern> patterns = Arrays.stream(symbolicNamePatterns)
+				.map(Pattern::compile)
+				.collect(toList());
+			bundles = bundles.filter(bundle -> patterns.stream()
+				.anyMatch(pattern -> pattern.matcher(bundle.getSymbolicName())
+					.matches()));
+		}
+		String headerFilter = source.headerFilter();
+		if (!headerFilter.isEmpty()) {
+			Filter filter = bundleContext.createFilter(headerFilter);
+			bundles = bundles.filter(bundle -> filter.match(bundle.getHeaders()));
+		}
+		return bundles.map(Arguments::of);
 	}
 
 	@Override
-	public void accept(BundleSource annotation) {
-		this.bundleSource = annotation;
+	public void accept(BundleSource source) {
+		this.source = source;
 	}
-
 }
