@@ -77,7 +77,7 @@ public @interface InjectService {
 
 	/**
 	 * Indicate the number of services that are required to arrive within the
-	 * specified by {@link #timeout()} before starting the test.
+	 * specified {@link #timeout()} before starting the test.
 	 *
 	 * @return The cardinality.
 	 */

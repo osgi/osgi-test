@@ -31,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.support.AnnotationConsumer;
@@ -47,64 +48,65 @@ public class ServiceArgumentsProvider implements ArgumentsProvider, AnnotationCo
 	@SuppressWarnings("resource")
 	@Override
 	public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
-
 		BundleContext bundleContext = BundleContextExtension.getBundleContext(context);
 
-		ServiceConfiguration<?> sc = ServiceExtension.getServiceConfiguration(serviceSource.serviceType(),
-			serviceSource.filter(), serviceSource.filterArguments(), 0, serviceSource.timeout(), context);
+		try {
+			ServiceConfiguration<?> sc = ServiceExtension.getServiceConfiguration(serviceSource.serviceType(),
+				serviceSource.filter(), serviceSource.filterArguments(), serviceSource.cardinality(), serviceSource.timeout(), context);
 
-		Stream<Arguments> stream = sc.getServiceReferences()
-			.stream()
-			.filter(Objects::nonNull)
-			.map((sr) -> {
+			Stream<Arguments> stream = sc.getServiceReferences()
+				.stream()
+				.filter(Objects::nonNull)
+				.map((sr) -> {
 
-				List<Object> list = new ArrayList<>();
-				Optional<AnnotatedElement> oElement = context.getElement();
-				if (oElement.isPresent()) {
-					if (oElement.get() instanceof Method) {
-						Method method = (Method) oElement.get();
-						for (Parameter param : method.getParameters()) {
+					List<Object> list = new ArrayList<>();
+					Optional<AnnotatedElement> oElement = context.getElement();
+					if (oElement.isPresent()) {
+						if (oElement.get() instanceof Method) {
+							Method method = (Method) oElement.get();
+							for (Parameter param : method.getParameters()) {
 
-							TargetType targetType = TargetType.of(param);
-							if (targetType.matches(serviceSource.serviceType())) {
-								Object service = sc.getTracked()
-									.get(sr);
-								list.add(service);
-								continue;
-							}
-
-							if (targetType.matches(ServiceReference.class, serviceSource.serviceType())) {
-								list.add(sr);
-								continue;
-							}
-
-							if (targetType.matches(Dictionary.class, String.class, Object.class)) {
-								Dictionary<String, Object> dict = new Hashtable<>();
-								for (String key : sr.getPropertyKeys()) {
-									dict.put(key, sr.getProperty(key));
+								TargetType targetType = TargetType.of(param);
+								if (targetType.matches(serviceSource.serviceType())) {
+									Object service = sc.getTracked()
+										.get(sr);
+									list.add(service);
+									continue;
 								}
-								list.add(dict);
-								continue;
-							}
 
-							if (targetType.matches(Map.class, String.class, Object.class)) {
-								Map<String, Object> map = new HashMap<>();
-								for (String key : sr.getPropertyKeys()) {
-									map.put(key, sr.getProperty(key));
+								if (targetType.matches(ServiceReference.class, serviceSource.serviceType())) {
+									list.add(sr);
+									continue;
 								}
-								list.add(map);
-								continue;
-							}
 
+								if (targetType.matches(Dictionary.class, String.class, Object.class)) {
+									Dictionary<String, Object> dict = new Hashtable<>();
+									for (String key : sr.getPropertyKeys()) {
+										dict.put(key, sr.getProperty(key));
+									}
+									list.add(dict);
+									continue;
+								}
+
+								if (targetType.matches(Map.class, String.class, Object.class)) {
+									Map<String, Object> map = new HashMap<>();
+									for (String key : sr.getPropertyKeys()) {
+										map.put(key, sr.getProperty(key));
+									}
+									list.add(map);
+									continue;
+								}
+
+							}
 						}
 					}
-				}
+					return Arguments.of(list.toArray());
+				});
 
-				return Arguments.of(list.toArray());
-			});
-
-		return stream;
-
+			return stream;
+		} catch (AssertionError e) {
+			throw new ParameterResolutionException("@ServiceSource: " + e.getMessage(), e);
+		}
 	}
 
 	@Override

@@ -19,6 +19,7 @@
 package org.osgi.test.junit5.test.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.osgi.test.junit5.test.testutils.TestKitUtils.assertThatTest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,9 @@ import java.util.Map;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -97,7 +100,7 @@ public class ServiceArgumentsProviderTest {
 	}
 
 	@ParameterizedTest
-	@ServiceSource(serviceType = Foo.class)
+	@ServiceSource(serviceType = Foo.class, cardinality = 3)
 	public void testOnlyService(Foo foo, TestInfo testInfo) throws Exception {
 		assertThat(foo).isNotNull();
 		testInfo.getTestMethod()
@@ -155,4 +158,17 @@ public class ServiceArgumentsProviderTest {
 		assertThat(count).as("Wrong test-execution-count on : %s", testName)
 			.isEqualTo(i);
 	}
+
+	static class UnmetCardinality {
+		@ParameterizedTest
+		@ServiceSource(serviceType = Foo.class, cardinality = 4)
+		public void test(ServiceReference<Foo> sr) throws Exception {}
+	}
+
+	@Test
+	void unmetCardinality() {
+		assertThatTest(ServiceArgumentsProviderTest.UnmetCardinality.class).isInstanceOf(ParameterResolutionException.class)
+			.hasMessageContainingAll("@ServiceSource", Foo.class.getName(), "didn't arrive within");
+	}
+
 }

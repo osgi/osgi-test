@@ -58,4 +58,14 @@ public @interface ServiceSource {
 	 * @return The timeout.
 	 */
 	long timeout() default DEFAULT_TIMEOUT;
+
+	/**
+	 * Indicate the number of services that are required to arrive within the
+	 * specified {@link #timeout()} before starting the test.
+	 * The default value is 1.
+	 *
+	 * @return The cardinality.
+	 * @since 1.2
+	 */
+	int cardinality() default 1;
 }
