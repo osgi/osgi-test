@@ -17,17 +17,17 @@
  *******************************************************************************/
 package org.osgi.test.junit5.service;
 
-import java.lang.reflect.AnnotatedElement;
+import static java.util.stream.Collectors.toList;
+
 import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -35,84 +35,68 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.support.AnnotationConsumer;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.common.service.ServiceConfiguration;
-import org.osgi.test.junit5.context.BundleContextExtension;
 
 public class ServiceArgumentsProvider implements ArgumentsProvider, AnnotationConsumer<ServiceSource> {
-
-	private ServiceSource serviceSource;
+	private ServiceSource source;
 
 	@SuppressWarnings("resource")
 	@Override
 	public Stream<? extends Arguments> provideArguments(ExtensionContext context) throws Exception {
-		BundleContext bundleContext = BundleContextExtension.getBundleContext(context);
-
+		List<TargetType> targetTypes = context.getElement()
+			.filter(Method.class::isInstance)
+			.map(Method.class::cast)
+			.map(Method::getParameters)
+			.map(params -> Arrays.stream(params)
+				.map(TargetType::of)
+				.collect(toList()))
+			.orElse(Collections.emptyList());
 		try {
-			ServiceConfiguration<?> sc = ServiceExtension.getServiceConfiguration(serviceSource.serviceType(),
-				serviceSource.filter(), serviceSource.filterArguments(), serviceSource.cardinality(), serviceSource.timeout(), context);
-
-			Stream<Arguments> stream = sc.getServiceReferences()
+			ServiceConfiguration<?> sc = ServiceExtension.getServiceConfiguration(source.serviceType(), source.filter(), source.filterArguments(), source.cardinality(), source.timeout(), context);
+			Stream<Object[]> arguments = sc.getServiceReferences()
 				.stream()
 				.filter(Objects::nonNull)
-				.map((sr) -> {
-
-					List<Object> list = new ArrayList<>();
-					Optional<AnnotatedElement> oElement = context.getElement();
-					if (oElement.isPresent()) {
-						if (oElement.get() instanceof Method) {
-							Method method = (Method) oElement.get();
-							for (Parameter param : method.getParameters()) {
-
-								TargetType targetType = TargetType.of(param);
-								if (targetType.matches(serviceSource.serviceType())) {
-									Object service = sc.getTracked()
-										.get(sr);
-									list.add(service);
-									continue;
-								}
-
-								if (targetType.matches(ServiceReference.class, serviceSource.serviceType())) {
-									list.add(sr);
-									continue;
-								}
-
-								if (targetType.matches(Dictionary.class, String.class, Object.class)) {
-									Dictionary<String, Object> dict = new Hashtable<>();
-									for (String key : sr.getPropertyKeys()) {
-										dict.put(key, sr.getProperty(key));
-									}
-									list.add(dict);
-									continue;
-								}
-
-								if (targetType.matches(Map.class, String.class, Object.class)) {
-									Map<String, Object> map = new HashMap<>();
-									for (String key : sr.getPropertyKeys()) {
-										map.put(key, sr.getProperty(key));
-									}
-									list.add(map);
-									continue;
-								}
-
-							}
+				.map(reference -> targetTypes.stream()
+					.map(targetType -> {
+						if (targetType.matches(source.serviceType())) {
+							return sc.getTracked()
+								.get(reference);
 						}
-					}
-					return Arguments.of(list.toArray());
-				});
 
-			return stream;
+						if (targetType.matches(ServiceReference.class, source.serviceType())) {
+							return reference;
+						}
+
+						if (targetType.matches(Dictionary.class, String.class, Object.class)) {
+							Dictionary<String, Object> dict = new Hashtable<>();
+							for (String key : reference.getPropertyKeys()) {
+								dict.put(key, reference.getProperty(key));
+							}
+							return dict;
+						}
+
+						if (targetType.matches(Map.class, String.class, Object.class)) {
+							Map<String, Object> map = new HashMap<>();
+							for (String key : reference.getPropertyKeys()) {
+								map.put(key, reference.getProperty(key));
+							}
+							return map;
+						}
+						// special value to indicate it should be filtered out
+						return this;
+					})
+					.filter(argument -> argument != this)
+					.toArray());
+			return arguments.map(Arguments::of);
 		} catch (AssertionError e) {
 			throw new ParameterResolutionException("@ServiceSource: " + e.getMessage(), e);
 		}
 	}
 
 	@Override
-	public void accept(ServiceSource annotation) {
-		this.serviceSource = annotation;
-
+	public void accept(ServiceSource source) {
+		this.source = source;
 	}
-
 }
