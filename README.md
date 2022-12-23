@@ -41,7 +41,7 @@ You can use your system `mvn` but we require a recent version.
 
 ## Code Quality
 
-We use [CodeQL](https://github.com/osgi/osgi-test/security/code-scanning?query=tool%3ACodeQL) for continuous security analysis.
+We use [CodeQL](https://github.com/osgi/osgi-test/blob/main/.github/workflows/codeql-analysis.yml) for continuous security analysis.
 
 ## Repository
 
