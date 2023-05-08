@@ -39,7 +39,7 @@
 		<bnd.version>6.4.0</bnd.version>
 		<junit-jupiter.compile.version>5.6.0</junit-jupiter.compile.version>
 		<junit-platform.compile.version>1.6.0</junit-platform.compile.version>
-		<junit-jupiter.version>5.9.2</junit-jupiter.version>
+		<junit-jupiter.version>5.9.3</junit-jupiter.version>
 		<junit-platform.version>1.9.2</junit-platform.version>
 		<assertj.compile.version>3.24.2</assertj.compile.version>
 		<assertj.version>3.24.2</assertj.version>
