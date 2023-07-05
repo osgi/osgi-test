@@ -71,7 +71,7 @@ jobs:
         distribution: 'temurin'
         java-version: ${{ matrix.java }}
     - name: Initialize CodeQL Analysis
-      uses: github/codeql-action/init@f6e388ebf0efc915c6c5b165b019ee61a6746a38
+      uses: github/codeql-action/init@004c5de30b6423267685b897a3d595e944f7fed5
       with:
         languages: 'java'
     - name: Build for CodeQL Analysis
@@ -79,4 +79,4 @@ jobs:
       run: |
         ./.github/scripts/codeql-build.sh
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@f6e388ebf0efc915c6c5b165b019ee61a6746a38
+      uses: github/codeql-action/analyze@004c5de30b6423267685b897a3d595e944f7fed5
