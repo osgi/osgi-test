@@ -11,5 +11,5 @@ repositories {
 
 dependencies {
 	implementation("biz.aQute.bnd:biz.aQute.bnd.gradle:${bnd_version}")
-	implementation("dev.hargrave:add-maven-descriptor:1.0.0")
+	implementation("dev.hargrave:add-maven-descriptor:1.1.0")
 }
