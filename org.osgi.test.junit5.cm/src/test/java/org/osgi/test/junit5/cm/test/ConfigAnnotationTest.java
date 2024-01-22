@@ -39,8 +39,6 @@ public class ConfigAnnotationTest {
 	@InjectService
 	ConfigurationAdmin			ca;
 
-
-
 	// START TESTS
 	@InjectConfiguration(NONSTATIC_CONFIGURATION_PID)
 	Configuration nonStaticConfiguration;

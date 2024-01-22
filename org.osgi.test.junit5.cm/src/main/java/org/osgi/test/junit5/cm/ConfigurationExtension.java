@@ -18,8 +18,12 @@
 
 package org.osgi.test.junit5.cm;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+
 import java.io.IOException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
@@ -27,14 +31,17 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.cm.ConfigurationListener;
@@ -46,63 +53,118 @@ import org.osgi.test.common.annotation.config.WithConfigurations;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfigurations;
 import org.osgi.test.common.dictionary.Dictionaries;
-import org.osgi.test.common.exceptions.FunctionWithException;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.inject.InjectingExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
 public class ConfigurationExtension extends InjectingExtension<InjectConfiguration>
-	implements BeforeEachCallback, ParameterResolver, BeforeAllCallback, AfterAllCallback, AfterEachCallback {
+	implements BeforeEachCallback, ParameterResolver, BeforeAllCallback, AfterAllCallback, AfterEachCallback,
+	BeforeTestExecutionCallback, AfterTestExecutionCallback {
 
 	public ConfigurationExtension() {
 		super(InjectConfiguration.class);
 	}
 
-	private static final String					STORE_CONFIGURATION_KEY	= "store.configurationAdmin";
+	private static final String	STORE_CONFIG_HANDLER			= "store.config.handler";
+	private static final String	STORE_CONFIG_HANDLER_REG		= "store.config.handler.reg";
+	private static final String		STORE_CONFIGURATION_CLASS_KEY	= "store.configurationAdmin.class";
+	private static final String		STORE_CONFIGURATION_BA_KEY		= "store.configurationAdmin.beforeAll";
+	private static final String		STORE_CONFIGURATION_BE_KEY		= "store.configurationAdmin.beforeEach";
+	private static final String	STORE_CONFIGURATION_TEST_KEY	= "store.configurationAdmin.test";
 
-	private static BlockingConfigurationHandler	blockingConfigHandler;
+	private static ExtensionContext	DO_NOT_USE_CONTEXT;
 
-	static ConfigurationAdmin configurationAdmin(ExtensionContext extensionContext) {
+	public static ConfigurationAdmin configurationAdmin(ExtensionContext extensionContext) {
 		return ServiceExtension
 			.getServiceConfiguration(ConfigurationAdmin.class, "", new String[0], 0, 0, extensionContext)
 			.getService();
 	}
 
+	private static BlockingConfigurationHandler getBlockingConfigurationHandler(ExtensionContext extensionContext) {
+		Store store = getStore(extensionContext.getRoot());
+		BlockingConfigurationHandlerImpl impl = store.getOrComputeIfAbsent(STORE_CONFIG_HANDLER,
+			y -> new BlockingConfigurationHandlerImpl(), BlockingConfigurationHandlerImpl.class);
+		ServiceRegistration<?> svc = store.getOrComputeIfAbsent(STORE_CONFIG_HANDLER_REG,
+			y -> BundleContextExtension.getBundleContext(extensionContext)
+			.registerService(ConfigurationListener.class, impl, null), ServiceRegistration.class);
+		return impl;
+	}
+
 	@Override
 	public void beforeAll(ExtensionContext extensionContext) throws Exception {
-		BlockingConfigurationHandlerImpl blockingConfigHandlerImpl = new BlockingConfigurationHandlerImpl();
-		BundleContextExtension.getBundleContext(extensionContext)
-			.registerService(ConfigurationListener.class, blockingConfigHandlerImpl, null);
-		blockingConfigHandler = blockingConfigHandlerImpl;
-		storeConfigCopy(extensionContext);
-		handleAnnotationsOnActiveElement(extensionContext);
+		DO_NOT_USE_CONTEXT = extensionContext.getRoot();
+		List<ConfigurationHolder> list = handleAnnotationsOnActiveElement(extensionContext);
+		storeConfigCopy(extensionContext, list, STORE_CONFIGURATION_CLASS_KEY);
+		storeConfigCopy(extensionContext, emptyList(), STORE_CONFIGURATION_BA_KEY);
 	}
 
 	@Override
 	public void afterAll(ExtensionContext extensionContext) throws Exception {
-		reset(extensionContext);
+		super.afterAll(extensionContext);
+		clearConfigurations(extensionContext, STORE_CONFIGURATION_BA_KEY);
+		clearConfigurations(extensionContext, STORE_CONFIGURATION_CLASS_KEY);
+		ServiceRegistration<?> svc = getStore(extensionContext.getRoot()).remove(STORE_CONFIG_HANDLER_REG,
+			ServiceRegistration.class);
+		if (svc != null) {
+			try {
+				svc.unregister();
+			} catch (IllegalStateException ise) {
+				// Swallow this as it means the framework is stopping
+			}
+		}
 	}
 
+	// Overridden to avoid a breaking baseline change
+	// The original logic was in the wrong place causing
+	// @Test configurations to be created earlier than they
+	// should have been
 	@Override
 	public void beforeEach(ExtensionContext extensionContext) throws Exception {
-		if (!isLifecyclePerClass(extensionContext)) {
-			storeConfigCopy(extensionContext);
-		}
-		handleAnnotationsOnActiveElement(extensionContext);
+		storeConfigCopy(extensionContext, emptyList(), STORE_CONFIGURATION_BE_KEY);
 		super.beforeEach(extensionContext);
 	}
 
 	@Override
 	public void afterEach(ExtensionContext extensionContext) throws Exception {
 		super.afterEach(extensionContext);
-		reset(extensionContext);
+		clearConfigurations(extensionContext, STORE_CONFIGURATION_BE_KEY);
 	}
 
-	Configuration handleWithConfiguration(WithConfiguration configAnnotation, ConfigurationAdmin configurationAdmin) {
+	@Override
+	public void beforeTestExecution(ExtensionContext extensionContext) throws Exception {
+		List<ConfigurationHolder> list = handleAnnotationsOnActiveElement(extensionContext);
+		storeConfigCopy(extensionContext, list, STORE_CONFIGURATION_TEST_KEY);
+	}
+
+	@Override
+	public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
+		clearConfigurations(extensionContext, STORE_CONFIGURATION_TEST_KEY);
+	}
+
+	private void clearConfigurations(ExtensionContext extensionContext, String key) {
+		ConfigCloseableResource resource = getStore(extensionContext).remove(key,
+			ConfigCloseableResource.class);
+		if (resource != null) {
+			try {
+				resource.close();
+			} catch (Throwable e) {
+				if (e instanceof RuntimeException) {
+					throw (RuntimeException) e;
+				} else {
+					throw new RuntimeException("Failed to delete test configuration", e);
+				}
+			}
+		}
+	}
+
+	private ConfigurationHolder handleWithConfiguration(ExtensionContext context, WithConfiguration configAnnotation,
+		ConfigurationAdmin configurationAdmin) {
 		try {
 			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin, configAnnotation.pid(),
 				0l);
+
+			Optional<ConfigurationCopy> copyOfBefore = createConfigurationCopy(configBefore);
 
 			Configuration configuration;
 			if (Property.NOT_SET.equals(configAnnotation.location())) {
@@ -112,21 +174,25 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 					configAnnotation.location());
 			}
 
-			updateConfigurationRespectNew(configuration, PropertiesConverter.of(configAnnotation.properties()),
+			updateConfigurationRespectNew(context, configuration,
+				PropertiesConverter.of(configAnnotation.properties()),
 				configBefore == null);
 
-			return configuration;
+			return new ConfigurationHolder(ConfigurationCopy.of(configuration), copyOfBefore);
 		} catch (Exception e) {
 			throw new ParameterResolutionException(
 				String.format("Unable to obtain Configuration for %s.", configAnnotation.pid()), e);
 		}
 	}
 
-	Configuration handleWithFactoryConfiguration(WithFactoryConfiguration configAnnotation,
-		ConfigurationAdmin configurationAdmin) {
+	private ConfigurationHolder handleWithFactoryConfiguration(ExtensionContext context,
+		WithFactoryConfiguration configAnnotation, ConfigurationAdmin configurationAdmin) {
+
 		try {
 			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin,
 				configAnnotation.factoryPid() + "~" + configAnnotation.name());
+
+			Optional<ConfigurationCopy> copyOfBefore = createConfigurationCopy(configBefore);
 
 			Configuration configuration;
 			if (Property.NOT_SET.equals(configAnnotation.location())) {
@@ -137,14 +203,25 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 					configAnnotation.name(), configAnnotation.location());
 			}
 
-			updateConfigurationRespectNew(configuration, PropertiesConverter.of(configAnnotation.properties()),
+			updateConfigurationRespectNew(context, configuration, PropertiesConverter.of(configAnnotation.properties()),
 				configBefore == null);
 
-			return configuration;
+			return new ConfigurationHolder(ConfigurationCopy.of(configuration), copyOfBefore);
 		} catch (Exception e) {
 			throw new ParameterResolutionException(
 				String.format("Unable to obtain Configuration for %s.", configAnnotation.factoryPid()), e);
 		}
+	}
+
+	private Optional<ConfigurationCopy> createConfigurationCopy(Configuration configBefore) {
+		Optional<ConfigurationCopy> copyOfBefore;
+		if (configBefore == null) {
+			copyOfBefore = Optional.empty();
+		} else {
+
+			copyOfBefore = Optional.of(ConfigurationCopy.of(configBefore));
+		}
+		return copyOfBefore;
 	}
 
 	@Override
@@ -206,29 +283,59 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 			option += 4;
 		}
 		Configuration configuration = null;
+		ConfigurationHolder configurationHolder = null;
 		switch (option) {
 			case 1 :
 				try {
 					configuration = ConfigUtil.getConfigsByServicePid(configurationAdmin(extensionContext),
 						injectConfiguration.value(), injectConfiguration.timeout());
+
+					if (configuration != null) {
+
+						ConfigurationCopy cCopy = ConfigurationCopy.of(configuration);
+						configurationHolder = new ConfigurationHolder(cCopy, Optional.of(cCopy));
+					}
+
 				} catch (Exception e) {
 					throw new ParameterResolutionException(
 						String.format("Unable to obtain Configuration for %s.", injectConfiguration.value()), e);
 				}
 				break;
 			case 2 :
-				configuration = handleWithConfiguration(injectConfiguration.withConfig(),
+				configurationHolder = handleWithConfiguration(extensionContext, injectConfiguration.withConfig(),
 					configurationAdmin(extensionContext));
+				try {
+					configuration = ConfigUtil.getConfigsByServicePid(configurationAdmin(extensionContext),
+						configurationHolder.getConfiguration()
+							.getPid());
+				} catch (Exception e) {
+					throw new ParameterResolutionException("Error while finding the Configuration.", e);
+
+				}
+
 				break;
 			case 4 :
-				configuration = handleWithFactoryConfiguration(injectConfiguration.withFactoryConfig(),
+				configurationHolder = handleWithFactoryConfiguration(extensionContext,
+					injectConfiguration.withFactoryConfig(),
 					configurationAdmin(extensionContext));
+				try {
+					configuration = ConfigUtil.getConfigsByServicePid(configurationAdmin(extensionContext),
+						configurationHolder.getConfiguration()
+							.getPid());
+				} catch (Exception e) {
+					throw new ParameterResolutionException("Error while finding the Configuration.", e);
+				}
 				break;
 			default :
 				throw new ParameterResolutionException(
 					String.format("@%s - one of the Fields `value`, `withConfig` or `withFactoryConfig` must be used.",
 						annotation().getSimpleName()));
 		}
+
+		if (configurationHolder != null) {
+			storeConfigCopy(extensionContext, configurationHolder, getFinestScopeKey(extensionContext));
+		}
+
 		if (targetType.matches(Configuration.class)) {
 			return configuration;
 		}
@@ -255,49 +362,76 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 			annotation().getSimpleName()));
 	}
 
-	private void handleAnnotationsOnActiveElement(ExtensionContext extensionContext) {
-		handleWithConfigurations(extensionContext);
-		handleWithConfiguration(extensionContext);
-		handleWithFactoryConfigurations(extensionContext);
-		handleWithFactoryConfiguration(extensionContext);
+	private String getFinestScopeKey(ExtensionContext extensionContext) {
+		Store store = getStore(extensionContext);
+		if (store.get(STORE_CONFIGURATION_TEST_KEY) != null) {
+			return STORE_CONFIGURATION_TEST_KEY;
+		} else if (store.get(STORE_CONFIGURATION_BE_KEY) != null) {
+			return STORE_CONFIGURATION_BE_KEY;
+		} else if (store.get(STORE_CONFIGURATION_BA_KEY) != null) {
+			return STORE_CONFIGURATION_BA_KEY;
+		} else {
+			throw new IllegalStateException("Unable to determine the current injection scope");
+		}
 	}
 
-	private void handleWithFactoryConfiguration(ExtensionContext extensionContext) {
+	private List<ConfigurationHolder> handleAnnotationsOnActiveElement(ExtensionContext extensionContext) {
+		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
+		list.addAll(handleWithConfigurations(extensionContext));
+		list.addAll(handleWithConfiguration(extensionContext));
+		list.addAll(handleWithFactoryConfigurations(extensionContext));
+		list.addAll(handleWithFactoryConfiguration(extensionContext));
+		return list;
+	}
+
+	private List<ConfigurationHolder> handleWithFactoryConfiguration(ExtensionContext extensionContext) {
+		ConfigurationAdmin ca = configurationAdmin(extensionContext);
+		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
 		extensionContext.getElement()
 			.map(element -> element.getAnnotation(WithFactoryConfiguration.class))
-			.ifPresent(factoryConfigAnnotation -> handleWithFactoryConfiguration(factoryConfigAnnotation,
-				configurationAdmin(extensionContext)));
+			.ifPresent(
+				factoryConfigAnnotation -> list
+					.add(handleWithFactoryConfiguration(extensionContext, factoryConfigAnnotation, ca)));
+		return list;
 	}
 
-	private void handleWithFactoryConfigurations(ExtensionContext extensionContext) {
+	private List<ConfigurationHolder> handleWithFactoryConfigurations(ExtensionContext extensionContext) {
+		ConfigurationAdmin ca = configurationAdmin(extensionContext);
+		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
 		extensionContext.getElement()
 			.map(element -> element.getAnnotation(WithFactoryConfigurations.class))
 			.map(WithFactoryConfigurations::value)
 			.ifPresent(factoryConfigAnnotations -> {
-				ConfigurationAdmin ca = configurationAdmin(extensionContext);
 				for (WithFactoryConfiguration factoryConfigAnnotation : factoryConfigAnnotations) {
-					handleWithFactoryConfiguration(factoryConfigAnnotation, ca);
+					list.add(handleWithFactoryConfiguration(extensionContext, factoryConfigAnnotation, ca));
 				}
 			});
+		return list;
+
 	}
 
-	private void handleWithConfiguration(ExtensionContext extensionContext) {
+	private List<ConfigurationHolder> handleWithConfiguration(ExtensionContext extensionContext) {
+		ConfigurationAdmin ca = configurationAdmin(extensionContext);
+		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
+
 		extensionContext.getElement()
 			.map(element -> element.getAnnotation(WithConfiguration.class))
-			.ifPresent(
-				configAnnotation -> handleWithConfiguration(configAnnotation, configurationAdmin(extensionContext)));
+			.ifPresent(configAnnotation -> list.add(handleWithConfiguration(extensionContext, configAnnotation, ca)));
+		return list;
 	}
 
-	private void handleWithConfigurations(ExtensionContext extensionContext) {
+	private List<ConfigurationHolder> handleWithConfigurations(ExtensionContext extensionContext) {
+		ConfigurationAdmin ca = configurationAdmin(extensionContext);
+		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
 		extensionContext.getElement()
 			.map(element -> element.getAnnotation(WithConfigurations.class))
 			.map(WithConfigurations::value)
-			.ifPresent(configAnnotations -> {
-				ConfigurationAdmin ca = configurationAdmin(extensionContext);
+			.ifPresent((configAnnotations -> {
 				for (WithConfiguration configAnnotation : configAnnotations) {
-					handleWithConfiguration(configAnnotation, ca);
+					list.add(handleWithConfiguration(extensionContext, configAnnotation, ca));
 				}
-			});
+			}));
+		return list;
 	}
 
 	static Store getStore(ExtensionContext extensionContext) {
@@ -305,29 +439,43 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 			.getStore(Namespace.create(ConfigurationExtension.class, extensionContext.getUniqueId()));
 	}
 
-	private void storeConfigCopy(ExtensionContext extensionContext) throws Exception {
-		getStore(extensionContext).getOrComputeIfAbsent(STORE_CONFIGURATION_KEY,
-			FunctionWithException.asFunction(key -> {
-				List<Configuration> configurations = ConfigUtil
-					.getAllConfigurations(configurationAdmin(extensionContext));
-				List<ConfigurationCopy> configurationCopies = ConfigUtil.cloneConfigurations(configurations);
-				return configurationCopies;
-			}), List.class);
+	private void storeConfigCopy(ExtensionContext extensionContext, List<ConfigurationHolder> configurationHolders,
+		String key) {
+		ConfigCloseableResource ccr = getStore(extensionContext).getOrComputeIfAbsent(key,
+			k -> new ConfigCloseableResource(extensionContext, getBlockingConfigurationHandler(extensionContext)),
+			ConfigCloseableResource.class);
+		ccr.addAll(configurationHolders);
 	}
 
-	private void reset(ExtensionContext extensionContext) throws Exception {
-		@SuppressWarnings("unchecked")
-		List<ConfigurationCopy> configurationCopies = getStore(extensionContext).remove(STORE_CONFIGURATION_KEY,
-			List.class);
-		if (configurationCopies != null) {
-			ConfigUtil.resetConfig(blockingConfigHandler, configurationAdmin(extensionContext), configurationCopies);
-		}
+	private void storeConfigCopy(ExtensionContext extensionContext, ConfigurationHolder configurationHolder,
+		String key) {
+		storeConfigCopy(extensionContext, singletonList(configurationHolder), key);
 	}
 
+	/**
+	 * This should not be used by external clients and will be removed in
+	 * future.
+	 *
+	 * @param configurationToBeUpdated
+	 * @param newConfigurationProperties
+	 * @param isNewConfiguration
+	 * @throws InterruptedException
+	 * @throws IOException
+	 */
+	@Deprecated
 	public void updateConfigurationRespectNew(Configuration configurationToBeUpdated,
 		Dictionary<String, Object> newConfigurationProperties, boolean isNewConfiguration)
 		throws InterruptedException, IOException {
+		updateConfigurationRespectNew(DO_NOT_USE_CONTEXT, configurationToBeUpdated, newConfigurationProperties,
+			isNewConfiguration);
+	}
+
+	private void updateConfigurationRespectNew(ExtensionContext extensionContext,
+		Configuration configurationToBeUpdated,
+		Dictionary<String, Object> newConfigurationProperties, boolean isNewConfiguration)
+		throws InterruptedException, IOException {
 		if (configurationToBeUpdated != null) {
+			BlockingConfigurationHandler blockingConfigHandler = getBlockingConfigurationHandler(extensionContext);
 			if (newConfigurationProperties != null
 				&& !ConfigUtil.isDictionaryWithNotSetMarker(newConfigurationProperties)) {
 				// has relevant Properties to update

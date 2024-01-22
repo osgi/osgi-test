@@ -31,15 +31,18 @@ import org.osgi.service.cm.ConfigurationListener;
 
 public class BlockingConfigurationHandlerImpl implements ConfigurationListener, BlockingConfigurationHandler {
 
-
 	private Map<String, CountDownLatch>	updateMap	= new HashMap<String, CountDownLatch>();
 	private Map<String, CountDownLatch>	deleteMap	= new HashMap<String, CountDownLatch>();
 
 	@Override
 	public boolean update(Configuration configuration, Dictionary<String, Object> dictionary, long timeout)
 		throws InterruptedException, IOException {
+
 		CountDownLatch latch = createCountdownLatchUpdate(configuration.getPid());
-		configuration.update(dictionary);
+		boolean updatedBecauseDifferent = configuration.updateIfDifferent(dictionary);
+		if (!updatedBecauseDifferent) {
+			return true;
+		}
 		boolean isOk = latch.await(timeout, TimeUnit.MILLISECONDS);
 		return isOk;
 	}

@@ -18,15 +18,12 @@
 package org.osgi.test.junit5.cm;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -97,71 +94,6 @@ public class ConfigUtil {
 
 	}
 
-	static void resetConfig(BlockingConfigurationHandler timeoutListener, ConfigurationAdmin ca,
-		List<ConfigurationCopy> copys) throws Exception {
-
-		List<ConfigurationCopy> leftOvers = new ArrayList<ConfigurationCopy>(copys);
-		List<Configuration> configurations = ConfigUtil.getAllConfigurations(ca);
-
-		configurations.stream()
-			.forEach((conf) -> {
-				boolean match = copys.stream()
-					.anyMatch((copy) -> {
-						if (Objects.equals(conf.getPid(), copy.getPid())) {
-							try {
-								timeoutListener.update(conf, copy.getProperties(), 3000);
-							} catch (IOException e) {
-								throw new UncheckedIOException(e);
-							} catch (InterruptedException e) {
-								throw new RuntimeException(e);
-							}
-							leftOvers.remove(copy);
-							return true;
-						} else {
-							return false;
-						}
-					});
-				try {
-					if (!match) {
-						String pid = conf.getPid();
-						timeoutListener.delete(conf, 3000);
-
-					}
-				} catch (IOException e) {
-					throw new UncheckedIOException(e);
-				} catch (InterruptedException e) {
-					throw new RuntimeException(e);
-				}
-			});
-		leftOvers.stream()
-			.forEach((copy) -> {
-				try {
-					Configuration conf = null;
-					if (copy.getFactoryPid() != null) {
-						String name = copy.getPid()
-							.substring(copy.getFactoryPid()
-								.length() + 1);
-						conf = ca.getFactoryConfiguration(copy.getFactoryPid(), name, copy.getBundleLocation());
-					} else {
-						conf = ca.getConfiguration(copy.getPid(), copy.getBundleLocation());
-					}
-
-					try {
-						timeoutListener.update(conf, copy.getProperties(), 3000);
-
-					} catch (IOException e) {
-						throw new UncheckedIOException(e);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-
-				} catch (IOException e) {
-					throw new UncheckedIOException(e);
-				}
-			});
-
-	}
-
 	public static <K, V> Dictionary<K, V> copy(Dictionary<K, V> dictionary) {
 		Dictionary<K, V> copy = new Hashtable<>();
 		Enumeration<K> keys = dictionary.keys();
@@ -171,6 +103,5 @@ public class ConfigUtil {
 		}
 		return copy;
 	}
-
 
 }
