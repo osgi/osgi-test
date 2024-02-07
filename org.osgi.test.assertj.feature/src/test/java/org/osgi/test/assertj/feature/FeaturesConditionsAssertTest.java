@@ -23,12 +23,14 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.osgi.util.feature.Feature;
+import org.osgi.service.feature.Feature;
 
 @ExtendWith(SoftAssertionsExtension.class)
 public class FeaturesConditionsAssertTest implements ConditionAssert {
@@ -97,20 +99,20 @@ public class FeaturesConditionsAssertTest implements ConditionAssert {
 			when(feature.getName()).thenReturn(null);
 
 			// condition pass
-			passingHas(FeaturesConditions.FeatureConditions.nameNull(), feature);
+			passingHas(FeaturesConditions.FeatureConditions.nameEmpty(), feature);
 
 			// assertion pass
 			Assertions.assertThat(feature)
-				.hasNameNull();
+				.hasNameEmpty();
 
-			when(feature.getName()).thenReturn("featureName");
+			when(feature.getName()).thenReturn(Optional.of("featureName"));
 
 			// condition fail
-			failingHas(FeaturesConditions.FeatureConditions.nameNull(), feature, "name <null>");
+			failingHas(FeaturesConditions.FeatureConditions.nameEmpty(), feature, "name <null>");
 
 			// assertion fail
 			assertThatExceptionOfType(AssertionError.class).isThrownBy(() -> Assertions.assertThat(feature)
-				.hasNameNull())
+				.hasNameEmpty())
 				.withMessage(format("%nExpecting:%n  " + featureName + "%nto have:%n  name <null>"));
 		}
 	}

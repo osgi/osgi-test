@@ -23,14 +23,14 @@ import static org.assertj.core.api.Assertions.not;
 import java.util.Objects;
 
 import org.assertj.core.api.Condition;
-import org.osgi.util.feature.Feature;
-import org.osgi.util.feature.FeatureArtifact;
-import org.osgi.util.feature.FeatureBundle;
-import org.osgi.util.feature.FeatureConfiguration;
-import org.osgi.util.feature.FeatureExtension;
-import org.osgi.util.feature.ID;
+import org.osgi.service.feature.Feature;
+import org.osgi.service.feature.FeatureArtifact;
+import org.osgi.service.feature.FeatureBundle;
+import org.osgi.service.feature.FeatureConfiguration;
+import org.osgi.service.feature.FeatureExtension;
+import org.osgi.service.feature.ID;
 
-public interface FeaturesConditions {
+interface FeaturesConditions {
 
 	interface FeatureArtifactConditions {
 
@@ -59,44 +59,73 @@ public interface FeaturesConditions {
 			return new Condition<Feature>(Feature::isComplete, "complete");
 		}
 
+		static Condition<Feature> descriptionEmpty() {
+			return new Condition<>(f -> !f.getDescription()
+				.isPresent(), "description <isEmpty>");
+		}
+
 		static Condition<Feature> description(String description) {
-			return new Condition<Feature>(f -> Objects.equals(f.getDescription(), description), "description <%s>",
-				description);
+			return new Condition<Feature>(f -> f.getDescription()
+				.isPresent()
+				&& f.getDescription()
+					.get()
+					.equals(description),
+				"description <%s>", description);
 		}
 
 		static Condition<Feature> descriptionMatches(String pattern) {
-			return new Condition<Feature>(f -> Objects.nonNull(f.getDescription()) && f.getDescription()
-				.matches(pattern), "description match <%s>", pattern);
-		}
-
-		static Condition<Feature> descriptionNull() {
-			return new Condition<>(f -> f.getDescription() == null, "description <null>");
+			return new Condition<Feature>(f -> f.getDescription()
+				.isPresent()
+				&& f.getDescription()
+					.get()
+					.matches(pattern),
+				"description match <%s>", pattern);
 		}
 
 		static Condition<Feature> license(String license) {
-			return new Condition<Feature>(f -> Objects.equals(f.getLicense(), license), "license <%s>", license);
+			return new Condition<Feature>(f -> f.getLicense()
+				.isPresent()
+				&& f.getLicense()
+					.get()
+					.equals(license),
+				"license <%s>", license);
 		}
 
 		static Condition<Feature> licenseMatches(String pattern) {
-			return new Condition<Feature>(f -> Objects.nonNull(f.getLicense()) && f.getLicense()
-				.matches(pattern), "license match <%s>", pattern);
+			return new Condition<Feature>(f -> f.getLicense()
+				.isPresent()
+				&& f.getLicense()
+					.get()
+					.matches(pattern),
+				"license match <%s>", pattern);
 		}
 
-		static Condition<Feature> licenseNull() {
-			return new Condition<>(f -> f.getLicense() == null, "license <null>");
+		static Condition<Feature> licenseEmpty() {
+			return new Condition<>(f -> !f.getLicense()
+				.isPresent(), "license <isEmpty>");
 		}
 
 		static Condition<Feature> name(String name) {
-			return new Condition<Feature>(f -> Objects.equals(f.getName(), name), "name <%s>", name);
+			return new Condition<Feature>(f -> f.getName()
+				.isPresent()
+				&& f.getName()
+					.get()
+					.equals(name),
+				"name <%s>", name);
 		}
 
 		static Condition<Feature> nameMatches(String pattern) {
-			return new Condition<Feature>(f -> Objects.nonNull(f.getName()) && f.getName()
-				.matches(pattern), "name match <%s>", pattern);
+			return new Condition<Feature>(f -> f.getName()
+				.isPresent()
+				&& f.getName()
+					.get()
+					.matches(pattern),
+				"name match <%s>", pattern);
 		}
 
-		static Condition<Feature> nameNull() {
-			return new Condition<>(f -> f.getName() == null, "name <null>");
+		static Condition<Feature> nameEmpty() {
+			return new Condition<>(f -> !f.getName()
+				.isPresent(), "name <isEmpty>");
 		}
 
 		static Condition<Feature> notComplete() {
@@ -104,16 +133,26 @@ public interface FeaturesConditions {
 		}
 
 		static Condition<Feature> vendor(String vendor) {
-			return new Condition<Feature>(f -> Objects.equals(f.getVendor(), vendor), "vendor <%s>", vendor);
+			return new Condition<Feature>(f -> f.getVendor()
+				.isPresent()
+				&& f.getVendor()
+					.get()
+					.equals(vendor),
+				"vendor <%s>", vendor);
 		}
 
 		static Condition<Feature> vendorMatches(String pattern) {
-			return new Condition<Feature>(f -> Objects.nonNull(f.getVendor()) && f.getVendor()
-				.matches(pattern), "vendor match <%s>", pattern);
+			return new Condition<Feature>(f -> f.getVendor()
+				.isPresent()
+				&& f.getVendor()
+					.get()
+					.matches(pattern),
+				"vendor match <%s>", pattern);
 		}
 
-		static Condition<Feature> vendorNull() {
-			return new Condition<>(f -> f.getVendor() == null, "vendor <null>");
+		static Condition<Feature> vendorEmpty() {
+			return new Condition<>(f -> !f.getVendor()
+				.isPresent(), "vendor <isEmpty>");
 		}
 
 		//
@@ -249,19 +288,6 @@ public interface FeaturesConditions {
 
 		static Condition<FeatureExtension> nameNull() {
 			return new Condition<>(f -> f.getName() == null, "name <null>");
-		}
-
-		static Condition<FeatureExtension> text(String text) {
-			return new Condition<FeatureExtension>(f -> Objects.equals(f.getText(), text), "text <%s>", text);
-		}
-
-		static Condition<FeatureExtension> textMatches(String pattern) {
-			return new Condition<FeatureExtension>(f -> Objects.nonNull(f.getText()) && f.getText()
-				.matches(pattern), "text match <%s>", pattern);
-		}
-
-		static Condition<FeatureExtension> textNull() {
-			return new Condition<>(f -> f.getText() == null, "json <null>");
 		}
 
 		static Condition<FeatureExtension> type(final FeatureExtension.Type type) {

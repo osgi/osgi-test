@@ -31,8 +31,8 @@ public class SoftAssertions extends org.assertj.core.api.SoftAssertions {
 	 * @return the created "soft" assertion object.
 	 */
 	@org.assertj.core.util.CheckReturnValue
-	public org.osgi.test.assertj.feature.FeatureAssert assertThat(org.osgi.util.feature.Feature actual) {
-		return proxy(org.osgi.test.assertj.feature.FeatureAssert.class, org.osgi.util.feature.Feature.class, actual);
+	public org.osgi.test.assertj.feature.FeatureAssert assertThat(org.osgi.service.feature.Feature actual) {
+		return proxy(org.osgi.test.assertj.feature.FeatureAssert.class, org.osgi.service.feature.Feature.class, actual);
 	}
 
 	/**
@@ -44,9 +44,9 @@ public class SoftAssertions extends org.assertj.core.api.SoftAssertions {
 	 */
 	@org.assertj.core.util.CheckReturnValue
 	public org.osgi.test.assertj.feature.FeatureArtifactAssert assertThat(
-		org.osgi.util.feature.FeatureArtifact actual) {
+		org.osgi.service.feature.FeatureArtifact actual) {
 		return proxy(org.osgi.test.assertj.feature.FeatureArtifactAssert.class,
-			org.osgi.util.feature.FeatureArtifact.class, actual);
+			org.osgi.service.feature.FeatureArtifact.class, actual);
 	}
 
 	/**
@@ -57,8 +57,8 @@ public class SoftAssertions extends org.assertj.core.api.SoftAssertions {
 	 * @return the created "soft" assertion object.
 	 */
 	@org.assertj.core.util.CheckReturnValue
-	public org.osgi.test.assertj.feature.FeatureBundleAssert assertThat(org.osgi.util.feature.FeatureBundle actual) {
-		return proxy(org.osgi.test.assertj.feature.FeatureBundleAssert.class, org.osgi.util.feature.FeatureBundle.class,
+	public org.osgi.test.assertj.feature.FeatureBundleAssert assertThat(org.osgi.service.feature.FeatureBundle actual) {
+		return proxy(org.osgi.test.assertj.feature.FeatureBundleAssert.class, org.osgi.service.feature.FeatureBundle.class,
 			actual);
 	}
 
@@ -71,9 +71,9 @@ public class SoftAssertions extends org.assertj.core.api.SoftAssertions {
 	 */
 	@org.assertj.core.util.CheckReturnValue
 	public org.osgi.test.assertj.feature.FeatureConfigurationAssert assertThat(
-		org.osgi.util.feature.FeatureConfiguration actual) {
+		org.osgi.service.feature.FeatureConfiguration actual) {
 		return proxy(org.osgi.test.assertj.feature.FeatureConfigurationAssert.class,
-			org.osgi.util.feature.FeatureConfiguration.class, actual);
+			org.osgi.service.feature.FeatureConfiguration.class, actual);
 	}
 
 	/**
@@ -85,9 +85,9 @@ public class SoftAssertions extends org.assertj.core.api.SoftAssertions {
 	 */
 	@org.assertj.core.util.CheckReturnValue
 	public org.osgi.test.assertj.feature.FeatureExtensionAssert assertThat(
-		org.osgi.util.feature.FeatureExtension actual) {
+		org.osgi.service.feature.FeatureExtension actual) {
 		return proxy(org.osgi.test.assertj.feature.FeatureExtensionAssert.class,
-			org.osgi.util.feature.FeatureExtension.class, actual);
+			org.osgi.service.feature.FeatureExtension.class, actual);
 	}
 
 	/**
@@ -98,8 +98,8 @@ public class SoftAssertions extends org.assertj.core.api.SoftAssertions {
 	 * @return the created "soft" assertion object.
 	 */
 	@org.assertj.core.util.CheckReturnValue
-	public org.osgi.test.assertj.feature.IDAssert assertThat(org.osgi.util.feature.ID actual) {
-		return proxy(org.osgi.test.assertj.feature.IDAssert.class, org.osgi.util.feature.ID.class, actual);
+	public org.osgi.test.assertj.feature.IDAssert assertThat(org.osgi.service.feature.ID actual) {
+		return proxy(org.osgi.test.assertj.feature.IDAssert.class, org.osgi.service.feature.ID.class, actual);
 	}
 
 }

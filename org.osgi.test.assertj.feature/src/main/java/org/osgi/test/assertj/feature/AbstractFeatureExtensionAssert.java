@@ -24,8 +24,8 @@ import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.ListAssert;
-import org.osgi.util.feature.FeatureExtension;
-import org.osgi.util.feature.ID;
+import org.osgi.service.feature.FeatureExtension;
+import org.osgi.service.feature.ID;
 
 /**
  * Abstract base class for {@link FeatureExtension} specific assertions -
@@ -108,28 +108,6 @@ public abstract class AbstractFeatureExtensionAssert<S extends AbstractFeatureEx
 	 */
 	public S hasName(String name) {
 		return has(FeaturesConditions.FeatureExtensionConditions.name(name));
-	}
-
-	/**
-	 * Verifies that the actual FeatureExtension's text is equal to the given
-	 * one.
-	 *
-	 * @param text the given text to compare the actual FeatureExtension's text
-	 *            to.
-	 * @return this assertion object.
-	 * @throws AssertionError - if the actual FeatureExtension's text is not
-	 *             equal to the given one.
-	 */
-	public S hasText(String text) {
-		return has(FeaturesConditions.FeatureExtensionConditions.text(text));
-	}
-
-	public S isTextNull() {
-		return is(FeaturesConditions.FeatureExtensionConditions.textNull());
-	}
-
-	public S hasTextMatching(String pattern) {
-		return has(FeaturesConditions.FeatureExtensionConditions.textMatches(pattern));
 	}
 
 	/**

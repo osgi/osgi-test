@@ -23,7 +23,7 @@ import java.util.Map;
 import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.api.InstanceOfAssertFactory;
 import org.assertj.core.api.MapAssert;
-import org.osgi.util.feature.FeatureBundle;
+import org.osgi.service.feature.FeatureBundle;
 
 /**
  * Abstract base class for {@link FeatureBundle} specific assertions - Generated

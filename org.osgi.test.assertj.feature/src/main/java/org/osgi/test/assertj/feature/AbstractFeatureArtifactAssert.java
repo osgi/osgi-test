@@ -19,7 +19,7 @@
 package org.osgi.test.assertj.feature;
 
 import org.assertj.core.api.AbstractObjectAssert;
-import org.osgi.util.feature.FeatureArtifact;
+import org.osgi.service.feature.FeatureArtifact;
 
 /**
  * Abstract base class for {@link FeatureArtifact} specific assertions -
