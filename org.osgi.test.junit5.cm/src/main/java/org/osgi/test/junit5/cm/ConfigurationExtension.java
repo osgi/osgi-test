@@ -168,7 +168,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 
 			Configuration configuration;
 			if (Property.NOT_SET.equals(configAnnotation.location())) {
-				configuration = configurationAdmin.getConfiguration(configAnnotation.pid());
+				configuration = configurationAdmin.getConfiguration(configAnnotation.pid(), null);
 			} else {
 				configuration = configurationAdmin.getConfiguration(configAnnotation.pid(),
 					configAnnotation.location());
@@ -197,7 +197,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 			Configuration configuration;
 			if (Property.NOT_SET.equals(configAnnotation.location())) {
 				configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
-					configAnnotation.name());
+					configAnnotation.name(), null);
 			} else {
 				configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
 					configAnnotation.name(), configAnnotation.location());

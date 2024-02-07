@@ -19,6 +19,7 @@ package org.osgi.test.junit5.cm.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -151,4 +152,101 @@ public class ConfigAnnotationTest {
 
 	}
 
+	@Nested
+	class LocationTests {
+
+		private static final String TEST = "test";
+
+		@Test
+		@WithConfiguration(pid = PARAM_PID, properties = {
+			@Property(key = "bar", value = "foo")
+		})
+		public void testMethodLevelNoLocation(@InjectService
+		ConfigurationAdmin ca) throws Exception {
+
+			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, PARAM_PID);
+			assertThat(cs).isNotNull();
+			assertThat(cs.getBundleLocation()).isNull();
+		}
+
+		@Test
+		public void testInjectedNoLocation(
+			@InjectConfiguration(withConfig = @WithConfiguration(pid = PARAM_PID, properties = {
+			@Property(key = "bar", value = "foo")
+		}))
+		Configuration cs) throws Exception {
+
+			assertThat(cs).isNotNull();
+			assertThat(cs.getBundleLocation()).isNull();
+		}
+
+		@Test
+		@WithConfiguration(pid = PARAM_PID, location = "?", properties = {
+			@Property(key = "bar", value = "foo")
+		})
+		public void testMethodLevelWithLocation(@InjectService
+		ConfigurationAdmin ca) throws Exception {
+
+			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, PARAM_PID);
+			assertThat(cs).isNotNull();
+			assertThat(cs.getBundleLocation()).isEqualTo("?");
+		}
+
+		@Test
+		public void testInjectedWithLocation(
+			@InjectConfiguration(withConfig = @WithConfiguration(pid = PARAM_PID, location = "?", properties = {
+				@Property(key = "bar", value = "foo")
+			}))
+			Configuration cs) throws Exception {
+
+			assertThat(cs).isNotNull();
+			assertThat(cs.getBundleLocation()).isEqualTo("?");
+		}
+
+		@Test
+		@WithFactoryConfiguration(factoryPid = PARAM_PID, name = TEST, properties = {
+			@Property(key = "bar", value = "foo")
+		})
+		public void testMethodLevelFactoryNoLocation(@InjectService
+		ConfigurationAdmin ca) throws Exception {
+
+			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, PARAM_PID + "~" + TEST);
+			assertThat(cs).isNotNull();
+			assertThat(cs.getBundleLocation()).isNull();
+		}
+
+		@Test
+		public void testInjectedFactoryNoLocation(
+			@InjectConfiguration(withFactoryConfig = @WithFactoryConfiguration(factoryPid = PARAM_PID, name = TEST, properties = {
+				@Property(key = "bar", value = "foo")
+			}))
+			Configuration cs) throws Exception {
+
+			assertThat(cs).isNotNull();
+			assertThat(cs.getBundleLocation()).isNull();
+		}
+
+		@Test
+		@WithFactoryConfiguration(factoryPid = PARAM_PID, name=TEST, location = "?", properties = {
+			@Property(key = "bar", value = "foo")
+		})
+		public void testMethodLevelFactoryWithLocation(@InjectService
+		ConfigurationAdmin ca) throws Exception {
+
+			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, PARAM_PID + "~" + TEST);
+			assertThat(cs).isNotNull();
+			assertThat(cs.getBundleLocation()).isEqualTo("?");
+		}
+
+		@Test
+		public void testInjectedFactoryWithLocation(
+			@InjectConfiguration(withFactoryConfig = @WithFactoryConfiguration(factoryPid = PARAM_PID, name = TEST, location = "?", properties = {
+				@Property(key = "bar", value = "foo")
+			}))
+			Configuration cs) throws Exception {
+
+			assertThat(cs).isNotNull();
+			assertThat(cs.getBundleLocation()).isEqualTo("?");
+		}
+	}
 }
