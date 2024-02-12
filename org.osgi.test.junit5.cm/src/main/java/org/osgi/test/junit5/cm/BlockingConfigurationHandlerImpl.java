@@ -41,6 +41,7 @@ public class BlockingConfigurationHandlerImpl implements ConfigurationListener, 
 		CountDownLatch latch = createCountdownLatchUpdate(configuration.getPid());
 		boolean updatedBecauseDifferent = configuration.updateIfDifferent(dictionary);
 		if (!updatedBecauseDifferent) {
+			updateMap.remove(configuration.getPid());
 			return true;
 		}
 		boolean isOk = latch.await(timeout, TimeUnit.MILLISECONDS);
@@ -72,16 +73,14 @@ public class BlockingConfigurationHandlerImpl implements ConfigurationListener, 
 		String pid = event.getPid();
 		if (event.getType() == ConfigurationEvent.CM_UPDATED) {
 
-			CountDownLatch countDownLatch = updateMap.get(pid);
+			CountDownLatch countDownLatch = updateMap.remove(pid);
 			if (countDownLatch != null) {
-				updateMap.remove(pid);
 				countDownLatch.countDown();
 			}
 		} else if (event.getType() == ConfigurationEvent.CM_DELETED) {
 
-			CountDownLatch countDownLatch = deleteMap.get(pid);
+			CountDownLatch countDownLatch = deleteMap.remove(pid);
 			if (countDownLatch != null) {
-				deleteMap.remove(pid);
 				countDownLatch.countDown();
 			}
 		}

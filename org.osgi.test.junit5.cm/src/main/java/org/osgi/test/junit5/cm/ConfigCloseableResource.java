@@ -85,7 +85,7 @@ public class ConfigCloseableResource implements CloseableResource {
 			})
 			.findAny();
 
-		// if we habe a state, we can ignore later ons
+		// if we have a state, we can ignore later ons
 		if (!preStoresConfig.isPresent()) {
 			holders.add(holder);
 		}
