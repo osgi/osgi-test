@@ -22,12 +22,14 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -66,12 +68,12 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 		super(InjectConfiguration.class);
 	}
 
-	private static final String	STORE_CONFIG_HANDLER			= "store.config.handler";
-	private static final String	STORE_CONFIG_HANDLER_REG		= "store.config.handler.reg";
+	private static final String		STORE_CONFIG_HANDLER			= "store.config.handler";
+	private static final String		STORE_CONFIG_HANDLER_REG		= "store.config.handler.reg";
 	private static final String		STORE_CONFIGURATION_CLASS_KEY	= "store.configurationAdmin.class";
 	private static final String		STORE_CONFIGURATION_BA_KEY		= "store.configurationAdmin.beforeAll";
 	private static final String		STORE_CONFIGURATION_BE_KEY		= "store.configurationAdmin.beforeEach";
-	private static final String	STORE_CONFIGURATION_TEST_KEY	= "store.configurationAdmin.test";
+	private static final String		STORE_CONFIGURATION_TEST_KEY	= "store.configurationAdmin.test";
 
 	private static ExtensionContext	DO_NOT_USE_CONTEXT;
 
@@ -86,8 +88,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 		BlockingConfigurationHandlerImpl impl = store.getOrComputeIfAbsent(STORE_CONFIG_HANDLER,
 			y -> new BlockingConfigurationHandlerImpl(), BlockingConfigurationHandlerImpl.class);
 		ServiceRegistration<?> svc = store.getOrComputeIfAbsent(STORE_CONFIG_HANDLER_REG,
-			y -> BundleContextExtension.getBundleContext(extensionContext)
-			.registerService(ConfigurationListener.class, impl, null), ServiceRegistration.class);
+			y -> BundleContextExtension.getBundleContext(extensionContext).registerService(ConfigurationListener.class, impl, null), ServiceRegistration.class);
 		return impl;
 	}
 
@@ -143,8 +144,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 	}
 
 	private void clearConfigurations(ExtensionContext extensionContext, String key) {
-		ConfigCloseableResource resource = getStore(extensionContext).remove(key,
-			ConfigCloseableResource.class);
+		ConfigCloseableResource resource = getStore(extensionContext).remove(key, ConfigCloseableResource.class);
 		if (resource != null) {
 			try {
 				resource.close();
@@ -174,8 +174,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 					configAnnotation.location());
 			}
 
-			updateConfigurationRespectNew(context, configuration,
-				PropertiesConverter.of(configAnnotation.properties()),
+			updateConfigurationRespectNew(context, configuration, PropertiesConverter.of(configAnnotation.properties()),
 				configBefore == null);
 
 			return new ConfigurationHolder(ConfigurationCopy.of(configuration), copyOfBefore);
@@ -190,7 +189,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 
 		try {
 			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin,
-				configAnnotation.factoryPid() + "~" + configAnnotation.name());
+				configAnnotation.factoryPid() + "~" + configAnnotation.name(), 0l);
 
 			Optional<ConfigurationCopy> copyOfBefore = createConfigurationCopy(configBefore);
 
@@ -316,8 +315,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 				break;
 			case 4 :
 				configurationHolder = handleWithFactoryConfiguration(extensionContext,
-					injectConfiguration.withFactoryConfig(),
-					configurationAdmin(extensionContext));
+					injectConfiguration.withFactoryConfig(), configurationAdmin(extensionContext));
 				try {
 					configuration = ConfigUtil.getConfigsByServicePid(configurationAdmin(extensionContext),
 						configurationHolder.getConfiguration()
@@ -376,62 +374,43 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 	}
 
 	private List<ConfigurationHolder> handleAnnotationsOnActiveElement(ExtensionContext extensionContext) {
-		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
-		list.addAll(handleWithConfigurations(extensionContext));
-		list.addAll(handleWithConfiguration(extensionContext));
-		list.addAll(handleWithFactoryConfigurations(extensionContext));
-		list.addAll(handleWithFactoryConfiguration(extensionContext));
-		return list;
+		ConfigurationAdmin ca = configurationAdmin(extensionContext);
+		return extensionContext.getElement()
+			.map(AnnotationUtil::findAllConfigAnnotations)
+			.orElse(emptyList())
+			.stream()
+			.flatMap(annotation -> handleConfiguration(extensionContext, annotation, ca).stream())
+			.collect(Collectors.toList());
 	}
 
-	private List<ConfigurationHolder> handleWithFactoryConfiguration(ExtensionContext extensionContext) {
-		ConfigurationAdmin ca = configurationAdmin(extensionContext);
-		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
-		extensionContext.getElement()
-			.map(element -> element.getAnnotation(WithFactoryConfiguration.class))
-			.ifPresent(
-				factoryConfigAnnotation -> list
-					.add(handleWithFactoryConfiguration(extensionContext, factoryConfigAnnotation, ca)));
-		return list;
-	}
+	private List<ConfigurationHolder> handleConfiguration(ExtensionContext extensionContext, Annotation an,
+		ConfigurationAdmin ca) {
 
-	private List<ConfigurationHolder> handleWithFactoryConfigurations(ExtensionContext extensionContext) {
-		ConfigurationAdmin ca = configurationAdmin(extensionContext);
-		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
-		extensionContext.getElement()
-			.map(element -> element.getAnnotation(WithFactoryConfigurations.class))
-			.map(WithFactoryConfigurations::value)
-			.ifPresent(factoryConfigAnnotations -> {
-				for (WithFactoryConfiguration factoryConfigAnnotation : factoryConfigAnnotations) {
-					list.add(handleWithFactoryConfiguration(extensionContext, factoryConfigAnnotation, ca));
-				}
-			});
-		return list;
+		ArrayList<ConfigurationHolder> configHolders = new ArrayList<>();
+		if (an instanceof WithConfigurations) {
 
-	}
+			WithConfigurations withConfigurations = (WithConfigurations) an;
+			for (WithConfiguration factoryConfigAnnotation : withConfigurations.value()) {
+				configHolders.add(handleWithConfiguration(extensionContext, factoryConfigAnnotation, ca));
 
-	private List<ConfigurationHolder> handleWithConfiguration(ExtensionContext extensionContext) {
-		ConfigurationAdmin ca = configurationAdmin(extensionContext);
-		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
+			}
 
-		extensionContext.getElement()
-			.map(element -> element.getAnnotation(WithConfiguration.class))
-			.ifPresent(configAnnotation -> list.add(handleWithConfiguration(extensionContext, configAnnotation, ca)));
-		return list;
-	}
+		} else if (an instanceof WithConfiguration) {
 
-	private List<ConfigurationHolder> handleWithConfigurations(ExtensionContext extensionContext) {
-		ConfigurationAdmin ca = configurationAdmin(extensionContext);
-		List<ConfigurationHolder> list = new ArrayList<ConfigurationHolder>();
-		extensionContext.getElement()
-			.map(element -> element.getAnnotation(WithConfigurations.class))
-			.map(WithConfigurations::value)
-			.ifPresent((configAnnotations -> {
-				for (WithConfiguration configAnnotation : configAnnotations) {
-					list.add(handleWithConfiguration(extensionContext, configAnnotation, ca));
-				}
-			}));
-		return list;
+			configHolders.add(handleWithConfiguration(extensionContext, (WithConfiguration) an, ca));
+
+		} else if (an instanceof WithFactoryConfigurations) {
+
+			WithFactoryConfigurations withFactoryConfigurations = (WithFactoryConfigurations) an;
+			for (WithFactoryConfiguration factoryConfigAnnotation : withFactoryConfigurations.value()) {
+				configHolders.add(handleWithFactoryConfiguration(extensionContext, factoryConfigAnnotation, ca));
+			}
+
+		} else if (an instanceof WithFactoryConfiguration) {
+
+			configHolders.add(handleWithFactoryConfiguration(extensionContext, (WithFactoryConfiguration) an, ca));
+		}
+		return configHolders;
 	}
 
 	static Store getStore(ExtensionContext extensionContext) {
@@ -471,9 +450,8 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 	}
 
 	private void updateConfigurationRespectNew(ExtensionContext extensionContext,
-		Configuration configurationToBeUpdated,
-		Dictionary<String, Object> newConfigurationProperties, boolean isNewConfiguration)
-		throws InterruptedException, IOException {
+		Configuration configurationToBeUpdated, Dictionary<String, Object> newConfigurationProperties,
+		boolean isNewConfiguration) throws InterruptedException, IOException {
 		if (configurationToBeUpdated != null) {
 			BlockingConfigurationHandler blockingConfigHandler = getBlockingConfigurationHandler(extensionContext);
 			if (newConfigurationProperties != null
