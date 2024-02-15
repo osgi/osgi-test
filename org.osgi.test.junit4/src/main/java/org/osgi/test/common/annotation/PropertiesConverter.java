@@ -17,10 +17,13 @@
  *******************************************************************************/
 package org.osgi.test.common.annotation;
 
+import static org.osgi.test.common.annotation.Property.NOT_SET;
+
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.Properties;
 
 import org.osgi.test.common.annotation.Property.Scalar;
 import org.osgi.test.common.annotation.Property.Type;
@@ -39,9 +42,24 @@ public class PropertiesConverter {
 
 		boolean primitive = entry.type()
 			.equals(Type.PrimitiveArray);
-		Object result = createArray(entry.scalar(), primitive, entry.value().length);
+		String[] value;
+		if (NOT_SET.equals(entry.systemProperty())) {
+			value = entry.value();
+		} else {
+			Properties sysProps = System.getProperties();
+			if (sysProps.containsKey(entry.systemProperty())) {
+				String prop = sysProps.getProperty(entry.systemProperty());
+				value = entry.type() == Type.Scalar ? new String[] {
+					prop
+				} : prop.split(",");
+			} else {
+				value = entry.value();
+			}
+		}
+
+		Object result = createArray(entry.scalar(), primitive, value.length);
 		int i = 0;
-		for (String v : entry.value()) {
+		for (String v : value) {
 			Object val = null;
 
 			if (v != null) {

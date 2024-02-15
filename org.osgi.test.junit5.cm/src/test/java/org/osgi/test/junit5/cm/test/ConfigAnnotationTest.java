@@ -18,14 +18,20 @@
 package org.osgi.test.junit5.cm.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.Property.Scalar;
+import org.osgi.test.common.annotation.Property.Type;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
@@ -247,6 +253,68 @@ public class ConfigAnnotationTest {
 
 			assertThat(cs).isNotNull();
 			assertThat(cs.getBundleLocation()).isEqualTo("?");
+		}
+	}
+
+	@Nested
+	class SystemPropertyTests {
+
+		private static final String	ARRAY_NAME	= "osgi.test.cm.array";
+		private static final String	METHOD_NAME	= "osgi.test.cm.method.name";
+
+		@BeforeEach
+		void setConfig(TestInfo info) {
+			System.setProperty(ARRAY_NAME, "1,2,3");
+			info.getTestMethod()
+				.ifPresent(m -> System.setProperty(METHOD_NAME, m.getName()));
+		}
+
+		@AfterEach
+		void unsetConfig() {
+			System.clearProperty(ARRAY_NAME);
+			System.clearProperty(METHOD_NAME);
+		}
+
+		@Test
+		@WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testScalar", systemProperty = METHOD_NAME),
+			@Property(key = "testArray", systemProperty = ARRAY_NAME, type = Type.PrimitiveArray, scalar = Scalar.Byte)
+		})
+		void testAnnotated(@InjectService
+		ConfigurationAdmin ca) throws Exception {
+			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, "foo");
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testScalar")).isEqualTo("testAnnotated");
+			assertArrayEquals(new byte[] {
+				1, 2, 3
+			}, (byte[]) cs.getProperties()
+				.get("testArray"));
+		}
+
+		@Test
+		void testInjected(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testScalar", systemProperty = METHOD_NAME),
+			@Property(key = "testArray", systemProperty = ARRAY_NAME, type = Type.PrimitiveArray, scalar = Scalar.Byte)
+		}))
+		Configuration cs) throws Exception {
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testScalar")).isEqualTo("testInjected");
+			assertArrayEquals(new byte[] {
+				1, 2, 3
+			}, (byte[]) cs.getProperties()
+				.get("testArray"));
+		}
+
+		@Test
+		void testFallback(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testFallback", value = "default", systemProperty = "missing")
+		}))
+		Configuration cs) throws Exception {
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testFallback")).isEqualTo("default");
 		}
 	}
 }

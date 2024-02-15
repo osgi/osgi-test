@@ -63,4 +63,6 @@ public @interface Property {
 
 	Type type() default Type.Scalar;
 
+	String systemProperty() default NOT_SET;
+
 }
