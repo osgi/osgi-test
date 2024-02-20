@@ -21,8 +21,8 @@ import java.util.Dictionary;
 
 /**
  * The generic PropertiesConverter is unable to support all forms of property
- * conversion and should not be used. Use the JUnit version specific alternative
- * instead.
+ * conversion and should not be used. Use the JUnit 5 specific
+ * {@link org.osgi.test.junit5.properties.PropertiesConverter} instead.
  */
 @Deprecated
 public class PropertiesConverter {

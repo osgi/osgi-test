@@ -17,8 +17,6 @@
  *******************************************************************************/
 package org.osgi.test.junit4.properties;
 
-import static org.osgi.test.common.annotation.Property.Type.Scalar;
-
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Dictionary;
@@ -168,7 +166,7 @@ public class PropertiesConverter {
 				throw new RuntimeException("conversion error - unknown source");
 		}
 
-		return entry.type() == Scalar ? new String[] {
+		return entry.type() == Type.Scalar ? new String[] {
 			prop
 		} : prop.split("\\s*,\\s*");
 	}

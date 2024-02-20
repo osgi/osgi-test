@@ -55,6 +55,11 @@ public @interface Property {
 		PrimitiveArray
 	}
 
+	/**
+	 * Indicates the source of the configuration value
+	 *
+	 * @since 1.2
+	 */
 	public enum ValueSource {
 		/** Use the {@link Property#value()} directly */
 		Value,
@@ -85,6 +90,7 @@ public @interface Property {
 
 	/**
 	 * @return the source that should be used to obtain the value
+	 * @since 1.2
 	 */
 	ValueSource source() default ValueSource.Value;
 
