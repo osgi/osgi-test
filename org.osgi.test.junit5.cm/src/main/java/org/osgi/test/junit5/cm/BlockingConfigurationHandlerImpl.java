@@ -18,25 +18,55 @@
 
 package org.osgi.test.junit5.cm;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import java.io.IOException;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationEvent;
 import org.osgi.service.cm.ConfigurationListener;
+import org.osgi.test.common.context.ContextHelper;
 
-public class BlockingConfigurationHandlerImpl implements ConfigurationListener, BlockingConfigurationHandler {
+public class BlockingConfigurationHandlerImpl
+	implements ConfigurationListener, BlockingConfigurationHandler, CloseableResource {
 
-	private Map<String, CountDownLatch>	updateMap	= new HashMap<String, CountDownLatch>();
-	private Map<String, CountDownLatch>	deleteMap	= new HashMap<String, CountDownLatch>();
+	private final Map<String, CountDownLatch>	updateMap	= new HashMap<String, CountDownLatch>();
+	private final Map<String, CountDownLatch>	deleteMap	= new HashMap<String, CountDownLatch>();
+
+	private final ServiceRegistration<?>		reg;
+	private final AtomicBoolean					closed		= new AtomicBoolean(false);
+
+	public BlockingConfigurationHandlerImpl() {
+		this(Optional.empty());
+	}
+
+	public BlockingConfigurationHandlerImpl(Optional<Class<?>> testClass) {
+		BundleContext context = ContextHelper
+			.getBundleContext(testClass.orElse(BlockingConfigurationHandlerImpl.class));
+		reg = context.registerService(ConfigurationListener.class, this, null);
+	}
+
+	@Override
+	public void close() throws Throwable {
+		reg.unregister();
+		closed.set(true);
+	}
 
 	@Override
 	public boolean update(Configuration configuration, Dictionary<String, Object> dictionary, long timeout)
 		throws InterruptedException, IOException {
+
+		assertFalse(closed.get(), "BlockingConfigurationHandler was closed");
 
 		CountDownLatch latch = createCountdownLatchUpdate(configuration.getPid());
 		boolean updatedBecauseDifferent = configuration.updateIfDifferent(dictionary);
@@ -50,6 +80,9 @@ public class BlockingConfigurationHandlerImpl implements ConfigurationListener, 
 
 	@Override
 	public boolean delete(Configuration configuration, long timeout) throws InterruptedException, IOException {
+
+		assertFalse(closed.get(), "BlockingConfigurationHandler was closed");
+
 		CountDownLatch latch = createCountdownLatchDelete(configuration.getPid());
 		configuration.delete();
 		boolean isOk = latch.await(timeout, TimeUnit.MILLISECONDS);
