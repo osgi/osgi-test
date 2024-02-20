@@ -19,19 +19,27 @@ package org.osgi.test.junit5.cm.test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.osgi.test.common.annotation.Property.Scalar.Byte;
+import static org.osgi.test.common.annotation.Property.Type.PrimitiveArray;
+import static org.osgi.test.common.annotation.Property.ValueSource.EnvironmentVariable;
+import static org.osgi.test.common.annotation.Property.ValueSource.SystemProperty;
+import static org.osgi.test.common.annotation.Property.ValueSource.TestClass;
+import static org.osgi.test.common.annotation.Property.ValueSource.TestMethod;
+import static org.osgi.test.common.annotation.Property.ValueSource.TestUniqueId;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
-import org.osgi.test.common.annotation.Property.Scalar;
-import org.osgi.test.common.annotation.Property.Type;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
@@ -277,8 +285,8 @@ public class ConfigAnnotationTest {
 
 		@Test
 		@WithConfiguration(pid = "foo", properties = {
-			@Property(key = "testScalar", systemProperty = METHOD_NAME),
-			@Property(key = "testArray", systemProperty = ARRAY_NAME, type = Type.PrimitiveArray, scalar = Scalar.Byte)
+			@Property(key = "testScalar", value = METHOD_NAME, source = SystemProperty),
+			@Property(key = "testArray", value = ARRAY_NAME, source = SystemProperty, type = PrimitiveArray, scalar = Byte)
 		})
 		void testAnnotated(@InjectService
 		ConfigurationAdmin ca) throws Exception {
@@ -294,8 +302,8 @@ public class ConfigAnnotationTest {
 
 		@Test
 		void testInjected(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
-			@Property(key = "testScalar", systemProperty = METHOD_NAME),
-			@Property(key = "testArray", systemProperty = ARRAY_NAME, type = Type.PrimitiveArray, scalar = Scalar.Byte)
+			@Property(key = "testScalar", value = METHOD_NAME, source = SystemProperty),
+			@Property(key = "testArray", value = ARRAY_NAME, source = SystemProperty, type = PrimitiveArray, scalar = Byte)
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();
@@ -309,12 +317,95 @@ public class ConfigAnnotationTest {
 
 		@Test
 		void testFallback(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
-			@Property(key = "testFallback", value = "default", systemProperty = "missing")
+			@Property(key = "testFallback", value = "default", source = SystemProperty)
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();
 			assertThat(cs.getProperties()
 				.get("testFallback")).isEqualTo("default");
+		}
+	}
+
+	@Nested
+	class EnvironmentPropertyTests {
+
+		@Test
+		@WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testScalar", value = "PATH", source = EnvironmentVariable)
+		})
+		void testAnnotated(@InjectService
+		ConfigurationAdmin ca) throws Exception {
+			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, "foo");
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testScalar")).isEqualTo(System.getenv("PATH"));
+		}
+
+		@Test
+		void testInjected(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testScalar", value = "PATH", source = EnvironmentVariable)
+		}))
+		Configuration cs) throws Exception {
+			assertThat(cs).isNotNull();
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testScalar")).isEqualTo(System.getenv("PATH"));
+		}
+
+		@Test
+		void testFallback(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testFallback", value = "default", source = EnvironmentVariable)
+		}))
+		Configuration cs) throws Exception {
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testFallback")).isEqualTo("default");
+		}
+	}
+
+	public static class TestIdAware implements BeforeTestExecutionCallback {
+		@Override
+		public void beforeTestExecution(ExtensionContext context) throws Exception {
+			((TestPropertyTests) context.getRequiredTestInstance()).uniqueId = context.getUniqueId();
+		}
+	}
+
+	@Nested
+	@ExtendWith(TestIdAware.class)
+	public class TestPropertyTests {
+
+		String uniqueId;
+
+		@Test
+		@WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testName", source = TestClass), @Property(key = "testMethod", source = TestMethod),
+			@Property(key = "testId", source = TestUniqueId)
+		})
+		void testAnnotated(@InjectService
+		ConfigurationAdmin ca) throws Exception {
+			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, "foo");
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testName")).isEqualTo(TestPropertyTests.class.getName());
+			assertThat(cs.getProperties()
+				.get("testMethod")).isEqualTo("testAnnotated");
+			assertThat(cs.getProperties()
+				.get("testId")).isEqualTo(uniqueId);
+		}
+
+		@Test
+		void testInjected(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testName", source = TestClass), @Property(key = "testMethod", source = TestMethod),
+			@Property(key = "testId", source = TestUniqueId)
+		}))
+		Configuration cs) throws Exception {
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testName")).isEqualTo(TestPropertyTests.class.getName());
+			assertThat(cs.getProperties()
+				.get("testMethod")).isEqualTo("testInjected");
+			assertThat(cs.getProperties()
+				.get("testId")).isEqualTo(uniqueId);
 		}
 	}
 }

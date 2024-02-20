@@ -55,6 +55,26 @@ public @interface Property {
 		PrimitiveArray
 	}
 
+	public enum ValueSource {
+		/** Use the {@link Property#value()} directly */
+		Value,
+		/**
+		 * Use the first {@link Property#value()} as a key in the System
+		 * Properties
+		 */
+		SystemProperty,
+		/**
+		 * Use the first {@link Property#value()} as a key in the Environment
+		 */
+		EnvironmentVariable,
+		/** Use the name of the test class */
+		TestClass,
+		/** Use the name of the test method */
+		TestMethod,
+		/** Use the test unique identifier */
+		TestUniqueId
+	}
+
 	String key();
 
 	String[] value() default "";
@@ -63,6 +83,9 @@ public @interface Property {
 
 	Type type() default Type.Scalar;
 
-	String systemProperty() default NOT_SET;
+	/**
+	 * @return the source that should be used to obtain the value
+	 */
+	ValueSource source() default ValueSource.Value;
 
 }

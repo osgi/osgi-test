@@ -15,21 +15,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  *******************************************************************************/
-package org.osgi.test.common.annotation;
 
-import java.util.Dictionary;
-
-/**
- * The generic PropertiesConverter is unable to support all forms of property
- * conversion and should not be used. Use the JUnit version specific alternative
- * instead.
- */
-@Deprecated
-public class PropertiesConverter {
-
-	@Deprecated
-	public static Dictionary<String, Object> of(Property[] entrys) {
-		return org.osgi.test.junit4.properties.PropertiesConverter.of(null, entrys);
-	}
-
-}
+@org.osgi.annotation.bundle.Export
+@org.osgi.annotation.versioning.Version("1.0.0")
+package org.osgi.test.junit4.properties;
