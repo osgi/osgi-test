@@ -46,7 +46,6 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.test.common.annotation.PropertiesConverter;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
@@ -56,6 +55,7 @@ import org.osgi.test.common.annotation.config.WithFactoryConfigurations;
 import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.inject.TargetType;
 import org.osgi.test.junit5.inject.InjectingExtension;
+import org.osgi.test.junit5.properties.PropertiesConverter;
 import org.osgi.test.junit5.service.ServiceExtension;
 
 public class ConfigurationExtension extends InjectingExtension<InjectConfiguration>
@@ -170,7 +170,8 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 					configAnnotation.location());
 			}
 
-			updateConfigurationRespectNew(context, configuration, PropertiesConverter.of(configAnnotation.properties()),
+			updateConfigurationRespectNew(context, configuration,
+				PropertiesConverter.of(context, configAnnotation.properties()),
 				configBefore == null);
 
 			return new ConfigurationHolder(ConfigurationCopy.of(configuration), copyOfBefore);
@@ -198,7 +199,8 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 					configAnnotation.name(), configAnnotation.location());
 			}
 
-			updateConfigurationRespectNew(context, configuration, PropertiesConverter.of(configAnnotation.properties()),
+			updateConfigurationRespectNew(context, configuration,
+				PropertiesConverter.of(context, configAnnotation.properties()),
 				configBefore == null);
 
 			return new ConfigurationHolder(ConfigurationCopy.of(configuration), copyOfBefore);

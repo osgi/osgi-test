@@ -55,6 +55,42 @@ public @interface Property {
 		PrimitiveArray
 	}
 
+	/**
+	 * Indicates the source of the configuration value
+	 *
+	 * @since 1.2
+	 */
+	public enum ValueSource {
+		/** Use the {@link Property#value()} directly */
+		Value,
+		/**
+		 * Use the first {@link Property#value()} as a key in the System
+		 * Properties. If the key does not exist then either:
+		 * <ul>
+		 * <li>Use the second {@link Property#value()} as the value</li>
+		 * <li>Throw an exception indicating that there is no property for the
+		 * supplied key</li>
+		 * </ul>
+		 */
+		SystemProperty,
+		/**
+		 * Use the first {@link Property#value()} as a key in the Environment If
+		 * the key does not exist then either:
+		 * <ul>
+		 * <li>Use the second {@link Property#value()} as the value</li>
+		 * <li>Throw an exception indicating that there is no property for the
+		 * supplied variable name</li>
+		 * </ul>
+		 */
+		EnvironmentVariable,
+		/** Use the name of the test class */
+		TestClass,
+		/** Use the name of the test method */
+		TestMethod,
+		/** Use the test unique identifier */
+		TestUniqueId
+	}
+
 	String key();
 
 	String[] value() default "";
@@ -62,5 +98,11 @@ public @interface Property {
 	Scalar scalar() default Scalar.String;
 
 	Type type() default Type.Scalar;
+
+	/**
+	 * @return the source that should be used to obtain the value
+	 * @since 1.2
+	 */
+	ValueSource source() default ValueSource.Value;
 
 }
