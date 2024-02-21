@@ -46,7 +46,6 @@ import org.junit.jupiter.api.extension.ParameterResolver;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
-import org.osgi.service.cm.ConfigurationListener;
 import org.osgi.test.common.annotation.PropertiesConverter;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
@@ -56,7 +55,6 @@ import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfigurations;
 import org.osgi.test.common.dictionary.Dictionaries;
 import org.osgi.test.common.inject.TargetType;
-import org.osgi.test.junit5.context.BundleContextExtension;
 import org.osgi.test.junit5.inject.InjectingExtension;
 import org.osgi.test.junit5.service.ServiceExtension;
 
@@ -84,11 +82,9 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 	}
 
 	private static BlockingConfigurationHandler getBlockingConfigurationHandler(ExtensionContext extensionContext) {
-		Store store = getStore(extensionContext.getRoot());
-		BlockingConfigurationHandlerImpl impl = store.getOrComputeIfAbsent(STORE_CONFIG_HANDLER,
-			y -> new BlockingConfigurationHandlerImpl(), BlockingConfigurationHandlerImpl.class);
-		ServiceRegistration<?> svc = store.getOrComputeIfAbsent(STORE_CONFIG_HANDLER_REG,
-			y -> BundleContextExtension.getBundleContext(extensionContext).registerService(ConfigurationListener.class, impl, null), ServiceRegistration.class);
+		BlockingConfigurationHandlerImpl impl = getStore(extensionContext).getOrComputeIfAbsent(STORE_CONFIG_HANDLER,
+			y -> new BlockingConfigurationHandlerImpl(extensionContext.getTestClass()),
+			BlockingConfigurationHandlerImpl.class);
 		return impl;
 	}
 
