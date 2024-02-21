@@ -317,7 +317,9 @@ public class ConfigAnnotationTest {
 
 		@Test
 		void testFallback(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
-			@Property(key = "testFallback", value = "default", source = SystemProperty)
+			@Property(key = "testFallback", value = {
+				"missing", "default"
+			}, source = SystemProperty)
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();
@@ -354,7 +356,9 @@ public class ConfigAnnotationTest {
 
 		@Test
 		void testFallback(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
-			@Property(key = "testFallback", value = "default", source = EnvironmentVariable)
+			@Property(key = "testFallback", value = {
+				"missing", "default"
+			}, source = EnvironmentVariable)
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();

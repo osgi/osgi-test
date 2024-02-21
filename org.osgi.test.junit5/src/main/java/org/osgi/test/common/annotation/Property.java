@@ -65,11 +65,22 @@ public @interface Property {
 		Value,
 		/**
 		 * Use the first {@link Property#value()} as a key in the System
-		 * Properties
+		 * Properties. If the key does not exist then either:
+		 * <ul>
+		 * <li>Use the second {@link Property#value()} as the value</li>
+		 * <li>Throw an exception indicating that there is no property for the
+		 * supplied key</li>
+		 * </ul>
 		 */
 		SystemProperty,
 		/**
-		 * Use the first {@link Property#value()} as a key in the Environment
+		 * Use the first {@link Property#value()} as a key in the Environment If
+		 * the key does not exist then either:
+		 * <ul>
+		 * <li>Use the second {@link Property#value()} as the value</li>
+		 * <li>Throw an exception indicating that there is no property for the
+		 * supplied variable name</li>
+		 * </ul>
 		 */
 		EnvironmentVariable,
 		/** Use the name of the test class */

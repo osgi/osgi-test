@@ -124,17 +124,29 @@ public class PropertiesConverter {
 		String prop = null;
 		switch (entry.source()) {
 			case EnvironmentVariable :
-				if (value.length == 0 || !System.getenv()
+				if (value.length == 0) {
+					throw new RuntimeException("A property name must be supplied for source EnvironmentVariable");
+				} else if (!System.getenv()
 					.containsKey(value[0])) {
-					return value;
+					if (value.length == 1) {
+						throw new RuntimeException("There is no environment variable for name " + value[0]);
+					} else {
+						prop = value[1];
+					}
 				} else {
 					prop = System.getenv(value[0]);
 				}
 				break;
 			case SystemProperty :
-				if (value.length == 0 || !System.getProperties()
+				if (value.length == 0) {
+					throw new RuntimeException("A property name must be supplied for source SystemProperty");
+				} else if (!System.getProperties()
 					.containsKey(value[0])) {
-					return value;
+					if (value.length == 1) {
+						throw new RuntimeException("There is no system property for name " + value[0]);
+					} else {
+						prop = value[1];
+					}
 				} else {
 					prop = System.getProperty(value[0]);
 				}
