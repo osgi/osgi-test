@@ -45,7 +45,7 @@ public class PropertiesConverter {
 		String[] value = getRawValue(desc, entry.value(), entry.source(), entry.type());
 
 		Object[] templateParams = Arrays.stream(entry.templateArguments())
-			.map(ta -> getRawValue(desc, ta.value(), ta.source(), Type.Scalar)[0])
+			.map(ta -> convertScalar(ta.scalar(), getRawValue(desc, ta.value(), ta.source(), Type.Scalar)[0]))
 			.toArray();
 
 		Object result = createArray(entry.scalar(), primitive, value.length);

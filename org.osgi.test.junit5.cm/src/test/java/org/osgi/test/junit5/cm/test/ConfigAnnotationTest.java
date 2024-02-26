@@ -41,8 +41,8 @@ import org.osgi.test.assertj.dictionary.DictionaryAssert;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.Property.Scalar;
+import org.osgi.test.common.annotation.Property.TemplateArgument;
 import org.osgi.test.common.annotation.Property.Type;
-import org.osgi.test.common.annotation.Property.ValueArgument;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
@@ -293,8 +293,8 @@ public class ConfigAnnotationTest {
 			@Property(key = "testTemplate", value = {
 				"Method : %s", "Easy As %2$s"
 			}, type = Type.Collection, templateArguments = {
-				@ValueArgument(value = METHOD_NAME, source = SystemProperty),
-				@ValueArgument(value = ARRAY_NAME, source = SystemProperty)
+				@TemplateArgument(value = METHOD_NAME, source = SystemProperty),
+				@TemplateArgument(value = ARRAY_NAME, source = SystemProperty)
 			})
 		})
 		void testAnnotated(@InjectService
@@ -319,8 +319,8 @@ public class ConfigAnnotationTest {
 			@Property(key = "testTemplate", value = {
 				"Method : %s", "Easy As %2$s"
 			}, type = Type.Collection, templateArguments = {
-				@ValueArgument(value = METHOD_NAME, source = SystemProperty),
-				@ValueArgument(value = ARRAY_NAME, source = SystemProperty)
+				@TemplateArgument(value = METHOD_NAME, source = SystemProperty),
+				@TemplateArgument(value = ARRAY_NAME, source = SystemProperty)
 			})
 		}))
 		Configuration cs) throws Exception {
@@ -343,9 +343,9 @@ public class ConfigAnnotationTest {
 			}, source = SystemProperty), @Property(key = "testTemplateFallback", value = {
 				"Method : %s", "Easy As %2$s"
 			}, type = Type.Collection, templateArguments = {
-				@ValueArgument(value = {
+				@TemplateArgument(value = {
 					"missing", "default2"
-				}, source = SystemProperty), @ValueArgument(value = {
+				}, source = SystemProperty), @TemplateArgument(value = {
 					"missing", "default3"
 				}, source = SystemProperty)
 			})
@@ -361,20 +361,25 @@ public class ConfigAnnotationTest {
 
 		@Test
 		@WithConfiguration(pid = "foo", properties = {
-			@Property(key = "testNumber", scalar = Scalar.Double, value = "%s.%s", templateArguments = {
-				@ValueArgument(value = {
+			@Property(key = "testNumber", scalar = Scalar.Double, value = "%d.%.0f", templateArguments = {
+				@TemplateArgument(value = {
 					"missing", "5"
-				}, source = SystemProperty),
-				@ValueArgument(value = "java.specification.version", source = SystemProperty)
+				}, source = SystemProperty, scalar = Scalar.Integer),
+				@TemplateArgument(value = "java.specification.version", source = SystemProperty, scalar = Scalar.Double)
 			})
 		})
 		void testNumeric(@InjectService
 		ConfigurationAdmin ca) throws Exception {
 			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, "foo");
 			assertThat(cs).isNotNull();
+			String javaVersion = System.getProperty("java.specification.version");
+			int idx = javaVersion.indexOf('.');
+			if (idx >= 0) {
+				javaVersion = javaVersion.substring(0, idx);
+			}
 			assertThat(cs.getProperties()
 				.get("testNumber"))
-					.isEqualTo(Double.parseDouble("5." + System.getProperty("java.specification.version")));
+					.isEqualTo(Double.parseDouble("5." + javaVersion));
 		}
 	}
 
@@ -385,7 +390,7 @@ public class ConfigAnnotationTest {
 		@WithConfiguration(pid = "foo", properties = {
 			@Property(key = "testScalar", value = "PATH", source = EnvironmentVariable),
 			@Property(key = "testTemplate", value = "Easy As %s", templateArguments = {
-				@ValueArgument(value = "PATH", source = EnvironmentVariable)
+				@TemplateArgument(value = "PATH", source = EnvironmentVariable)
 			})
 		})
 		void testAnnotated(@InjectService
@@ -402,7 +407,7 @@ public class ConfigAnnotationTest {
 		void testInjected(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
 			@Property(key = "testScalar", value = "PATH", source = EnvironmentVariable),
 			@Property(key = "testTemplate", value = "Easy As %s", templateArguments = {
-				@ValueArgument(value = "PATH", source = EnvironmentVariable)
+				@TemplateArgument(value = "PATH", source = EnvironmentVariable)
 			})
 		}))
 		Configuration cs) throws Exception {
@@ -421,9 +426,9 @@ public class ConfigAnnotationTest {
 			}, source = EnvironmentVariable), @Property(key = "testTemplateFallback", value = {
 				"Method : %s", "Easy As %2$s"
 			}, type = Type.Collection, templateArguments = {
-				@ValueArgument(value = {
+				@TemplateArgument(value = {
 					"missing", "default2"
-				}, source = EnvironmentVariable), @ValueArgument(value = {
+				}, source = EnvironmentVariable), @TemplateArgument(value = {
 					"missing", "default3"
 				}, source = EnvironmentVariable)
 			})
@@ -457,8 +462,8 @@ public class ConfigAnnotationTest {
 			@Property(key = "testId", source = TestUniqueId), @Property(key = "testTemplate", value = {
 				"Class : %s", "Test : %2$s", "Id : %3$s"
 			}, type = Type.Collection, templateArguments = {
-				@ValueArgument(source = TestClass), @ValueArgument(source = TestMethod),
-				@ValueArgument(source = TestUniqueId)
+				@TemplateArgument(source = TestClass), @TemplateArgument(source = TestMethod),
+				@TemplateArgument(source = TestUniqueId)
 			})
 		})
 		void testAnnotated(@InjectService
@@ -483,8 +488,8 @@ public class ConfigAnnotationTest {
 			@Property(key = "testId", source = TestUniqueId), @Property(key = "testTemplate", value = {
 				"Class : %s", "Test : %2$s", "Id : %3$s"
 			}, type = Type.Collection, templateArguments = {
-				@ValueArgument(source = TestClass), @ValueArgument(source = TestMethod),
-				@ValueArgument(source = TestUniqueId)
+				@TemplateArgument(source = TestClass), @TemplateArgument(source = TestMethod),
+				@TemplateArgument(source = TestUniqueId)
 			})
 		}))
 		Configuration cs) throws Exception {

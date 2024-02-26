@@ -93,12 +93,12 @@ public @interface Property {
 
 	/**
 	 * Used to provide an argument in the {@link Property#templateArguments()}.
-	 * {@link ValueArgument} values are resolved in the same way as
+	 * {@link TemplateArgument} values are resolved in the same way as
 	 * {@link Property} values but they are always of {@link Type#Scalar}
 	 *
 	 * @since 1.2
 	 */
-	public @interface ValueArgument {
+	public @interface TemplateArgument {
 		String[] value() default "";
 
 		Scalar scalar() default Scalar.String;
@@ -123,7 +123,7 @@ public @interface Property {
 	/**
 	 * If any template arguments are set then the resolved value of this
 	 * {@link Property} annotation will be used as a template in
-	 * {@link String#format} with the resolved {@link ValueArgument} values used
+	 * {@link String#format} with the resolved {@link TemplateArgument} values used
 	 * as arguments.
 	 * <p>
 	 * Note that any defaulting or processing according to the {@link #source()}
@@ -136,6 +136,6 @@ public @interface Property {
 	 * @return the arguments that should be used with the template
 	 * @since 1.2
 	 */
-	ValueArgument[] templateArguments() default {};
+	TemplateArgument[] templateArguments() default {};
 
 }
