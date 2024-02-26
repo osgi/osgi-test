@@ -40,6 +40,9 @@ import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.test.assertj.dictionary.DictionaryAssert;
 import org.osgi.test.common.annotation.InjectService;
 import org.osgi.test.common.annotation.Property;
+import org.osgi.test.common.annotation.Property.Scalar;
+import org.osgi.test.common.annotation.Property.Type;
+import org.osgi.test.common.annotation.Property.ValueArgument;
 import org.osgi.test.common.annotation.config.InjectConfiguration;
 import org.osgi.test.common.annotation.config.WithConfiguration;
 import org.osgi.test.common.annotation.config.WithFactoryConfiguration;
@@ -286,7 +289,13 @@ public class ConfigAnnotationTest {
 		@Test
 		@WithConfiguration(pid = "foo", properties = {
 			@Property(key = "testScalar", value = METHOD_NAME, source = SystemProperty),
-			@Property(key = "testArray", value = ARRAY_NAME, source = SystemProperty, type = PrimitiveArray, scalar = Byte)
+			@Property(key = "testArray", value = ARRAY_NAME, source = SystemProperty, type = PrimitiveArray, scalar = Byte),
+			@Property(key = "testTemplate", value = {
+				"Method : %s", "Easy As %2$s"
+			}, type = Type.Collection, templateArguments = {
+				@ValueArgument(value = METHOD_NAME, source = SystemProperty),
+				@ValueArgument(value = ARRAY_NAME, source = SystemProperty)
+			})
 		})
 		void testAnnotated(@InjectService
 		ConfigurationAdmin ca) throws Exception {
@@ -298,12 +307,21 @@ public class ConfigAnnotationTest {
 				1, 2, 3
 			}, (byte[]) cs.getProperties()
 				.get("testArray"));
+			assertThat(cs.getProperties()
+				.get("testTemplate")).asList()
+					.containsExactly("Method : testAnnotated", "Easy As 1,2,3");
 		}
 
 		@Test
 		void testInjected(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
 			@Property(key = "testScalar", value = METHOD_NAME, source = SystemProperty),
-			@Property(key = "testArray", value = ARRAY_NAME, source = SystemProperty, type = PrimitiveArray, scalar = Byte)
+			@Property(key = "testArray", value = ARRAY_NAME, source = SystemProperty, type = PrimitiveArray, scalar = Byte),
+			@Property(key = "testTemplate", value = {
+				"Method : %s", "Easy As %2$s"
+			}, type = Type.Collection, templateArguments = {
+				@ValueArgument(value = METHOD_NAME, source = SystemProperty),
+				@ValueArgument(value = ARRAY_NAME, source = SystemProperty)
+			})
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();
@@ -313,18 +331,50 @@ public class ConfigAnnotationTest {
 				1, 2, 3
 			}, (byte[]) cs.getProperties()
 				.get("testArray"));
+			assertThat(cs.getProperties()
+				.get("testTemplate")).asList()
+					.containsExactly("Method : testInjected", "Easy As 1,2,3");
 		}
 
 		@Test
 		void testFallback(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
 			@Property(key = "testFallback", value = {
 				"missing", "default"
-			}, source = SystemProperty)
+			}, source = SystemProperty), @Property(key = "testTemplateFallback", value = {
+				"Method : %s", "Easy As %2$s"
+			}, type = Type.Collection, templateArguments = {
+				@ValueArgument(value = {
+					"missing", "default2"
+				}, source = SystemProperty), @ValueArgument(value = {
+					"missing", "default3"
+				}, source = SystemProperty)
+			})
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();
 			assertThat(cs.getProperties()
 				.get("testFallback")).isEqualTo("default");
+			assertThat(cs.getProperties()
+				.get("testTemplateFallback")).asList()
+					.containsExactly("Method : default2", "Easy As default3");
+		}
+
+		@Test
+		@WithConfiguration(pid = "foo", properties = {
+			@Property(key = "testNumber", scalar = Scalar.Double, value = "%s.%s", templateArguments = {
+				@ValueArgument(value = {
+					"missing", "5"
+				}, source = SystemProperty),
+				@ValueArgument(value = "java.specification.version", source = SystemProperty)
+			})
+		})
+		void testNumeric(@InjectService
+		ConfigurationAdmin ca) throws Exception {
+			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, "foo");
+			assertThat(cs).isNotNull();
+			assertThat(cs.getProperties()
+				.get("testNumber"))
+					.isEqualTo(Double.parseDouble("5." + System.getProperty("java.specification.version")));
 		}
 	}
 
@@ -333,7 +383,10 @@ public class ConfigAnnotationTest {
 
 		@Test
 		@WithConfiguration(pid = "foo", properties = {
-			@Property(key = "testScalar", value = "PATH", source = EnvironmentVariable)
+			@Property(key = "testScalar", value = "PATH", source = EnvironmentVariable),
+			@Property(key = "testTemplate", value = "Easy As %s", templateArguments = {
+				@ValueArgument(value = "PATH", source = EnvironmentVariable)
+			})
 		})
 		void testAnnotated(@InjectService
 		ConfigurationAdmin ca) throws Exception {
@@ -341,29 +394,47 @@ public class ConfigAnnotationTest {
 			assertThat(cs).isNotNull();
 			assertThat(cs.getProperties()
 				.get("testScalar")).isEqualTo(System.getenv("PATH"));
+			assertThat(cs.getProperties()
+				.get("testTemplate")).isEqualTo("Easy As " + System.getenv("PATH"));
 		}
 
 		@Test
 		void testInjected(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
-			@Property(key = "testScalar", value = "PATH", source = EnvironmentVariable)
+			@Property(key = "testScalar", value = "PATH", source = EnvironmentVariable),
+			@Property(key = "testTemplate", value = "Easy As %s", templateArguments = {
+				@ValueArgument(value = "PATH", source = EnvironmentVariable)
+			})
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();
 			assertThat(cs).isNotNull();
 			assertThat(cs.getProperties()
 				.get("testScalar")).isEqualTo(System.getenv("PATH"));
+			assertThat(cs.getProperties()
+				.get("testTemplate")).isEqualTo("Easy As " + System.getenv("PATH"));
 		}
 
 		@Test
 		void testFallback(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
 			@Property(key = "testFallback", value = {
 				"missing", "default"
-			}, source = EnvironmentVariable)
+			}, source = EnvironmentVariable), @Property(key = "testTemplateFallback", value = {
+				"Method : %s", "Easy As %2$s"
+			}, type = Type.Collection, templateArguments = {
+				@ValueArgument(value = {
+					"missing", "default2"
+				}, source = EnvironmentVariable), @ValueArgument(value = {
+					"missing", "default3"
+				}, source = EnvironmentVariable)
+			})
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();
 			assertThat(cs.getProperties()
 				.get("testFallback")).isEqualTo("default");
+			assertThat(cs.getProperties()
+				.get("testTemplateFallback")).asList()
+					.containsExactly("Method : default2", "Easy As default3");
 		}
 	}
 
@@ -383,7 +454,12 @@ public class ConfigAnnotationTest {
 		@Test
 		@WithConfiguration(pid = "foo", properties = {
 			@Property(key = "testName", source = TestClass), @Property(key = "testMethod", source = TestMethod),
-			@Property(key = "testId", source = TestUniqueId)
+			@Property(key = "testId", source = TestUniqueId), @Property(key = "testTemplate", value = {
+				"Class : %s", "Test : %2$s", "Id : %3$s"
+			}, type = Type.Collection, templateArguments = {
+				@ValueArgument(source = TestClass), @ValueArgument(source = TestMethod),
+				@ValueArgument(source = TestUniqueId)
+			})
 		})
 		void testAnnotated(@InjectService
 		ConfigurationAdmin ca) throws Exception {
@@ -395,12 +471,21 @@ public class ConfigAnnotationTest {
 				.get("testMethod")).isEqualTo("testAnnotated");
 			assertThat(cs.getProperties()
 				.get("testId")).isEqualTo(uniqueId);
+			assertThat(cs.getProperties()
+				.get("testTemplate")).asList()
+					.containsExactly("Class : " + TestPropertyTests.class.getName(), "Test : testAnnotated",
+						"Id : " + uniqueId);
 		}
 
 		@Test
 		void testInjected(@InjectConfiguration(withConfig = @WithConfiguration(pid = "foo", properties = {
 			@Property(key = "testName", source = TestClass), @Property(key = "testMethod", source = TestMethod),
-			@Property(key = "testId", source = TestUniqueId)
+			@Property(key = "testId", source = TestUniqueId), @Property(key = "testTemplate", value = {
+				"Class : %s", "Test : %2$s", "Id : %3$s"
+			}, type = Type.Collection, templateArguments = {
+				@ValueArgument(source = TestClass), @ValueArgument(source = TestMethod),
+				@ValueArgument(source = TestUniqueId)
+			})
 		}))
 		Configuration cs) throws Exception {
 			assertThat(cs).isNotNull();
@@ -410,6 +495,10 @@ public class ConfigAnnotationTest {
 				.get("testMethod")).isEqualTo("testInjected");
 			assertThat(cs.getProperties()
 				.get("testId")).isEqualTo(uniqueId);
+			assertThat(cs.getProperties()
+				.get("testTemplate")).asList()
+					.containsExactly("Class : " + TestPropertyTests.class.getName(), "Test : testInjected",
+						"Id : " + uniqueId);
 		}
 	}
 }

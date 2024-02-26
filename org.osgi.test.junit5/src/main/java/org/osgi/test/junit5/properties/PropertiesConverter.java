@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.common.annotation.Property.Scalar;
 import org.osgi.test.common.annotation.Property.Type;
+import org.osgi.test.common.annotation.Property.ValueSource;
 
 public class PropertiesConverter {
 
@@ -41,60 +42,19 @@ public class PropertiesConverter {
 
 		boolean primitive = entry.type()
 			.equals(Type.PrimitiveArray);
-		String[] value = getRawValue(context, entry);
+		String[] value = getRawValue(context, entry.value(), entry.source(), entry.type());
+
+		Object[] templateParams = Arrays.stream(entry.templateArguments())
+			.map(ta -> getRawValue(context, ta.value(), ta.source(), Type.Scalar)[0])
+			.toArray();
 
 		Object result = createArray(entry.scalar(), primitive, value.length);
 		int i = 0;
 		for (String v : value) {
-			Object val = null;
-
-			if (v != null) {
-				switch (entry.scalar()) {
-					case Boolean :
-						Boolean booleanValue = Boolean.valueOf(v);
-						val = primitive ? booleanValue.booleanValue() : booleanValue;
-						break;
-
-					case Byte :
-						Byte byteVal = Byte.valueOf(v);
-						val = primitive ? byteVal.byteValue() : byteVal;
-						break;
-
-					case Character :
-						char charVal = v.charAt(0);
-						val = primitive ? charVal : Character.valueOf(charVal);
-						break;
-
-					case Double :
-						Double doubleVal = Double.valueOf(v);
-						val = primitive ? doubleVal.doubleValue() : doubleVal;
-						break;
-
-					case Float :
-						Float floatVal = Float.valueOf(v);
-						val = primitive ? floatVal.floatValue() : floatVal;
-						break;
-
-					case Integer :
-						Integer integerVal = Integer.valueOf(v);
-						val = primitive ? integerVal.intValue() : integerVal;
-						break;
-
-					case Long :
-						Long longVal = Long.valueOf(v);
-						val = primitive ? longVal.longValue() : longVal;
-						break;
-
-					case Short :
-						Short shortVal = Short.valueOf(v);
-						val = primitive ? shortVal.shortValue() : shortVal;
-						break;
-
-					case String :
-						val = v;
-						break;
-				}
+			if (v != null && templateParams.length > 0) {
+				v = String.format(v, templateParams);
 			}
+			Object val = convertScalar(entry.scalar(), v);
 
 			if (Type.Scalar.equals(entry.type())) {
 				result = val;
@@ -119,10 +79,43 @@ public class PropertiesConverter {
 
 	}
 
-	private static String[] getRawValue(ExtensionContext context, Property entry) {
-		String[] value = entry.value();
+	private static Object convertScalar(Scalar scalar, String v) {
+		if (v != null) {
+			switch (scalar) {
+				case Boolean :
+					return Boolean.valueOf(v);
+
+				case Byte :
+					return Byte.valueOf(v);
+
+				case Character :
+					return v.charAt(0);
+
+				case Double :
+					return Double.valueOf(v);
+
+				case Float :
+					return Float.valueOf(v);
+
+				case Integer :
+					return Integer.valueOf(v);
+
+				case Long :
+					return Long.valueOf(v);
+
+				case Short :
+					return Short.valueOf(v);
+
+				case String :
+					return v;
+			}
+		}
+		return null;
+	}
+
+	private static String[] getRawValue(ExtensionContext context, String[] value, ValueSource source, Type type) {
 		String prop = null;
-		switch (entry.source()) {
+		switch (source) {
 			case EnvironmentVariable :
 				if (value.length == 0) {
 					throw new RuntimeException("A property name must be supplied for source EnvironmentVariable");
@@ -180,7 +173,7 @@ public class PropertiesConverter {
 				throw new RuntimeException("conversion error - unknown source");
 		}
 
-		return entry.type() == Type.Scalar ? new String[] {
+		return type == Type.Scalar ? new String[] {
 			prop
 		} : prop.split("\\s*,\\s*");
 	}
