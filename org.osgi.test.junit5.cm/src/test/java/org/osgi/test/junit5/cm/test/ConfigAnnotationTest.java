@@ -372,14 +372,10 @@ public class ConfigAnnotationTest {
 		ConfigurationAdmin ca) throws Exception {
 			Configuration cs = ConfigUtil.getConfigsByServicePid(ca, "foo");
 			assertThat(cs).isNotNull();
-			String javaVersion = System.getProperty("java.specification.version");
-			int idx = javaVersion.indexOf('.');
-			if (idx >= 0) {
-				javaVersion = javaVersion.substring(0, idx);
-			}
+			double javaVersion = Double.parseDouble(System.getProperty("java.specification.version"));
 			assertThat(cs.getProperties()
 				.get("testNumber"))
-					.isEqualTo(Double.parseDouble("5." + javaVersion));
+					.isEqualTo(Double.parseDouble("5." + Math.round(javaVersion)));
 		}
 	}
 
