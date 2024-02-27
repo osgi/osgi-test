@@ -91,6 +91,21 @@ public @interface Property {
 		TestUniqueId
 	}
 
+	/**
+	 * Used to provide an argument in the {@link Property#templateArguments()}.
+	 * {@link TemplateArgument} values are resolved in the same way as
+	 * {@link Property} values but they are always of {@link Type#Scalar}
+	 *
+	 * @since 1.2
+	 */
+	public @interface TemplateArgument {
+		String[] value() default "";
+
+		Scalar scalar() default Scalar.String;
+
+		ValueSource source() default ValueSource.Value;
+	}
+
 	String key();
 
 	String[] value() default "";
@@ -104,5 +119,23 @@ public @interface Property {
 	 * @since 1.2
 	 */
 	ValueSource source() default ValueSource.Value;
+
+	/**
+	 * If any template arguments are set then the resolved value of this
+	 * {@link Property} annotation will be used as a template in
+	 * {@link String#format} with the resolved {@link TemplateArgument} values used
+	 * as arguments.
+	 * <p>
+	 * Note that any defaulting or processing according to the {@link #source()}
+	 * will happen <em>before</em> the formatting is applied, so template
+	 * arguments cannot be used, for example, to change the name of a system
+	 * property. Conversely, the scalar conversion will happen <em>after</em>
+	 * the template is applied, meaning that numeric values can be assembled
+	 * from multiple template arguments.
+	 *
+	 * @return the arguments that should be used with the template
+	 * @since 1.2
+	 */
+	TemplateArgument[] templateArguments() default {};
 
 }

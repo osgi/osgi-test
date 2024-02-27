@@ -185,25 +185,36 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 		WithFactoryConfiguration configAnnotation, ConfigurationAdmin configurationAdmin) {
 
 		try {
-			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin,
-				configAnnotation.factoryPid() + "~" + configAnnotation.name(), 0l);
-
-			Optional<ConfigurationCopy> copyOfBefore = createConfigurationCopy(configBefore);
-
+			Configuration configBefore;
 			Configuration configuration;
-			if (Property.NOT_SET.equals(configAnnotation.location())) {
-				configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
-					configAnnotation.name(), null);
+
+			if (Property.NOT_SET.equals(configAnnotation.name())) {
+				configBefore = null;
+
+				if (Property.NOT_SET.equals(configAnnotation.location())) {
+					configuration = configurationAdmin.createFactoryConfiguration(configAnnotation.factoryPid(), null);
+				} else {
+					configuration = configurationAdmin.createFactoryConfiguration(configAnnotation.factoryPid(),
+						configAnnotation.location());
+				}
 			} else {
-				configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
-					configAnnotation.name(), configAnnotation.location());
+				configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin,
+					configAnnotation.factoryPid() + "~" + configAnnotation.name(), 0l);
+
+				if (Property.NOT_SET.equals(configAnnotation.location())) {
+					configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
+						configAnnotation.name(), null);
+				} else {
+					configuration = configurationAdmin.getFactoryConfiguration(configAnnotation.factoryPid(),
+						configAnnotation.name(), configAnnotation.location());
+				}
 			}
 
 			updateConfigurationRespectNew(context, configuration,
 				PropertiesConverter.of(context, configAnnotation.properties()),
 				configBefore == null);
 
-			return new ConfigurationHolder(ConfigurationCopy.of(configuration), copyOfBefore);
+			return new ConfigurationHolder(ConfigurationCopy.of(configuration), createConfigurationCopy(configBefore));
 		} catch (Exception e) {
 			throw new ParameterResolutionException(
 				String.format("Unable to obtain Configuration for %s.", configAnnotation.factoryPid()), e);

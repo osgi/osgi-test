@@ -59,7 +59,7 @@ public @interface WithFactoryConfiguration {
 	 *
 	 * @return The name
 	 */
-	String name();
+	String name() default Property.NOT_SET;
 
 	/**
 	 * The location of the Configuration.<br>
