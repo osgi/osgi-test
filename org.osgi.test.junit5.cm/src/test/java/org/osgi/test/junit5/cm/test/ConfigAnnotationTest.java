@@ -169,6 +169,31 @@ public class ConfigAnnotationTest {
 
 	}
 
+	@Test
+	@WithFactoryConfiguration(factoryPid = FACTORY_CONFIGURATION_PID, properties = {
+		@Property(key = "foo", value = "bar")
+	})
+	@WithFactoryConfiguration(factoryPid = FACTORY_CONFIGURATION_PID, properties = {
+		@Property(key = "fizz", value = "buzz")
+	})
+	public void testMethodConfigurationFactoryUnboundNames() throws Exception {
+
+		Configuration[] cfgs = ca.listConfigurations("(foo=bar)");
+		assertThat(cfgs).isNotNull()
+			.hasSize(1);
+		assertThat(cfgs[0].getFactoryPid()).isEqualTo(FACTORY_CONFIGURATION_PID);
+		DictionaryAssert.assertThat(cfgs[0].getProperties())
+			.containsEntry("foo", "bar");
+
+		cfgs = ca.listConfigurations("(fizz=buzz)");
+		assertThat(cfgs[0].getFactoryPid()).isEqualTo(FACTORY_CONFIGURATION_PID);
+		assertThat(cfgs).isNotNull()
+			.hasSize(1);
+		DictionaryAssert.assertThat(cfgs[0].getProperties())
+			.containsEntry("fizz", "buzz");
+
+	}
+
 	@Nested
 	class LocationTests {
 
