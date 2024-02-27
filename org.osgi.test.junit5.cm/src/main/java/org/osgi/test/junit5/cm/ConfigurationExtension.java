@@ -155,7 +155,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 	}
 
 	private ConfigurationHolder handleWithConfiguration(ExtensionContext context, WithConfiguration configAnnotation,
-		ConfigurationAdmin configurationAdmin) {
+		ConfigurationAdmin configurationAdmin, boolean injecting) {
 		try {
 			Configuration configBefore = ConfigUtil.getConfigsByServicePid(configurationAdmin, configAnnotation.pid(),
 				0l);
@@ -172,9 +172,9 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 
 			updateConfigurationRespectNew(context, configuration,
 				PropertiesConverter.of(context, configAnnotation.properties()),
-				configBefore == null);
+				configBefore == null, injecting);
 
-			return new ConfigurationHolder(ConfigurationCopy.of(configuration), copyOfBefore);
+			return new ConfigurationHolder(configuration, copyOfBefore);
 		} catch (Exception e) {
 			throw new ParameterResolutionException(
 				String.format("Unable to obtain Configuration for %s.", configAnnotation.pid()), e);
@@ -182,7 +182,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 	}
 
 	private ConfigurationHolder handleWithFactoryConfiguration(ExtensionContext context,
-		WithFactoryConfiguration configAnnotation, ConfigurationAdmin configurationAdmin) {
+		WithFactoryConfiguration configAnnotation, ConfigurationAdmin configurationAdmin, boolean injecting) {
 
 		try {
 			Configuration configBefore;
@@ -212,9 +212,9 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 
 			updateConfigurationRespectNew(context, configuration,
 				PropertiesConverter.of(context, configAnnotation.properties()),
-				configBefore == null);
+				configBefore == null, injecting);
 
-			return new ConfigurationHolder(ConfigurationCopy.of(configuration), createConfigurationCopy(configBefore));
+			return new ConfigurationHolder(configuration, createConfigurationCopy(configBefore));
 		} catch (Exception e) {
 			throw new ParameterResolutionException(
 				String.format("Unable to obtain Configuration for %s.", configAnnotation.factoryPid()), e);
@@ -301,7 +301,7 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 					if (configuration != null) {
 
 						ConfigurationCopy cCopy = ConfigurationCopy.of(configuration);
-						configurationHolder = new ConfigurationHolder(cCopy, Optional.of(cCopy));
+						configurationHolder = new ConfigurationHolder(configuration, Optional.of(cCopy));
 					}
 
 				} catch (Exception e) {
@@ -311,27 +311,13 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 				break;
 			case 2 :
 				configurationHolder = handleWithConfiguration(extensionContext, injectConfiguration.withConfig(),
-					configurationAdmin(extensionContext));
-				try {
-					configuration = ConfigUtil.getConfigsByServicePid(configurationAdmin(extensionContext),
-						configurationHolder.getConfiguration()
-							.getPid());
-				} catch (Exception e) {
-					throw new ParameterResolutionException("Error while finding the Configuration.", e);
-
-				}
-
+					configurationAdmin(extensionContext), true);
+				configuration = configurationHolder.getCmConfiguration();
 				break;
 			case 4 :
 				configurationHolder = handleWithFactoryConfiguration(extensionContext,
-					injectConfiguration.withFactoryConfig(), configurationAdmin(extensionContext));
-				try {
-					configuration = ConfigUtil.getConfigsByServicePid(configurationAdmin(extensionContext),
-						configurationHolder.getConfiguration()
-							.getPid());
-				} catch (Exception e) {
-					throw new ParameterResolutionException("Error while finding the Configuration.", e);
-				}
+					injectConfiguration.withFactoryConfig(), configurationAdmin(extensionContext), true);
+				configuration = configurationHolder.getCmConfiguration();
 				break;
 			default :
 				throw new ParameterResolutionException(
@@ -400,24 +386,25 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 
 			WithConfigurations withConfigurations = (WithConfigurations) an;
 			for (WithConfiguration factoryConfigAnnotation : withConfigurations.value()) {
-				configHolders.add(handleWithConfiguration(extensionContext, factoryConfigAnnotation, ca));
+				configHolders.add(handleWithConfiguration(extensionContext, factoryConfigAnnotation, ca, false));
 
 			}
 
 		} else if (an instanceof WithConfiguration) {
 
-			configHolders.add(handleWithConfiguration(extensionContext, (WithConfiguration) an, ca));
+			configHolders.add(handleWithConfiguration(extensionContext, (WithConfiguration) an, ca, false));
 
 		} else if (an instanceof WithFactoryConfigurations) {
 
 			WithFactoryConfigurations withFactoryConfigurations = (WithFactoryConfigurations) an;
 			for (WithFactoryConfiguration factoryConfigAnnotation : withFactoryConfigurations.value()) {
-				configHolders.add(handleWithFactoryConfiguration(extensionContext, factoryConfigAnnotation, ca));
+				configHolders.add(handleWithFactoryConfiguration(extensionContext, factoryConfigAnnotation, ca, false));
 			}
 
 		} else if (an instanceof WithFactoryConfiguration) {
 
-			configHolders.add(handleWithFactoryConfiguration(extensionContext, (WithFactoryConfiguration) an, ca));
+			configHolders
+				.add(handleWithFactoryConfiguration(extensionContext, (WithFactoryConfiguration) an, ca, false));
 		}
 		return configHolders;
 	}
@@ -455,18 +442,25 @@ public class ConfigurationExtension extends InjectingExtension<InjectConfigurati
 		Dictionary<String, Object> newConfigurationProperties, boolean isNewConfiguration)
 		throws InterruptedException, IOException {
 		updateConfigurationRespectNew(DO_NOT_USE_CONTEXT, configurationToBeUpdated, newConfigurationProperties,
-			isNewConfiguration);
+			isNewConfiguration, false);
 	}
 
 	private void updateConfigurationRespectNew(ExtensionContext extensionContext,
 		Configuration configurationToBeUpdated, Dictionary<String, Object> newConfigurationProperties,
-		boolean isNewConfiguration) throws InterruptedException, IOException {
+		boolean isNewConfiguration, boolean injecting) throws InterruptedException, IOException {
 		if (configurationToBeUpdated != null) {
 			BlockingConfigurationHandler blockingConfigHandler = getBlockingConfigurationHandler(extensionContext);
-			if (newConfigurationProperties != null
-				&& !ConfigUtil.isDictionaryWithNotSetMarker(newConfigurationProperties)) {
-				// has relevant Properties to update
-				blockingConfigHandler.update(configurationToBeUpdated, newConfigurationProperties, 1000);
+			if (newConfigurationProperties != null) {
+				if (ConfigUtil.isDictionaryWithNotSetMarker(newConfigurationProperties)) {
+					// We don't call update if the configuration exists, or if
+					// it is being injected
+					if (isNewConfiguration && !injecting) {
+						blockingConfigHandler.update(configurationToBeUpdated, Dictionaries.dictionaryOf(), 1000);
+					}
+				} else {
+					// has relevant Properties to update
+					blockingConfigHandler.update(configurationToBeUpdated, newConfigurationProperties, 1000);
+				}
 			} else if (isNewConfiguration) {
 				// is new created Configuration. must be updated
 				blockingConfigHandler.update(configurationToBeUpdated, Dictionaries.dictionaryOf(), 1000);

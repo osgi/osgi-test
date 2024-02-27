@@ -95,6 +95,9 @@ public class ConfigUtil {
 	}
 
 	public static <K, V> Dictionary<K, V> copy(Dictionary<K, V> dictionary) {
+		if (dictionary == null) {
+			return null;
+		}
 		Dictionary<K, V> copy = new Hashtable<>();
 		Enumeration<K> keys = dictionary.keys();
 		while (keys.hasMoreElements()) {

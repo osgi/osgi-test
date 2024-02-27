@@ -17,6 +17,8 @@
  *******************************************************************************/
 package org.osgi.test.junit5.cm.test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -84,4 +86,38 @@ public class InjectWith {
 			.isNotNull();
 	}
 
+	@Test
+	public void testInjectNoConfig(@InjectConfiguration("pid")
+	Configuration c, @InjectConfiguration("factory.pid~name")
+	Configuration fc) {
+		assertThat(c).isNull();
+		assertThat(fc).isNull();
+	}
+
+	@Test
+	public void testInjectNoUpdate(@InjectConfiguration(withConfig = @WithConfiguration(pid = "pid"))
+	Configuration c,
+		@InjectConfiguration(withFactoryConfig = @WithFactoryConfiguration(factoryPid = "factory.pid", name = "name"))
+		Configuration fc) throws Exception {
+		assertThat(c).isNotNull();
+		assertThat(c.getProperties()).isNull();
+		assertThat(fc).isNotNull();
+		assertThat(fc.getProperties()).isNull();
+	}
+
+	@Test
+	public void testInjectEmptyUpdate(
+		@InjectConfiguration(withConfig = @WithConfiguration(pid = "pid", properties = {}))
+		Configuration c,
+		@InjectConfiguration(withFactoryConfig = @WithFactoryConfiguration(factoryPid = "factory.pid", name = "name", properties = {}))
+		Configuration fc) throws Exception {
+		assertThat(c).isNotNull();
+		DictionaryAssert.assertThat(c.getProperties())
+			.isNotNull()
+			.isNotEmpty();
+		assertThat(fc).isNotNull();
+		DictionaryAssert.assertThat(fc.getProperties())
+			.isNotNull()
+			.isNotEmpty();
+	}
 }
