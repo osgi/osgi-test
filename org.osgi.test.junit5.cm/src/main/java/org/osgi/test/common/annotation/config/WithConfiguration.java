@@ -29,6 +29,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.osgi.service.cm.Configuration;
 import org.osgi.test.common.annotation.Property;
 import org.osgi.test.junit5.cm.ConfigurationExtension;
 
@@ -62,8 +63,17 @@ public @interface WithConfiguration {
 	String location() default (Property.NOT_SET);
 
 	/**
-	 * Indicate the properties, that will be updated (if set) after selecting a
-	 * Configuration. If empty no update will be done.
+	 * Indicate the properties that will be used to update the defined
+	 * configuration.
+	 * <p>
+	 * When this annotation is used with
+	 * {@link InjectConfiguration#withConfig()} then leaving the properties
+	 * unset will result in the injection of a configuration that <em>has
+	 * not</em> had {@link Configuration#update(java.util.Dictionary)} called.
+	 * <p>
+	 * When used as a direct annotation leaving the properties unset has the
+	 * same effect as an empty array, and the configuration will be updated with
+	 * empty properties.
 	 *
 	 * @return The Properties.
 	 */
