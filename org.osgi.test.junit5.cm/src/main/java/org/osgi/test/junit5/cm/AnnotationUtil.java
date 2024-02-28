@@ -59,9 +59,9 @@ class AnnotationUtil {
 
 	private static void findAllAnnotationsMatching(AnnotatedElement annotatedElement, Predicate<Annotation> test,
 		ArrayList<? super Annotation> found, Set<Entry<AnnotatedElement, Annotation>> visited) {
-		Annotation[] declaredAnnotations = annotatedElement.getDeclaredAnnotations();
+		Annotation[] annotations = annotatedElement.getAnnotations();
 
-		for (Annotation ann : declaredAnnotations) {
+		for (Annotation ann : annotations) {
 			if (isJavaLangAnnotation(ann) || isJunitAnnotation(ann)) {
 				continue;
 			}
